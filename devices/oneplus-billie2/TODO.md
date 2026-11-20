@@ -14,8 +14,9 @@ Legend: [x] done · [~] partly / workaround · [ ] not started
 - [x] RAM-boot dev loop (`fastboot boot`) incl. the installed root (`fap.root=`)
 - [x] Keys: power, volume up/down
 - [x] Battery % (read-only `adc-ocv-battery`, OCV table)
-- [~] **P1 Performance**: GPU had no DDR bandwidth vote → fixed in board DT (v2 image, testing); UBWC off (`FD_MESA_DEBUG=noubwc`), fix properly
-- [ ] **P1 USB on normal boot** (no gadget after a non-fastboot boot) → `qcom,select-utmi-as-pipe-clk` in v2 image, testing
+- [x] Performance: GPU DDR bandwidth votes (board DT, image v3) — navigation noticeably smoother
+- [ ] **P1 UBWC** still off (`FD_MESA_DEBUG=noubwc`), costs bandwidth; see Display
+- [x] USB on normal boot (`qcom,select-utmi-as-pipe-clk`, image v3)
 - [ ] **P1 Reboot to bootloader** from Linux (`reboot bootloader` doesn't reach fastboot; needs the PON reboot-mode for "bootloader")
 - [ ] P2 Boot without `clk_ignore_unused pd_ignore_unused` (hidden-dependencies.md)
 - [ ] P2 Quiet kernel console in the installed boot (drop `loglevel=7 ignore_loglevel`, add a splash?)
@@ -69,7 +70,8 @@ Legend: [x] done · [~] partly / workaround · [ ] not started
 - [ ] P3 Fast charging
 
 ## Sensors and peripherals
-- [~] P1 Vibrator (PMI632 vib enabled in board DT, image v3; untested; keep ≤ ~73 % strength)
+- [x] Vibrator (PMI632, image v3; tested at 31 %; keep ≤ ~73 % strength)
+- [ ] P2 Haptic feedback in Plasma Mobile (check which service drives it, cap strength)
 - [ ] P2 Sensors on the ADSP: accelerometer/gyro (rotation!), proximity, light, compass (libssc + hexagonrpcd + iio-sensor-proxy; n100-sensors-misc.md)
 - [ ] P2 microSD card (controller up; test a card)
 - [ ] P3 Notification LED (probably not fitted)

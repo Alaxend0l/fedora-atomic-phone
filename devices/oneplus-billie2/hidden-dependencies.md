@@ -17,7 +17,7 @@ How to look (on the phone, as root):
 | Finding | Effect | Status |
 |---|---|---|
 | GPU node has no `interconnects`, OPPs no `opp-peak-kBps` (mainline sm6115.dtsi) | GPU never votes DDR bandwidth; EBI stays at the display's ~0.8 GB/s; Plasma GPU-bound at 600 MHz | fixed in board DT (agatti values); verified: GPU votes 3.88 GB/s at 600 MHz, EBI peak ~4 GB/s |
-| USB: HS-only wiring without `qcom,select-utmi-as-pipe-clk` | DWC3 needs a PIPE clock; only present after fastboot mode (USB3 PHY pipe clock left on); normal boot: "failed to enable ep0out", no USB | fixed in board DT, testing |
+| USB: HS-only wiring without `qcom,select-utmi-as-pipe-clk` | DWC3 needs a PIPE clock; only present after fastboot mode (USB3 PHY pipe clock left on); normal boot: "failed to enable ep0out", no USB | fixed in board DT; verified: gadget enumerates after a normal boot |
 | UFS has no bandwidth vote; SM6115 RPM interconnect driver has no UFS node | UFS relies on others' DDR votes; 381 MB/s (Gear 3, 1 lane; ~580 MB/s raw max) | needs a driver change (icc-rpm sm6115 node for UFS); not urgent |
 | `gcc_gpu_iref_clk` on but unclaimed | GPU may misbehave once `clk_ignore_unused` is dropped | check against agatti's GPU clock list before dropping it |
 | display: `gcc_disp_throttle_core_clk`, `gcc_disp_gpll0_clk_src`, `disp_cc_sleep_clk` unclaimed | display may break without `clk_ignore_unused` | same |
