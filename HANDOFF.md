@@ -94,6 +94,10 @@ EFS/IMEI copies and OEM firmware; never commit or upload):
 2. **Waydroid polish**: first-run checks, `fap-waydroid-init`, network (nftables NAT), GPU in the container.
 3. userdata alignment (mkfs warned 80 KiB offset): measure I/O; repartitioning only with a plan.
 4. Plasma Wi‑Fi details page blank; lm_sensors.service fails (harmless).
+5. Clock: PMIC RTC reads 1970 (not writable for us; Android keeps an offset), so
+   time starts ~1 month behind until chrony syncs → TLS errors in Firefox right
+   after boot. Fix: keep `/var/lib/systemd/timesync/clock` fresh (PID 1 uses its
+   mtime as the minimum time), or the rtc-pm8xxx offset from nvmem/SDAM.
 5. Sensors reset, speakers (with OK), cameras, headset, GPS, alert slider.
 
 ## Safety rules (summary; full list in the notebooks' AGENTS.md)
