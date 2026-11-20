@@ -50,4 +50,21 @@ payload; `CONFIG_EFI_ZBOOT=y`, checked on Fedora 45). ABL can't boot it.
 - `make-bootimg.sh`: builds the first `boot.img` from a disk image, using the
   image's own tool.
 
-Status: untested.
+## RAM-boot dev loop (`make-ramboot.sh`)
+`boot/android-bootimg/make-ramboot.sh devices/<id> <outdir> [image]` builds a
+boot image that `fastboot boot` runs once from RAM, writing nothing:
+- the image's kernel, EFI zboot unwrapped to `Image.gz` (checked for the arm64
+  `ARMd` header),
+- a debug initramfs: dracut with only the device's `RAMBOOT_DRIVERS` (what's
+  needed for UFS and USB device mode) plus `dracut/90fap-usb-debug`, which
+  brings up a USB CDC-ACM gadget with a root shell (macOS `/dev/cu.usbmodem*`),
+- the kernel's own DTB for the device,
+- cmdline `console=tty0 loglevel=7 ignore_loglevel clk_ignore_unused
+  pd_ignore_unused rd.shell rd.timeout=60` (kernel log on the screen; keep the
+  bootloader's clocks/power domains so the framebuffer survives).
+
+First N100 build (2026-11-20, Fedora 45 kernel 7.3.4): 89.5 MB image (Image.gz
+21.8 MB, initramfs 67.7 MB, 109 modules). The `/root` errors from dracut are
+harmless (bootc images make `/root` a symlink into `/var`). Not booted yet.
+
+Status of the on-device sync tool and make-bootimg.sh: untested.
