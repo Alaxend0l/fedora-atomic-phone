@@ -17,8 +17,10 @@ when you stop. Newest log entries at the top.
   verified), slot `a`, bootloader unlocked. Nothing of ours is installed.
 
 ## Next steps
-1. Rebuild U-Boot with `qcom-phone.config` (U-Boot's documented phone config)
-   and RAM-boot it; see boot/uboot-android/README.md "Open leads" 1–4.
+1. Disable AVB verification in vbmeta_a (patch flags 0→2 on the backup copy;
+   ask first), then RAM-boot U-Boot with stock dtbo and with dtbo erased.
+   Also rebuild U-Boot with `qcom-phone.config`. See
+   boot/uboot-android/README.md "Open leads".
 2. If U-Boot still won't start: try header v0 with appended DTB; check the
    Image header; or fall back to `BOOT_METHOD=android-bootimg` (kernel +
    initramfs directly, same dtbo constraint applies).
@@ -42,6 +44,8 @@ when you stop. Newest log entries at the top.
   `billie2`.
 - Fedora's aarch64 vmlinuz is EFI zboot (zstd); Android bootloaders need
   `Image.gz` (handled in boot/android-bootimg).
+- Both vbmeta slots have AVB verification enabled (flags 0); postmarketOS's
+  (downstream) billie2 port flashes its own vbmeta.
 - Backups of the N100's boot/dtbo/vbmeta (both slots) and identity
   partitions are in the UBports-N100 repo under `backup/` (git-ignored).
 

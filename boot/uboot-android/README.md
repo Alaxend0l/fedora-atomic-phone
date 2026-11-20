@@ -121,6 +121,18 @@ Ubuntu Touch boots. So the stock overlay wasn't the only blocker.
 4. **Kernel image header:** some ABLs check the arm64 Image header of the
    decompressed kernel; check `u-boot-nodtb.bin` has one
    (`LINUX_KERNEL_IMAGE_HEADER`).
-5. **postmarketOS's billie2 port** boots mainline via ABL and would show what
-   works; its pmaports URLs currently redirect to `gitlab.nura.eco` (404), so
-   that config wasn't readable on 2026-11-20.
+5. **vbmeta verification.** Both `vbmeta` slots on this phone have AVB flags
+   `0` (verification enabled). With AVB on, ABL loads `dtbo` as part of
+   verification, which explains the `Load Error` with dtbo erased. Custom-OS
+   installs (incl. postmarketOS) flash a vbmeta with verification disabled
+   (flags `2`). Test: patch only the flags field of the backed-up vbmeta_a,
+   flash it, RAM-boot U-Boot with stock dtbo, then with dtbo erased.
+
+### postmarketOS billie2 port (read 2026-11-20)
+From the gitlab.com mirror (`device/testing/device-oneplus-billie2/deviceinfo`;
+gitlab.postmarketos.org currently redirects to gitlab.nura.eco, 404). It's a
+**downstream** port (vendor kernel `linux-oneplus-billie2`, vendor DT
+`bengal-qrd`), so it doesn't show a mainline path. Settings: header v0
+(default), `append_dtb="true"` (Image.gz-dtb), same offsets and page size as
+ours, dtbo untouched (the vendor overlay matches the vendor DT), and the
+installer flashes `vbmeta`.
