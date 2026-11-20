@@ -1,0 +1,126 @@
+// SPDX-License-Identifier: (GPL-2.0+ OR BSD-3-Clause)
+/*
+ * OnePlus 12 (waffle): first-light trim of the board DT, for RAM boots via
+ * uniLoader (devices/oneplus-waffle/README.md). Our own file. It includes
+ * the board DT from DaDDevil/linux waffle-voice (pinned in
+ * build-env/fap-waffle-build.sh), which is read from that kernel tree at
+ * build time and never copied into this repository: it carries no licence
+ * line yet (research/mainline-status.md), so we must not redistribute it.
+ *
+ * What stays on (v5): simplefb until msm, MDSS/DSI panel, UFS, touch,
+ * ADSP/CDSP/MPSS/IPA, pmic-glink, PCIe0 Wi-Fi, reboot-mode,
+ * USB in device mode (gadget), power/volume keys, ramoops. Off: GPU, video,
+ * DP, audio, cameras, Bluetooth, IR, flash LED, haptics, the charger/redriver
+ * I2C buses.
+ */
+
+#include "sm8650-oneplus-waffle.dts"
+
+/ {
+	chosen {
+		#address-cells = <2>;
+		#size-cells = <2>;
+		ranges;
+
+		/*
+		 * The splash buffer ABL/UEFI leaves on the panel: 1440x3168
+		 * ARGB8888 at 0xd5100000. Sources: uniLoader board-waffle.c
+		 * (DaDDevil, simplefb at the same address) and ios-waffle's
+		 * measured UEFI GOP reservation 0xd5100000-0xd7c00000 (dossier
+		 * boot-and-flashing.md section 1). Stride 1440 * 4.
+		 */
+		framebuffer@d5100000 {
+			compatible = "simple-framebuffer";
+			reg = <0x0 0xd5100000 0x0 (1440 * 3168 * 4)>;
+			memory-region = <&fap_splash>;
+			width = <1440>;
+			height = <3168>;
+			stride = <(1440 * 4)>;
+			format = "a8r8g8b8";
+		};
+	};
+
+	reserved-memory {
+		/* Keep the kernel out of the whole UEFI display reservation. */
+		fap_splash: splash@d5100000 {
+			reg = <0x0 0xd5100000 0x0 0x02b00000>;
+			no-map;
+		};
+	};
+
+	sound {
+		status = "disabled";
+	};
+};
+
+/*
+ * USB: device mode, high speed only. The board DT runs dwc3 as OTG with
+ * role switching from pmic-glink (ADSP), which first light doesn't start;
+ * peripheral mode needs no role source. Only the eUSB2 PHY (+ PM8550B
+ * repeater, both built in) is used: the QMP USB3/DP combo PHY stays
+ * out of dwc3's phys (no USB3 at first light); it is built in only as the
+ * DP clock provider dispcc needs (build-env/waffle.config). USB 2.0 is
+ * plenty for a shell and the netroot.
+ */
+&usb_1 {
+	dr_mode = "peripheral";
+	maximum-speed = "high-speed";
+	phys = <&usb_1_hsphy>;
+	phy-names = "usb2-phy";
+	/delete-property/ usb-role-switch;
+};
+
+
+/*
+ * Display: MDSS + DSI0 + the BOE AA545 panel as the board DT has them (built
+ * into the kernel). The panel is in command mode, so the splash buffer is
+ * only a bridge (simpledrm) until msm takes over. DP is off: it needs the
+ * QMP combo PHY and pmic-glink altmode, neither of which runs at first light,
+ * and a DP controller that never binds would hold back the whole msm DRM
+ * device. No GPU (needs zap firmware), no video.
+ */
+&mdss_dp0 { status = "disabled"; };
+&gpu { status = "disabled"; };
+&iris { status = "disabled"; };
+
+/* Bluetooth (UART14), cameras, audio buses. */
+&uart14 { status = "disabled"; };
+&camss { status = "disabled"; };
+&cci0 { status = "disabled"; };
+&cci1 { status = "disabled"; };
+&swr1 { status = "disabled"; };
+&swr2 { status = "disabled"; };
+&i2c_hub_7 { status = "disabled"; };
+
+/* IR (SPI11), the I2C buses with charger/redriver/sensor parts. */
+&spi11 { status = "disabled"; };
+&i2c3 { status = "disabled"; };
+&i2c6 { status = "disabled"; };
+&i2c9 { status = "disabled"; };
+
+/* Flash LED and haptics: PMIC outputs, nothing to drive at first light. */
+&pm8550_flash { status = "disabled"; };
+&pm8550b_haptics { status = "disabled"; };
+
+/*
+ * v5: DSPs, pmic-glink (battery via ADSP), Wi-Fi (PCIe0 + WCN7850 PMU) and
+ * touch (SPI4) as the board DT has them. Firmware comes from this unit's own
+ * modem partition and is only installed into the (local, never published)
+ * netroot tarball, as the partition ships it: .mdt + .bNN, so the modem and
+ * IPA names point at the .mdt files (the board DT says .mbn, i.e. squashed).
+ * CDSP isn't enabled in the board DT; same firmware directory.
+ */
+&remoteproc_mpss {
+	firmware-name = "qcom/sm8650/oneplus/waffle/modem.mdt",
+			"qcom/sm8650/oneplus/waffle/modem_dtb.mdt";
+};
+
+&ipa {
+	firmware-name = "qcom/sm8650/oneplus/waffle/ipa_fws.mdt";
+};
+
+&remoteproc_cdsp {
+	firmware-name = "qcom/sm8650/oneplus/waffle/cdsp.mdt",
+			"qcom/sm8650/oneplus/waffle/cdsp_dtb.mdt";
+	status = "okay";
+};
