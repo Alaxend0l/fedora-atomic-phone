@@ -31,3 +31,14 @@ Legend: [x] done · [~] partly / workaround · [ ] not started
 - [ ] P2 USB-C analog headset: i2c3 wcd939x-usbss + codec graph link + altmode
 - [~] P2 Haptics (v7: stock 1.72 V vmax, untested), [ ] alert slider
 - [ ] P3 Modem, cameras, sensors (SSC)
+
+## Power and display polish (branch oneplus12-power, built 2026-11-20, untested)
+Test plan: `~/Develop/fap-build/waffle/power/POWER.md`.
+- [~] P1 Brightness: DCS backlight without DSI traffic while off (patch 0010)
+- [~] P1 Screen off/on (DPMS → panel unprepare/prepare): to test; [ ] touch inhibited while blanked
+- [~] P1 CPU throttling: passive 90 °C trips + cpufreq cooling per cluster (dts/…-power.dtsi)
+- [~] P2 Torch (PM8550 flash LED, capped 100 mA torch / 1 A flash)
+- [ ] P1 Suspend (s2idle): disabled in the root (sleep.conf.d) until the pm_test stages pass
+- [ ] P2 Alert slider: 2× MXM1120 hall sensors on i2c_hub_8, needs a driver (POWER.md "Not done")
+- [ ] P2 Skin-temperature thermal zone from the PMK8550 ADC therm channels
+- [ ] P3 60 Hz default if it saves power

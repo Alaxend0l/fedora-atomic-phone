@@ -41,7 +41,7 @@
 # Runs on the host (macOS or Linux, podman) and re-executes itself inside
 # localhost/fap-waffle-build (built from ./Containerfile when missing, or with
 # REBUILD_IMAGE=1). State lives in the case-sensitive podman volume
-# "waffle-build" (/work; macOS's file system is case-insensitive, Linux trees
+# "waffle-build" (FAP_WAFFLE_VOLUME; /work; macOS's file system is case-insensitive, Linux trees
 # aren't): sources in /work/src, kernel trees /work/linux-waffle and
 # /work/linux (Fedora), build dirs /work/out-<tree>, intermediate files
 # /work/stage. Outputs go to OUT (default ~/Develop/fap-build/waffle).
@@ -61,6 +61,8 @@
 #   STOCK_BACKUP   host dir with the phone's partition backup; only
 #                  vendor_boot_a.img is read (read-only mount) for the
 #                  header-v2 fallback image. Optional.
+#   FAP_WAFFLE_VOLUME  podman volume for /work (default waffle-build); a
+#                  copy lets parallel work trees build without sharing state
 #   FAP_OFFLINE    1 (default): kernel/config-check/dtb/initramfs/images/all/
 #                  bisect run with --network=none (sources must already be in
 #                  the volume, at the pinned commits); 0 allows the network
