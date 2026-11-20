@@ -273,11 +273,11 @@ cmd_ramboot() {
     log "fastboot boot $img (RAM only)"
     fb boot "$img" || die "fastboot boot failed (Load Error: was the session fresh? image too big?)"
     log "waiting for the USB gadget \"$FAP_GADGET_PRODUCT\""
-    wait_gadget || die "no USB gadget after ${FAP_TIMEOUT}s (check the screen; tools/serial-shell.py)"
+    wait_gadget "$FAP_TIMEOUT" || die "no USB gadget after ${FAP_TIMEOUT}s (check the screen; tools/serial-shell.py)"
     log "gadget up"
     [ "$want_ssh" = 1 ] || return 0
     log "waiting for SSH (needs a netroot or installed root; tiny-init alone has telnet + serial)"
-    if a=$(wait_ssh); then
+    if a=$(wait_ssh "$FAP_TIMEOUT"); then
         log "ready: fap-dev ssh  (root@$a)"
     else
         die "no SSH after ${FAP_TIMEOUT}s; is \`fap-dev serve\` running? Try telnet 172.16.42.1 or tools/serial-shell.py"
