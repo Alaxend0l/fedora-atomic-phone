@@ -13,7 +13,7 @@ still on slot a, but its data was given up for Fedora (owner's choice):
 
 | What | Where |
 |---|---|
-| Fedora kernel (uniLoader boot image; Rust binder + USB fix) | `boot_b` (sha256 `c30a7be6…`, `fap-build/waffle/install-waydroid/boot_b/`; previous `f870e95f…` in `install/boot_b/`) |
+| Fedora kernel (uniLoader boot image; Rust binder + USB fix) | `boot_b` (sha256 `d01416bd…`, `fap-build/waffle/install-waydroid-net/boot_b/`; before: `c30a7be6…` `install-waydroid/`, `f870e95f…` `install/`; module backups in `/root/modules-*` on the phone) |
 | Fedora root (ext4, label `fap-root`, 8 GiB) | logical partition `fap_root` in `super` (raw sha256 `cd29c50f…`) |
 | Fedora `/home` + Waydroid images (`/home/.waydroid-images`) | ext4 `fap-home` on the former **userdata** (`/dev/sda14`, 447 GiB), fstab `nofail` |
 | LineageOS 23.2 (rooted: Magisk + KernelSU) | slot a system unchanged; **its userdata is gone** |
@@ -60,7 +60,7 @@ rewrite slot b. Re-enable: `adb shell pm enable org.lineageos.updater`.
 | Cameras, USB‑C headset | built in `oneplus12-hw`, untested |
 | GPS | `qmicli --loc-start` → QMI GeneralError; untested via ModemManager |
 | SMS, data, calls | need a SIM; call audio + VoLTE missing; never rely on it for emergency calls |
-| Waydroid | runs (Android UI starts). **No network inside Android**: netd needs policy routing + legacy iptables (oneplus12-dualboot 636f0e6, build `fap-build/waffle/install-waydroid-net/`) |
+| Waydroid | **works, with internet** (Rust binder; policy routing + legacy xtables for netd, oneplus12-dualboot 1616cdb; boot_b sha `d01416bd…` from `fap-build/waffle/install-waydroid-net/`) |
 | Suspend | disabled on purpose (`AllowSuspend=no`); staged test plan in POWER.md |
 | Alert slider | needs a new driver (MXM1120 hall sensors), plan in POWER.md |
 | Spontaneous resets | 2 tonight (sensors test; telephony build idle), cause unknown |
