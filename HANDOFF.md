@@ -1,5 +1,5 @@
 <!-- SPDX-License-Identifier: AGPL-3.0-or-later -->
-# Handoff: state of the project (2026-11-20, 23:40 CET)
+# Handoff: state of the project (2026-11-21, 00:40 CET)
 
 Read this first, then `AGENTS.md` and `docs/status.md`. The phone-side lab
 notebooks (not in git; contain unit data) are `~/Develop/OnePlus12/`
@@ -13,7 +13,7 @@ still on slot a, but its data was given up for Fedora (owner's choice):
 
 | What | Where |
 |---|---|
-| Fedora kernel (uniLoader boot image; **full Fedora config** since 2026-11-21) | `boot_b` (sha256 `d01416bd…`, `fap-build/waffle/install-waydroid-net/boot_b/`; before: `c30a7be6…` `install-waydroid/`, `f870e95f…` `install/`; module backups in `/root/modules-*` on the phone) |
+| Fedora kernel (uniLoader boot image; **full Fedora config + power patches** since 2026-11-21, sha `dde4b84b…`, `install-full-power/`) | `boot_b` (sha256 `d01416bd…`, `fap-build/waffle/install-waydroid-net/boot_b/`; before: `c30a7be6…` `install-waydroid/`, `f870e95f…` `install/`; module backups in `/root/modules-*` on the phone) |
 | Fedora root (ext4, label `fap-root`, 8 GiB) | logical partition `fap_root` in `super` (raw sha256 `cd29c50f…`) |
 | Fedora `/home` + Waydroid images (`/home/.waydroid-images`) | ext4 `fap-home` on the former **userdata** (`/dev/sda14`, 447 GiB), fstab `nofail` |
 | LineageOS 23.2 (rooted: Magisk + KernelSU) | slot a system unchanged; **its userdata is gone** |
@@ -51,8 +51,8 @@ rewrite slot b. Re-enable: `adb shell pm enable org.lineageos.updater`.
 | 15 GB RAM, battery %, cpufreq | works |
 | Wi‑Fi (ath12k WCN7850), Bluetooth, warm reboot keeps Wi‑Fi | works (RAM boot); join Wi‑Fi in Settings |
 | Iris video, haptics, microphones | works (RAM boot) |
-| Modem + ModemManager (QRTR), EFS served from RAM copies | works; auto-start only in the `oneplus12-tel` build |
-| Brightness, flash LED, CPU thermal throttling at 90 °C | works in the `oneplus12-power` RAM build; not in the installed image yet |
+| Modem + ModemManager (QRTR), EFS served from RAM copies | **starts at boot on the installed system** (fap-rmtfs etc.); no SIM to test SMS/data |
+| Brightness, screen off/on, flash LED, CPU thermal throttling at 90 °C | **installed** (owner tested brightness + screen off/on); suspend still disabled on purpose |
 | USB gadget (SSH over USB) on the installed boot | works since `qcom,select-utmi-as-pipe-clk` (same hidden dependency as the N100) |
 | Wi‑Fi on the installed boot | works; Plasma's connection-details page stays blank (cosmetic) |
 | Speakers/earpiece (TFA9874) | first test 2026-11-20 (owner's OK, -40 dBFS, bottom): amp on/off fine, **TDMERR** → silent; OVERTEMP/UNDERVOLTAGE already latched while off. Fix the MI2S/TDM frame format (oneplus12-hw, HW.md open question); test script fixed to use `hw:N` (712b348) |
@@ -60,7 +60,7 @@ rewrite slot b. Re-enable: `adb shell pm enable org.lineageos.updater`.
 | Cameras, USB‑C headset | built in `oneplus12-hw`, untested |
 | GPS | `qmicli --loc-start` → QMI GeneralError; untested via ModemManager |
 | SMS, data, calls | need a SIM; call audio + VoLTE missing; never rely on it for emergency calls |
-| Waydroid | **works, with internet** (Rust binder; policy routing + legacy xtables for netd, oneplus12-dualboot 1616cdb; boot_b sha `d01416bd…` from `fap-build/waffle/install-waydroid-net/`) |
+| Waydroid | **runs, with internet**; density 480 (`waydroid_base.prop`); "Stop Waydroid" launcher. **Android storage broken**: `/storage/emulated` FUSE mount has no daemon (MediaProvider's ExternalStorageService times out in StorageUserConnection; browser downloads crash, Files hangs). Tried: session/container restarts (worked once briefly), `persist.sys.fuse=false` (Android 13 ignores it), `persist.sys.fuse.passthrough.enable=false` (no change). Next: MediaProvider/FuseDaemon logcat with `-v threadtime` from session start, compare FUSE ioctls (Android passthrough vs mainline backing-file API), try the Waydroid image's newer build. Earlier: (Rust binder; policy routing + legacy xtables for netd, oneplus12-dualboot 1616cdb; boot_b sha `d01416bd…` from `fap-build/waffle/install-waydroid-net/`) |
 | Suspend | disabled on purpose (`AllowSuspend=no`); staged test plan in POWER.md |
 | Alert slider | needs a new driver (MXM1120 hall sensors), plan in POWER.md |
 | Spontaneous resets | 2 tonight (sensors test; telephony build idle), cause unknown |
@@ -88,9 +88,9 @@ EFS/IMEI copies and OEM firmware; never commit or upload):
    `uname -v`; `devices/oneplus-waffle/try-kernel.sh` RAM-tests a candidate
    with a 9-point feature check (oneplus12-dualboot e0d7956). Slim kernel
    rollback: flash `install-waydroid-net/boot_b/fap-boot_b.img`.
-1. **Merge** `oneplus12-dualboot` (install + USB fix + Rust binder) with
-   `-power` and `-tel`, rebuild, and update the installed system (boot_b +
-   modules, as done on 2026-11-20 for Waydroid).
+1. Done 2026-11-21: `oneplus12-power` merged into `oneplus12-dualboot` and installed;
+   clock save/restore (`fap-clock`), modem at boot (from `oneplus12-tel`).
+   Still to merge: `oneplus12-hw` (speakers/sensors/cameras) and the branches into main.
 2. **Waydroid polish**: first-run checks, `fap-waydroid-init`, network (nftables NAT), GPU in the container.
 3. userdata alignment (mkfs warned 80 KiB offset): measure I/O; repartitioning only with a plan.
 4. Plasma Wi‑Fi details page blank; lm_sensors.service fails (harmless).
