@@ -3,7 +3,7 @@
 # Build the development root filesystem that tiny-init can download into RAM
 # (kernel argument fap.netroot=http://172.16.42.2:8000/netroot.tar.gz).
 #
-#   boot/android-bootimg/make-netroot.sh <outdir> [ssh-pubkey]
+#   [NETROOT_DEVICE=<id>] boot/android-bootimg/make-netroot.sh <outdir> [ssh-pubkey]
 #   ssh-pubkey defaults to ~/.ssh/id_ed25519.pub (copied in at build time,
 #   never committed). Writes <outdir>/netroot.tar.gz.
 #
@@ -32,6 +32,17 @@ if [ -n "${NETROOT_EXTRA_MODULES:-}" ]; then
     echo "extra modules for $mkver: $(cd "$mdir" && ls *.ko | tr '\n' ' ')"
 fi
 
+# NETROOT_DEVICE=<id>: the device's RAM-boot overlay, devices/<id>/netroot/
+# (e.g. its fap-modem-ram), copied over / like rootfs/.
+if [ -n "${NETROOT_DEVICE:-}" ]; then
+    dev=$here/../../devices/$NETROOT_DEVICE
+    [ -d "$dev" ] || { echo "no such device: $dev" >&2; exit 1; }
+    if [ -d "$dev/netroot" ]; then
+        cp -R "$dev/netroot/." "$ctx/rootfs/"
+        echo "device overlay: devices/$NETROOT_DEVICE/netroot"
+    fi
+fi
+
 # NETROOT_EXTRA_FIRMWARE=<dir>: files to install under /usr/lib/firmware
 # (keeping the directory layout), e.g. firmware extracted from the phone
 # that may not be redistributed. Never commit those files.
@@ -51,10 +62,13 @@ if [ -n "${FAP_PINNED:-}" ]; then
     while IFS= read -r a; do build_args+=(--build-arg "$a"); done <<< "$pins"
 fi
 
-# NETROOT_IMAGE: image tag (default localhost/fap-netroot:latest, which
-# installroot/Containerfile builds FROM; use another tag for other devices).
+# NETROOT_IMAGE: image tag (default localhost/fap-netroot:latest;
+# make-devroot.sh builds FROM localhost/fap-netroot-<device>:latest).
 tag=${NETROOT_IMAGE:-localhost/fap-netroot:latest}
 podman build ${build_args[@]+"${build_args[@]}"} -t "$tag" "$ctx"
+
+# NETROOT_EXPORT=0: only the image (make-devroot.sh), no tarball.
+[ "${NETROOT_EXPORT:-1}" = 0 ] && exit 0
 
 # Export the filesystem (not the image layers) as one tarball.
 cid=$(podman create "$tag" /bin/true)

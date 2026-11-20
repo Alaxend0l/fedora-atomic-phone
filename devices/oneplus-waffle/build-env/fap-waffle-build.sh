@@ -49,7 +49,11 @@
 #                  bisect run with --network=none (sources must already be in
 #                  the volume, at the pinned commits); 0 allows the network
 #                  (first fetch). netroot/shell always get the network.
-#   NETROOT_GENERIC  host path of a generic netroot.tar.gz (netroot command)
+#   NETROOT_GENERIC  host path of a generic netroot.tar.gz (netroot command):
+#                  make-netroot.sh's, or a dev root from
+#                  boot/android-bootimg/make-devroot.sh oneplus-waffle <desktop>
+#   NETROOT_OUTDIR subdirectory of OUT for the netroot command's tarball
+#                  (default netroot; e.g. plasma-netroot for a dev root)
 #   PHONE_BACKUP   host dir with this unit's partition dumps (netroot command,
 #                  optional, read-only mount): modem_a.img (DSP/modem firmware)
 #                  and modemst1/modemst2/fsg/fsc (EFS copies for rmtfs -r)
@@ -109,7 +113,7 @@ if [[ -z ${FAP_WAFFLE_INNER:-} ]]; then
   extra+=(${net[@]+"${net[@]}"})
   exec podman run --rm ${tty[@]+"${tty[@]}"} -v "$VOLUME:/work" -v "$REPO:/repo:ro" -v "$OUT:/out" \
     ${extra[@]+"${extra[@]}"} -e FAP_WAFFLE_INNER=1 -e JOBS="${JOBS:-}" \
-    -e KERNEL_TREE="${KERNEL_TREE:-waffle}" \
+    -e KERNEL_TREE="${KERNEL_TREE:-waffle}" -e NETROOT_OUTDIR="${NETROOT_OUTDIR:-netroot}" \
     "$IMAGE" bash /repo/devices/oneplus-waffle/build-env/fap-waffle-build.sh "$@"
 fi
 
@@ -221,7 +225,7 @@ kconfig() {
       [[ -z $got ]] && got=n
       if [[ $want == "$got" || ( $want == m && $got == y ) ]]; then continue; fi
       # Option absent in this tree (e.g. DEBUG_INFO_* variants): fine for "n".
-      [[ $want == n ]] && ! grep -q "$sym[= ]" "$KO/.config" && continue
+      [[ $want == n ]] && ! grep -q "${sym}[= ]" "$KO/.config" && continue
       echo "  $sym: want $want, got $got ($(basename "$f"))"; bad=1
     done < "$f"
   done
@@ -511,11 +515,13 @@ netroot_phone_files() {   # netroot_phone_files <root>
 
 cmd_netroot() {
   [[ -f /netroot-generic.tar.gz ]] || die "set NETROOT_GENERIC=<generic netroot.tar.gz>"
-  local kver R=/work/netroot-root; kver=$(cat "$S/kernel-release-waffle")
-  say "netroot: generic tarball + modules $kver"
+  local kver R=/work/netroot-root D=/out/$NETROOT_OUTDIR; kver=$(cat "$S/kernel-release-waffle")
+  say "netroot: generic tarball + modules $kver -> $D"
   rm -rf "$R" && mkdir -p "$R"
   tar -xzf /netroot-generic.tar.gz -C "$R"
-  mkdir -p "$R/usr/lib/modules"
+  # Only this kernel's modules: the generic root carries Fedora's (from the
+  # netroot's KERNEL_IMAGE), which can't load into our kernel.
+  rm -rf "$R/usr/lib/modules" && mkdir -p "$R/usr/lib/modules"
   cp -a "$S/modroot-waffle/lib/modules/$kver" "$R/usr/lib/modules/"
   # Waffle overlay (replaces the N100 fap-modem-ram of the generic tarball).
   cp -a "$DEV/netroot/." "$R/"
@@ -524,10 +530,11 @@ cmd_netroot() {
   else
     echo "no PHONE_BACKUP: netroot without DSP firmware and EFS copies"
   fi
-  mkdir -p /out/netroot
-  (cd "$R" && tar -czf /out/netroot/netroot.tar.gz .)
+  echo "unpacked: $(du -sxm "$R" | cut -f1) MiB (tiny-init tmpfs: fap.netroot_size= in the netroot DT)"
+  mkdir -p "$D"
+  (cd "$R" && tar -czf "$D/netroot.tar.gz" .)
   rm -rf "$R"
-  (cd /out/netroot && sha256sum netroot.tar.gz > SHA256SUMS && ls -l)
+  (cd "$D" && sha256sum netroot.tar.gz > SHA256SUMS && ls -l)
 }
 
 # Crash bisect (first RAM boot ended in crashdump 900e with no uniLoader or

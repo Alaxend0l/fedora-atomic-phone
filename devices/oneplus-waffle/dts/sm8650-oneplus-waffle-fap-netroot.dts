@@ -4,6 +4,8 @@
  * filesystem over USB from the host (tools/fap-dev serve) into tmpfs and
  * switches to systemd. uniLoader passes no command line, so the URL lives
  * here. Uses the board DT's full (16 GB) memory map: the root needs RAM.
+ * fap.netroot_size: tiny-init's tmpfs cap (default 2560m, sized for the
+ * N100); a Plasma Mobile dev root unpacks to ~2.5 GB.
  * Try the plain variant first.
  */
 /dts-v1/;
@@ -12,6 +14,6 @@
 
 / {
 	chosen {
-		bootargs = "console=tty0 loglevel=7 ignore_loglevel printk.devkmsg=on clk_ignore_unused pd_ignore_unused regulator_ignore_unused nokaslr fbcon=font:TER16x32 fap.netroot=http://172.16.42.2:8000/netroot.tar.gz";
+		bootargs = "console=tty0 loglevel=7 ignore_loglevel printk.devkmsg=on clk_ignore_unused pd_ignore_unused regulator_ignore_unused nokaslr fbcon=font:TER16x32 fap.netroot=http://172.16.42.2:8000/netroot.tar.gz fap.netroot_size=6g";
 	};
 };

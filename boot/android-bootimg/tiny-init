@@ -98,10 +98,18 @@ fi
 # filesystem into RAM over the USB network and switch to its systemd. The
 # gadget and its network address carry over. Nothing touches the phone's
 # storage. On failure, fall through to the busybox shells below.
+# fap.netroot_size= caps the tmpfs (tmpfs size syntax: 2560m, 6g, 50%);
+# default 2560m (sized for a 4 GB phone). A dev root with a desktop needs
+# more (boot/android-bootimg/make-devroot.sh prints the unpacked size).
 netroot=$(sed -n 's/.*fap\.netroot=\([^ ]*\).*/\1/p' /proc/cmdline)
+nrsize=$(sed -n 's/.*fap\.netroot_size=\([^ ]*\).*/\1/p' /proc/cmdline)
+case "$nrsize" in
+    ''|*[!0-9kmgKMG%]*) nrsize=2560m ;;
+esac
 if [ -n "$netroot" ] && [ -n "$udc" ]; then
     mkdir -p /newroot
-    mount -t tmpfs -o size=2560m,mode=0755 tmpfs /newroot
+    mount -t tmpfs -o size="$nrsize",mode=0755 tmpfs /newroot
+    echo "fap-init: netroot tmpfs size=$nrsize" > /dev/kmsg
     i=0
     until wget -q -O - "$netroot" | tar -xzf - -C /newroot 2>/dev/null; do
         i=$((i + 1))

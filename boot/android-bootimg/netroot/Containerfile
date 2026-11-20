@@ -33,7 +33,8 @@ RUN find /usr/lib/modules -maxdepth 2 \( -name 'initramfs*.img' -o -name vmlinuz
 # The USB network and serial gadget are set up by the initramfs and survive
 # switch_root; keep them as they are (no NetworkManager).
 # rootfs/ may also carry out-of-tree modules in /usr/lib/modules/<kver>/extra
-# (make-netroot.sh NETROOT_EXTRA_MODULES), hence depmod afterwards.
+# (make-netroot.sh NETROOT_EXTRA_MODULES), hence depmod afterwards, and the
+# device's own RAM-boot files (devices/<id>/netroot/, NETROOT_DEVICE).
 COPY rootfs/ /
 RUN depmod -a "$(ls /usr/lib/modules | sort -V | tail -1)"
 
@@ -42,9 +43,11 @@ RUN depmod -a "$(ls /usr/lib/modules | sort -V | tail -1)"
 # copies read-only instead.
 RUN systemctl mask rmtfs.service
 
+# Hostname: systemd's fallback from os-release (RUN can't write /etc/hostname,
+# the build bind-mounts it; dev roots set the device's codename instead).
 RUN systemctl enable sshd.service serial-getty@ttyGS0.service \
     && systemctl set-default multi-user.target \
-    && echo n100-dev > /etc/hostname
+    && echo 'DEFAULT_HOSTNAME="fap-netroot"' >> /usr/lib/os-release
 
 # The versionlock was for this build only.
 RUN rm -f /etc/dnf/versionlock.toml /etc/yum.repos.d/fap-updates-archive.repo

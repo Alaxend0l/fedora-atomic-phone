@@ -1,0 +1,42 @@
+#!/usr/bin/env bash
+# SPDX-License-Identifier: AGPL-3.0-or-later
+# Last step of a dev-root build (devroot/Containerfile). Development only:
+# a known user password and root shells; never a product image.
+set -euxo pipefail
+
+# The desktop user the autologin configs name (desktops/*/rootfs). Password
+# for sudo and the lock screen: 147147 (dev root only).
+if ! id phone >/dev/null 2>&1; then
+    useradd -m -G wheel,video,audio,input phone
+    echo 'phone:147147' | chpasswd
+fi
+
+# With a graphical session, tty1 belongs to the display manager, not to the
+# netroot's root autologin console.
+if [ "$(systemctl get-default)" = graphical.target ]; then
+    systemctl mask getty@tty1.service
+fi
+
+# --installroot: the ext4 root that tiny-init mounts with fap.root=LABEL=fap-root.
+if [ -n "${INSTALLROOT:-}" ]; then
+    echo 'LABEL=fap-root / ext4 defaults,noatime 0 1' > /etc/fstab
+fi
+
+# os-release: what this is (`cat /etc/os-release`; also the USB gadget's
+# product string, fap-usb-gadget) and the hostname. /etc/hostname can't be
+# written here (the build bind-mounts it), so systemd's fallback
+# DEFAULT_HOSTNAME carries the device's codename.
+# shellcheck source=/dev/null
+DEVICE_CODENAME=$(. /ctx/device/device.env && echo "$DEVICE_CODENAME")
+set_os_release() {   # set_os_release KEY value
+    if grep -q "^$1=" /usr/lib/os-release; then
+        sed -i "s/^$1=.*/$1=\"$2\"/" /usr/lib/os-release
+    else
+        echo "$1=\"$2\"" >> /usr/lib/os-release
+    fi
+}
+set_os_release VARIANT "${FAP_DESKTOP} dev root on ${FAP_DEVICE}"
+set_os_release DEFAULT_HOSTNAME "${DEVICE_CODENAME:-$FAP_DEVICE}"
+
+# Pinned build (FAP_PINNED=1): the versionlock was for this build only.
+rm -f /etc/dnf/versionlock.toml /etc/yum.repos.d/fap-updates-archive.repo
