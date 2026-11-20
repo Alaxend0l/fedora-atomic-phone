@@ -25,6 +25,13 @@ mount -t debugfs debugfs /sys/kernel/debug 2>/dev/null
     cat /sys/kernel/debug/regulator/regulator_summary 2>/dev/null | head -200
     echo "== usb"
     ls /sys/class/udc 2>&1; dmesg | grep -iE "dwc3|udc|qusb|usb" | tail -20
+    echo "== bench"
+    echo "mem: $(dd if=/dev/zero of=/dev/null bs=64M count=64 2>&1 | tail -1)"
+    echo "tmpfs write: $(dd if=/dev/zero of=/dev/shm/fap-bench bs=16M count=64 conv=fdatasync 2>&1 | tail -1)"
+    echo "tmpfs read: $(dd if=/dev/shm/fap-bench of=/dev/null bs=16M 2>&1 | tail -1)"
+    rm -f /dev/shm/fap-bench
+    echo "cpu sha256 256MB: $(head -c 268435456 /dev/zero | { TIMEFORMAT=%R; time sha256sum >/dev/null; } 2>&1)"
+    echo "ufs read: $(dd if=/dev/disk/by-label/fap-root of=/dev/null bs=4M count=512 iflag=direct 2>&1 | tail -1)"
     echo "== dmesg errors"
     dmesg --level=err,warn | tail -60
 } > "$f" 2>&1
