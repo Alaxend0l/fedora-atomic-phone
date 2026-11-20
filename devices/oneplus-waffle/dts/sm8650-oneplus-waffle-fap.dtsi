@@ -7,10 +7,11 @@
  * build time and never copied into this repository: it carries no licence
  * line yet (research/mainline-status.md), so we must not redistribute it.
  *
- * What stays on: simple-framebuffer on the bootloader's splash buffer, UFS,
- * USB in device mode (gadget), power/volume keys, ramoops. Everything that
- * loads DSP firmware, drives a rail for a peripheral, or replaces the splash
- * (MDSS/GPU) is off. Untested on hardware.
+ * What stays on (v5): simplefb until msm, MDSS/DSI panel, UFS, touch,
+ * ADSP/CDSP/MPSS/IPA, pmic-glink, PCIe0 Wi-Fi, reboot-mode,
+ * USB in device mode (gadget), power/volume keys, ramoops. Off: GPU, video,
+ * DP, audio, cameras, Bluetooth, IR, flash LED, haptics, the charger/redriver
+ * I2C buses.
  */
 
 #include "sm8650-oneplus-waffle.dts"
@@ -47,15 +48,6 @@
 		};
 	};
 
-	/* Off for first light (each needs ADSP, a supply or firmware). */
-	pmic-glink {
-		status = "disabled";
-	};
-
-	wcn7850-pmu {
-		status = "disabled";
-	};
-
 	sound {
 		status = "disabled";
 	};
@@ -78,10 +70,6 @@
 	/delete-property/ usb-role-switch;
 };
 
-/* No DSPs, no firmware loading. */
-&remoteproc_adsp { status = "disabled"; };
-&remoteproc_mpss { status = "disabled"; };
-&ipa { status = "disabled"; };
 
 /*
  * Display: MDSS + DSI0 + the BOE AA545 panel as the board DT has them (built
@@ -95,9 +83,7 @@
 &gpu { status = "disabled"; };
 &iris { status = "disabled"; };
 
-/* Wi-Fi (PCIe0), Bluetooth (UART14), cameras, audio buses. */
-&pcie0 { status = "disabled"; };
-&pcie0_phy { status = "disabled"; };
+/* Bluetooth (UART14), cameras, audio buses. */
 &uart14 { status = "disabled"; };
 &camss { status = "disabled"; };
 &cci0 { status = "disabled"; };
@@ -106,8 +92,7 @@
 &swr2 { status = "disabled"; };
 &i2c_hub_7 { status = "disabled"; };
 
-/* Touch (SPI4), IR (SPI11), the I2C buses with charger/redriver/sensor parts. */
-&spi4 { status = "disabled"; };
+/* IR (SPI11), the I2C buses with charger/redriver/sensor parts. */
 &spi11 { status = "disabled"; };
 &i2c3 { status = "disabled"; };
 &i2c6 { status = "disabled"; };
@@ -116,3 +101,26 @@
 /* Flash LED and haptics: PMIC outputs, nothing to drive at first light. */
 &pm8550_flash { status = "disabled"; };
 &pm8550b_haptics { status = "disabled"; };
+
+/*
+ * v5: DSPs, pmic-glink (battery via ADSP), Wi-Fi (PCIe0 + WCN7850 PMU) and
+ * touch (SPI4) as the board DT has them. Firmware comes from this unit's own
+ * modem partition and is only installed into the (local, never published)
+ * netroot tarball, as the partition ships it: .mdt + .bNN, so the modem and
+ * IPA names point at the .mdt files (the board DT says .mbn, i.e. squashed).
+ * CDSP isn't enabled in the board DT; same firmware directory.
+ */
+&remoteproc_mpss {
+	firmware-name = "qcom/sm8650/oneplus/waffle/modem.mdt",
+			"qcom/sm8650/oneplus/waffle/modem_dtb.mdt";
+};
+
+&ipa {
+	firmware-name = "qcom/sm8650/oneplus/waffle/ipa_fws.mdt";
+};
+
+&remoteproc_cdsp {
+	firmware-name = "qcom/sm8650/oneplus/waffle/cdsp.mdt",
+			"qcom/sm8650/oneplus/waffle/cdsp_dtb.mdt";
+	status = "okay";
+};

@@ -46,6 +46,11 @@
 #                  vendor_boot_a.img is read (read-only mount) for the
 #                  header-v2 fallback image. Optional.
 #   NETROOT_GENERIC  host path of a generic netroot.tar.gz (netroot command)
+#   PHONE_BACKUP   host dir with this unit's partition dumps (netroot command,
+#                  optional, read-only mount): modem_a.img (DSP/modem firmware)
+#                  and modemst1/modemst2/fsg/fsc (EFS copies for rmtfs -r)
+#                  go into the netroot tarball, which therefore must stay
+#                  local (it carries the unit's IMEI data and OEM firmware).
 set -euo pipefail
 
 IMAGE=localhost/fap-waffle-build
@@ -85,6 +90,10 @@ if [[ -z ${FAP_WAFFLE_INNER:-} ]]; then
   if [[ -n ${STOCK_BACKUP:-} ]]; then
     [[ -f $STOCK_BACKUP/vendor_boot_a.img ]] || { echo "no $STOCK_BACKUP/vendor_boot_a.img" >&2; exit 1; }
     extra+=(-v "$STOCK_BACKUP/vendor_boot_a.img:/stock/vendor_boot_a.img:ro")
+  fi
+  if [[ -n ${PHONE_BACKUP:-} ]]; then
+    [[ -f $PHONE_BACKUP/modem_a.img ]] || { echo "no $PHONE_BACKUP/modem_a.img" >&2; exit 1; }
+    extra+=(-v "$(cd "$PHONE_BACKUP" && pwd):/backup:ro")
   fi
   [[ -n ${NETROOT_GENERIC:-} ]] && extra+=(-v "$(cd "$(dirname "$NETROOT_GENERIC")" && pwd)/$(basename "$NETROOT_GENERIC"):/netroot-generic.tar.gz:ro")
   tty=(); [[ -t 0 && -t 1 ]] && tty=(-it)
@@ -468,6 +477,28 @@ stock_v2() {   # stock_v2 <variant> <out.img>: uniLoader + stock vendor_boot DTB
     --os_version "$OS_VERSION" --os_patch_level "$OS_PATCH_LEVEL" --output "$o"
 }
 
+# DSP/modem firmware from the unit's modem_a partition (vfat, read with
+# mtools from the read-only backup image; nothing is mounted) and EFS copies.
+NETROOT_FW_GLOBS="adsp.* adsp_dtb.* cdsp.* cdsp_dtb.* modem.* modem_dtb.* ipa_fws.* modem_pr modem_oem"
+netroot_phone_files() {   # netroot_phone_files <root>
+  local R=$1 F=$1/usr/lib/firmware/qcom/sm8650/oneplus/waffle M=/work/stage/fw-modem g
+  command -v mcopy >/dev/null || dnf -y -q install mtools >/dev/null
+  rm -rf "$M" && mkdir -p "$M" "$F"
+  MTOOLS_SKIP_CHECK=1 mcopy -s -n -i /backup/modem_a.img ::/image "$M/"
+  (cd "$M/image" && for g in $NETROOT_FW_GLOBS; do cp -a $g "$F/"; done)
+  for g in adsp.mdt adsp_dtb.mdt cdsp.mdt cdsp_dtb.mdt modem.mdt modem_dtb.mdt ipa_fws.mdt; do
+    [[ -f $F/$g ]] || die "modem_a.img has no image/$g"
+  done
+  echo "firmware: $(du -sh "$F" | cut -f1) in /usr/lib/firmware/qcom/sm8650/oneplus/waffle"
+  mkdir -p "$R/usr/lib/fap-efs"
+  local p
+  for p in modemst1:modem_fs1 modemst2:modem_fs2 fsg:modem_fsg fsc:modem_fsc; do
+    [[ -f /backup/${p%%:*}.img ]] || die "no ${p%%:*}.img in PHONE_BACKUP"
+    install -m 600 "/backup/${p%%:*}.img" "$R/usr/lib/fap-efs/${p##*:}"
+  done
+  echo "EFS copies: $(ls "$R/usr/lib/fap-efs" | tr '\n' ' ')"
+}
+
 cmd_netroot() {
   [[ -f /netroot-generic.tar.gz ]] || die "set NETROOT_GENERIC=<generic netroot.tar.gz>"
   local kver R=/work/netroot-root; kver=$(cat "$S/kernel-release-waffle")
@@ -476,6 +507,13 @@ cmd_netroot() {
   tar -xzf /netroot-generic.tar.gz -C "$R"
   mkdir -p "$R/usr/lib/modules"
   cp -a "$S/modroot-waffle/lib/modules/$kver" "$R/usr/lib/modules/"
+  # Waffle overlay (replaces the N100 fap-modem-ram of the generic tarball).
+  cp -a "$DEV/netroot/." "$R/"
+  if [[ -d /backup ]]; then
+    netroot_phone_files "$R"
+  else
+    echo "no PHONE_BACKUP: netroot without DSP firmware and EFS copies"
+  fi
   mkdir -p /out/netroot
   (cd "$R" && tar -czf /out/netroot/netroot.tar.gz .)
   rm -rf "$R"

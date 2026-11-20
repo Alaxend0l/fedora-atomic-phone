@@ -1,0 +1,38 @@
+#!/bin/bash
+# SPDX-License-Identifier: AGPL-3.0-or-later
+# OnePlus 12 (waffle) netroot: start the modem with nothing written to the
+# phone. Replaces the N100 version of this script in the generic netroot.
+#
+#   fap-modem-ram
+#
+# - Firmware: baked into this netroot under
+#   /usr/lib/firmware/qcom/sm8650/oneplus/waffle/ (from this unit's modem_a
+#   backup, incl. modem_pr/ which the modem fetches over TFTP; tqftpserv
+#   finds it next to the remoteproc's firmware-name).
+# - EFS: RAM copies of this unit's modemst1/modemst2/fsg/fsc backup, baked in
+#   at /usr/lib/fap-efs and copied to /run/fap-efs; rmtfs serves those with
+#   -r (read-only: writes stay in rmtfs's memory) -o <dir>. The phone's own
+#   EFS partitions are never opened. Fedora's rmtfs.service stays masked.
+set -euo pipefail
+
+rproc=
+for r in /sys/class/remoteproc/remoteproc*; do
+    case "$(cat "$r/firmware")" in */modem.mdt|*/modem.mbn) rproc=$r ;; esac
+done
+[ -n "$rproc" ] || { echo "no modem remoteproc (qcom_q6v5_pas not loaded?)" >&2; exit 1; }
+echo "modem: $rproc ($(cat "$rproc/state")), firmware $(cat "$rproc/firmware")"
+
+mkdir -p /run/fap-efs
+cp /usr/lib/fap-efs/modem_fs1 /usr/lib/fap-efs/modem_fs2 /usr/lib/fap-efs/modem_fsg \
+   /usr/lib/fap-efs/modem_fsc /run/fap-efs/
+echo "EFS copies: $(ls /run/fap-efs | tr '\n' ' ')"
+
+modprobe -a qrtr qrtr-smd qcom_pd_mapper qcom_rmtfs_mem
+
+systemctl stop fap-rmtfs.service fap-tqftpserv.service 2>/dev/null || true
+systemctl reset-failed fap-rmtfs.service fap-tqftpserv.service 2>/dev/null || true
+systemd-run --unit fap-tqftpserv --collect stdbuf -oL -eL /usr/bin/tqftpserv
+# -s starts the modem once rmtfs is ready, and stops it when rmtfs exits.
+systemd-run --unit fap-rmtfs --collect stdbuf -oL -eL /usr/bin/rmtfs -r -o /run/fap-efs -s -v
+sleep 15
+echo "modem: $(cat "$rproc/state")"
