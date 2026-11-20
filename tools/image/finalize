@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+# Last step of every image build. Runs inside the container build.
+set -euxo pipefail
+
+# Name the image after what it is, so `cat /etc/os-release` on a phone says so.
+sed -i "s/^VARIANT=.*/VARIANT=\"${FAP_DESKTOP} on ${FAP_DEVICE}\"/" /usr/lib/os-release \
+    || echo "VARIANT=\"${FAP_DESKTOP} on ${FAP_DEVICE}\"" >> /usr/lib/os-release
+
+# bootc images must not ship content in /var (it's per-machine state), except
+# the empty dirs the base image expects.
+find /var -mindepth 1 -maxdepth 1 ! -name cache ! -name tmp -exec rm -rf {} +
+mkdir -p /var/tmp && chmod 1777 /var/tmp

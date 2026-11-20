@@ -1,0 +1,18 @@
+#!/usr/bin/env bash
+# Device layer. Runs inside the container build, after base/ and the desktop.
+# Files in ./rootfs are already installed. Keep this script about *this*
+# phone; anything shared by a whole SoC family belongs in kernels/<soc>/ or a
+# package.
+set -euxo pipefail
+source ./device.env
+
+# Kernel: by default Fedora's kernel is already in the base image.
+if [ "$KERNEL_PACKAGE" != "fedora" ]; then
+    dnf5 -y remove kernel kernel-core kernel-modules kernel-modules-core || true
+    rm -rf /usr/lib/modules/*
+    dnf5 -y install "$KERNEL_PACKAGE"
+fi
+
+# Device-specific packages and services go here, e.g.:
+# dnf5 -y install qrtr rmtfs pd-mapper tqftpserv
+# systemctl enable rmtfs.service

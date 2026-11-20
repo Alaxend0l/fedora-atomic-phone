@@ -1,0 +1,48 @@
+#!/usr/bin/env bash
+# Expose the phone as a USB network adapter (NCM) so a host can reach it at
+# 172.16.42.1 over the cable, even with no display or Wi-Fi.
+# Uses the kernel's USB gadget configfs; needs CONFIG_USB_CONFIGFS_NCM.
+#
+# Host side (macOS/Linux): the phone shows up as a network interface; give it
+# 172.16.42.2/24 and `ssh user@172.16.42.1`.
+set -euo pipefail
+
+G=/sys/kernel/config/usb_gadget/fap
+IP=172.16.42.1/24
+
+up() {
+    modprobe libcomposite 2>/dev/null || true
+    mountpoint -q /sys/kernel/config || mount -t configfs none /sys/kernel/config
+    udc=$(ls /sys/class/udc 2>/dev/null | head -1)
+    [ -n "$udc" ] || { echo "no USB device controller found" >&2; exit 1; }
+
+    mkdir -p "$G"
+    echo 0x1d6b > "$G/idVendor"    # Linux Foundation
+    echo 0x0104 > "$G/idProduct"   # Multifunction Composite Gadget
+    mkdir -p "$G/strings/0x409"
+    echo "fedora-atomic-phone" > "$G/strings/0x409/manufacturer"
+    sed -n 's/^VARIANT="\(.*\)"/\1/p' /usr/lib/os-release > "$G/strings/0x409/product"
+
+    mkdir -p "$G/functions/ncm.usb0" "$G/configs/c.1/strings/0x409"
+    echo "NCM" > "$G/configs/c.1/strings/0x409/configuration"
+    ln -sf "$G/functions/ncm.usb0" "$G/configs/c.1/"
+    echo "$udc" > "$G/UDC"
+
+    iface=$(cat "$G/functions/ncm.usb0/ifname")
+    ip addr replace "$IP" dev "$iface"
+    ip link set "$iface" up
+}
+
+down() {
+    [ -d "$G" ] || exit 0
+    echo "" > "$G/UDC" 2>/dev/null || true
+    rm -f "$G/configs/c.1/ncm.usb0"
+    rmdir "$G/configs/c.1/strings/0x409" "$G/configs/c.1" \
+          "$G/functions/ncm.usb0" "$G/strings/0x409" "$G" 2>/dev/null || true
+}
+
+case "${1:-up}" in
+    up) up ;;
+    down) down ;;
+    *) echo "usage: $0 up|down" >&2; exit 2 ;;
+esac

@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+# Plasma Mobile: KDE's phone shell. Starts from Kinoite (see Justfile).
+# Untested placeholder; package set to be confirmed against Fedora's repos.
+set -euxo pipefail
+
+dnf5 -y install plasma-mobile
+dnf5 -y remove firefox firefox-langpacks || true

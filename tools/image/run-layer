@@ -1,0 +1,30 @@
+#!/usr/bin/env bash
+# Apply one layer folder to the image being built. Runs inside the container
+# build (see Containerfile).
+#
+# A layer folder may contain:
+#   rootfs/   copied over / as-is (use rootfs/usr and rootfs/etc only)
+#   build     executable script, run with the layer folder as working dir
+# Both are optional.
+set -euxo pipefail
+
+layer=${1:?usage: run-layer <layer-dir>}
+[ -d "$layer" ] || { echo "no such layer: $layer" >&2; exit 1; }
+
+if [ -d "$layer/rootfs" ]; then
+    # Only /usr and /etc are safe to ship in a bootc image; /var is created at
+    # first boot, and other top-level dirs are owned by the base image.
+    for d in "$layer/rootfs"/*; do
+        case "$(basename "$d")" in
+            usr|etc) cp -a --no-preserve=ownership "$d/." "/$(basename "$d")/" ;;
+            *) echo "refusing to install $d: only rootfs/usr and rootfs/etc allowed" >&2; exit 1 ;;
+        esac
+    done
+fi
+
+if [ -x "$layer/build" ]; then
+    (cd "$layer" && ./build)
+fi
+
+# Keep layers small: package caches live in the cache mount, not the image.
+dnf5 clean all || true

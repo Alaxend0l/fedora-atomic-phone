@@ -1,0 +1,25 @@
+# Build one image on demand. Manual trigger only while the repo is private
+# (Actions minutes) and nothing boots yet. Status: untested.
+name: build
+
+on:
+  workflow_dispatch:
+    inputs:
+      device:
+        description: device folder under devices/
+        default: oneplus-billie2
+      desktop:
+        description: desktop folder under desktops/
+        default: tty
+
+jobs:
+  build:
+    runs-on: ubuntu-24.04-arm
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install just
+        run: sudo apt-get update && sudo apt-get install -y just podman
+      - name: Validate device
+        run: just DEVICE=${{ inputs.device }} DESKTOP=${{ inputs.desktop }} check
+      - name: Build image
+        run: just DEVICE=${{ inputs.device }} DESKTOP=${{ inputs.desktop }} build

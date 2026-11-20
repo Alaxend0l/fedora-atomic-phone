@@ -1,0 +1,16 @@
+# Build outputs
+/output/
+/out/
+*.raw
+*.img
+*.simg
+*.7z
+
+# Local settings for the Justfile
+.env
+
+# Firmware and vendor blobs are extracted on the phone, never committed
+*.mbn
+*.mdt
+*.b[0-9][0-9]
+/firmware/

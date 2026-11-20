@@ -1,0 +1,13 @@
+[Unit]
+Description=USB network gadget for debug access (172.16.42.1)
+After=systemd-modules-load.service
+Before=sshd.service
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+ExecStart=/usr/libexec/fap-usb-gadget up
+ExecStop=/usr/libexec/fap-usb-gadget down
+
+[Install]
+WantedBy=multi-user.target

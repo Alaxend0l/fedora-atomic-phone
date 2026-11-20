@@ -1,0 +1,24 @@
+# Roadmap
+
+## Framework
+- [x] Scaffold: layered Containerfile, device folder format, validation
+- [ ] Set up a build environment and get `just build` green for
+      `oneplus-billie2` + `tty`
+- [ ] `just disk` produces esp.img + rootfs.img
+- [ ] CI: build images on push (manual trigger for now)
+- [ ] Firmware extraction at first boot (modeled on droid-juicer)
+- [ ] Publish images to a registry; `bootc upgrade` from a phone
+
+## OnePlus Nord N100 (`oneplus-billie2`)
+Each step is reversible via fastboot or EDL.
+1. [ ] Check Fedora's kernel config for SM6115 drivers (kernels/qcom-sm6115)
+2. [ ] Build U-Boot; `fastboot boot uboot.img` (RAM only) shows U-Boot on screen
+3. [ ] Decide the ESP partition; extract `vendor` firmware first if it's `super`
+4. [ ] First flash: Fedora tty image boots to the framebuffer console
+5. [ ] SSH over USB; pstore collects crash logs
+6. [ ] Phosh on the simple framebuffer (no GPU acceleration yet)
+7. [ ] Touch (Ilitek SPI)
+8. [ ] Wi‑Fi
+9. [ ] Charging / battery reporting (PMI632, SMB1355)
+10. [ ] Proper display driver (ILI9882N panel), GPU (Adreno 610)
+11. [ ] Audio (WCD937x), modem, sensors

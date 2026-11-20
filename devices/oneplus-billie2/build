@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+# OnePlus Nord N100 device layer. Runs inside the container build.
+set -euxo pipefail
+source ./device.env
+
+# Kernel: Fedora's, for now (KERNEL_PACKAGE=fedora). Fail the build early if
+# that kernel doesn't ship this board's device tree.
+kver=$(ls /usr/lib/modules | sort -V | tail -1)
+dtb="/usr/lib/modules/$kver/dtb/$KERNEL_DTB"
+[ -f "$dtb" ] || { echo "kernel $kver has no $KERNEL_DTB" >&2; exit 1; }
+
+# Qualcomm userspace for the remote processors (modem, DSPs). All four are in
+# Fedora. Services get enabled once firmware extraction exists.
+dnf5 -y install qrtr rmtfs pd-mapper tqftpserv

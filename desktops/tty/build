@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+# tty: no graphical UI. Useful for first boots of a new device, where all you
+# want is a console on the framebuffer and SSH over USB.
+set -euxo pipefail
+
+dnf5 -y remove firefox firefox-langpacks || true
