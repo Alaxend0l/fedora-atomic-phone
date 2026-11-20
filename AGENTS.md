@@ -31,6 +31,7 @@ checkout, built images). Pocketblue reference clones:
 | boot/uboot-android/README.md | U-Boot build + the N100 boot experiments |
 | boot/android-bootimg/README.md | the RAM-boot dev loop (`fastboot boot` + netroot over USB) |
 | docs/hardware/ | per-area bring-up plans for the N100's remaining hardware |
+| docs/waydroid.md | Android apps via Waydroid: kernel check, setup, test plan |
 | kmod/, devices/*/kmod/ | out-of-tree modules (touch, battery, panel); each README has its lessons |
 
 ## Reproducing the current N100 state (all RAM-only, nothing written)

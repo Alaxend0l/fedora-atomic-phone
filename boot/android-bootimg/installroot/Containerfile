@@ -10,6 +10,13 @@ RUN dnf5 -y install --setopt=install_weak_deps=True @kde-mobile-environment \
         mesa-dri-drivers e2fsprogs sudo chrony systemd-pam \
     && dnf5 clean all
 
+# Waydroid: Android apps in an LXC container (docs/waydroid.md). Only the
+# tools; the ~1 GB LineageOS images are fetched on the phone by
+# /usr/libexec/fap-waydroid-init. Own layer so the Plasma layer above stays
+# cached. Binder comes from the kernel (Rust binder + binderfs, built in).
+RUN dnf5 -y install --setopt=install_weak_deps=False waydroid \
+    && dnf5 clean all
+
 COPY rootfs/ /
 
 # /usr/local/share/applications/systemsettings.desktop hides the desktop

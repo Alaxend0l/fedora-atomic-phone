@@ -110,6 +110,7 @@ serious.
       the modem partition, EFS policy: RAM-only vs real partitions, decided
       with the user).
 - [ ] Clock at boot (RTC unset; timesyncd once Wi‑Fi is up).
+- [ ] Waydroid (Android apps): packaged + setup script on branch `waydroid`, untested on the phone; test plan in [waydroid.md](waydroid.md). Watch the Rust binder ENOSPC bug (waydroid#2422).
 Each step is reversible via fastboot or EDL.
 1. [x] Check Fedora's kernel config for SM6115 drivers: all present in 7.3.4 (fc45), incl. the billie2 DTB (kernels/qcom-sm6115)
 2. [x] Build U-Boot (`just uboot`, boot/uboot-android/): uboot.img built 2026-11-20
