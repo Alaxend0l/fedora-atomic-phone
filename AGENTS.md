@@ -46,6 +46,19 @@ checkout, built images). Pocketblue reference clones:
    `ssh root@172.16.42.1`. Modem/Wi‑Fi: `/usr/libexec/fap-modem-ram`.
 Needs `dtbo_a` erased (it is, as of 2026-11-20; backup in UBports-N100/backup/).
 
+## The installed system (since 2026-11-20)
+The N100 boots on its own: `boot_a` holds our boot image, `userdata` is an
+ext4 root labelled `fap-root` (Fedora 45 + Plasma Mobile, user `phone`).
+- Rebuild the root: `make-netroot.sh` (with the extra modules/firmware), then
+  `boot/android-bootimg/installroot/make-installroot.sh <dir>`; install from a
+  RAM boot: `mkfs.ext4 -L fap-root` on userdata, stream the tarball in, add
+  the zap shader (`qcom/sm6115/OnePlus/billie2/a610_zap.*` from vendor_a).
+- Boot image: `RAMBOOT_CMDLINE="fap.root=LABEL=fap-root selinux=0" make-ramboot.sh …`;
+  `fastboot boot` it for tests (nothing written), `fastboot flash boot_a` it to keep.
+- Risky kernel/DT work: keep using `fastboot boot` (RAM); it can mount the
+  installed root via `fap.root=`, or use the netroot instead.
+- Bootloader: hold Vol Down while powering on (Power + Vol Up forces a restart).
+
 ## Rules
 **Safety (the phone is real hardware):**
 - Never write `modemst1/2`, `fsg`, `fsc`, `persist`, boot-chain partitions

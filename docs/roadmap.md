@@ -99,6 +99,9 @@ cleanly (`rmmod` was risky on the N100). Use the RAM-boot loop for anything
 serious.
 
 ## OnePlus Nord N100 (`oneplus-billie2`)
+- [ ] Fix UBWC for SM6115 (drop `FD_MESA_DEBUG=noubwc`): compare the kernel's ubwc_config entry with Mesa's freedreno a610 parameters.
+- [ ] Move the install from a plain rootfs to the bootc image (ostree deployment + `fap-android-boot`).
+- [ ] USB gadget in the installed system: check host enumeration (not seen on the Mac after the first standalone boot).
 - [ ] Wi‑Fi board data: pick the right vendor `bdwlan.*` (board_id reads
       0xff), pack a `board-2.bin` entry for variant `OnePlus_billie2`.
 - [ ] Stable Wi‑Fi MAC (DT `local-mac-address` from the vendor-programmed
