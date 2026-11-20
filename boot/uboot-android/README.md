@@ -101,3 +101,26 @@ billie2 DT byte-identical.
 Result: `dtbo-noop.img`, 4096 bytes, sha256 `0bee5680…c22e72dd`.
 Flashing it to `dtbo_a` means Ubuntu Touch won't boot until the stock dtbo
 backup is restored.
+
+**Tested 2026-11-20:** flashed `dtbo-noop.img` to `dtbo_a`, `fastboot boot`
+the U-Boot image (with os_version fields): ABL `Booting OKAY`, but ABL's
+fastboot (product `bengal`) keeps answering for 30 s+ → still no handoff (or an
+immediate return we can't see). Stock dtbo restored, hash verified,
+Ubuntu Touch boots. So the stock overlay wasn't the only blocker.
+
+### Open leads (next experiments)
+1. **`qcom-phone.config`.** U-Boot's `doc/board/qualcomm/board.rst` builds
+   phones with `make qcom_defconfig qcom-phone.config`; we built
+   `qcom_defconfig` only. Probably needed for display/buttons; may or may not
+   affect the handoff. Cheap: rebuild, RAM-boot (with stock or no-op dtbo).
+2. **Tell "ABL refused" from "U-Boot died instantly".** ABL's fastboot staying
+   up suggests the former, but a crash + reset back into fastboot would look
+   similar. A build that shows something on the framebuffer (lead 1) answers it.
+3. **Header v0 with appended DTB** (`u-boot-nodtb.bin.gz` + DTB concatenated,
+   as in U-Boot's docs for older boards) instead of v2's separate DTB section.
+4. **Kernel image header:** some ABLs check the arm64 Image header of the
+   decompressed kernel; check `u-boot-nodtb.bin` has one
+   (`LINUX_KERNEL_IMAGE_HEADER`).
+5. **postmarketOS's billie2 port** boots mainline via ABL and would show what
+   works; its pmaports URLs currently redirect to `gitlab.nura.eco` (404), so
+   that config wasn't readable on 2026-11-20.
