@@ -1,0 +1,350 @@
+#!/usr/bin/env bash
+# SPDX-License-Identifier: AGPL-3.0-or-later
+#
+# fap-dev: the phone development loop from the host (macOS or Linux).
+#
+#   tools/fap-dev <command> [args]
+#
+#   wait-fastboot [timeout]   wait until a phone is in fastboot; print its serial
+#   fresh-fastboot            new ABL session (fastboot reboot bootloader, wait
+#                             for the phone to leave and come back, check that
+#                             it is the bootloader's fastboot, not fastbootd)
+#   ramboot <img> [--reuse-session] [--no-ssh]
+#                             fresh session + `fastboot boot <img>` (RAM only),
+#                             then wait for the USB gadget and SSH
+#   state [-o file]           `fastboot getvar all` summary: product, slots,
+#                             lock state, bootloader, anti-rollback counters
+#   addr                      print the phone's address on the USB network
+#   ssh [cmd...]              SSH to the phone (root, no host key checks)
+#   scp-to <src> <dst>        copy to the phone (recursive)
+#   scp-from <src> <dst>      copy from the phone (recursive)
+#   serve <dir> [port]        HTTP server for a netroot on 172.16.42.2 (foreground)
+#   clock                     set the phone's clock from the host's (UTC)
+#   audit                     hidden-dependency audit over SSH (Markdown report)
+#
+# Safe by design: the only fastboot commands it runs are devices, getvar,
+# reboot, reboot bootloader and boot (RAM). Flashing stays in tools/flash.sh.
+#
+# Environment:
+#   FAP_SERIAL          fastboot serial to use when several phones are attached
+#   FAP_PHONE           phone address; skips discovery (e.g. 172.16.42.1)
+#   FAP_IF              host interface to search for the phone (default: any
+#                       with a 172.16.42.x or 169.254.x address)
+#   FAP_USER            SSH user (default root)
+#   FAP_SSH_OPTS        extra ssh/scp options (word-split)
+#   FAP_GADGET_PRODUCT  USB product string of our gadget (default
+#                       "ramboot debug shell", set by tiny-init)
+#   FAP_TIMEOUT         seconds to wait for fastboot/gadget/SSH (default 120)
+#   FASTBOOT, SSH, SCP  override the tools (used by the tests)
+set -euo pipefail
+
+FASTBOOT=${FASTBOOT:-fastboot}
+SSH=${SSH:-ssh}
+SCP=${SCP:-scp}
+FAP_USER=${FAP_USER:-root}
+FAP_POLL=${FAP_POLL:-1}
+FAP_TIMEOUT=${FAP_TIMEOUT:-120}
+FAP_GADGET_PRODUCT=${FAP_GADGET_PRODUCT:-ramboot debug shell}
+FAP_OS=${FAP_OS:-$(uname -s)}
+FAP_DEV_DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
+
+# Throwaway host keys: every RAM boot has new ones.
+SSH_OPTS=(-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null
+          -o LogLevel=ERROR -o ConnectTimeout=5)
+# shellcheck disable=SC2206
+[ -n "${FAP_SSH_OPTS:-}" ] && SSH_OPTS+=($FAP_SSH_OPTS)
+
+die() { echo "fap-dev: $*" >&2; exit 1; }
+log() { echo "fap-dev: $*" >&2; }
+
+# Run a command with a time limit (macOS has no `timeout`; perl is everywhere).
+with_timeout() {
+    local secs=$1; shift
+    perl -e 'alarm shift; exec @ARGV or die "exec: $!"' "$secs" "$@"
+}
+
+# --- fastboot (allow-list) ----------------------------------------------------
+fb() {
+    case "${1:-}" in
+        devices|getvar|boot) ;;
+        reboot) [ $# -eq 1 ] || [ "$*" = "reboot bootloader" ] || die "refusing: fastboot $*" ;;
+        *) die "refusing: fastboot $* (fap-dev never writes; see tools/flash.sh)" ;;
+    esac
+    if [ "$1" != devices ] && [ -n "${FAP_SERIAL:-}" ]; then
+        "$FASTBOOT" -s "$FAP_SERIAL" "$@"
+    else
+        "$FASTBOOT" "$@"
+    fi
+}
+
+# Serials of phones in fastboot (bootloader or fastbootd), FAP_SERIAL only if set.
+fastboot_serials() {
+    fb devices 2>/dev/null | awk -v want="${FAP_SERIAL:-}" \
+        '$2 == "fastboot" && (want == "" || $1 == want) {print $1}'
+}
+
+# One value from `fastboot getvar <name>` ("name: value" on stderr).
+getvar() {
+    fb getvar "$1" 2>&1 | awk -v k="$1:" 'index($0, k) == 1 {
+        v = substr($0, length(k) + 1); sub(/^[ \t]+/, "", v); print v; exit }'
+}
+
+wait_fastboot() {
+    local timeout=${1:-$FAP_TIMEOUT} end serials n
+    end=$((SECONDS + timeout))
+    while :; do
+        serials=$(fastboot_serials)
+        n=$(printf '%s' "$serials" | grep -c . || true)
+        [ "$n" -gt 1 ] && die "several phones in fastboot ($(echo "$serials" | tr '\n' ' ')); set FAP_SERIAL"
+        [ "$n" -eq 1 ] && { echo "$serials"; return 0; }
+        [ $SECONDS -ge $end ] && die "no phone in fastboot after ${timeout}s"
+        sleep "$FAP_POLL"
+    done
+}
+
+wait_fastboot_gone() {
+    local end=$((SECONDS + ${1:-30}))
+    while [ -n "$(fastboot_serials)" ]; do
+        [ $SECONDS -ge $end ] && return 1
+        sleep "$FAP_POLL"
+    done
+}
+
+# A fresh ABL session. After a `fastboot boot` that didn't hand over, the next
+# one in the same session fails with "Load Error" (N100), and `fastboot boot`
+# only exists in the bootloader's fastboot, not Android's fastbootd.
+# mode: always (default) | if-userspace (only leave fastbootd).
+fresh_fastboot() {
+    local mode=${1:-always} serial
+    serial=$(wait_fastboot)
+    if [ "$mode" = if-userspace ] && [ "$(getvar is-userspace)" != yes ]; then
+        log "reusing the current bootloader session ($serial)"
+        return 0
+    fi
+    log "fastboot reboot bootloader ($serial)"
+    fb reboot bootloader >/dev/null 2>&1 || die "fastboot reboot bootloader failed"
+    wait_fastboot_gone 30 || log "phone never left fastboot; continuing anyway"
+    serial=$(wait_fastboot)
+    [ "$(getvar is-userspace)" = yes ] && die "$serial is in fastbootd (userspace), not the bootloader"
+    log "fresh bootloader session ($serial)"
+}
+
+# --- USB ----------------------------------------------------------------------
+# Product strings of attached USB devices, one per line.
+usb_products() {
+    if [ "$FAP_OS" = Darwin ]; then
+        ioreg -p IOUSB -l -w0 2>/dev/null | sed -n 's/.*"USB Product Name" = "\(.*\)"$/\1/p'
+    else
+        cat /sys/bus/usb/devices/*/product 2>/dev/null || true
+    fi
+}
+
+wait_gadget() {
+    local end=$((SECONDS + ${1:-$FAP_TIMEOUT}))
+    until usb_products | grep -Fxq "$FAP_GADGET_PRODUCT"; do
+        [ $SECONDS -ge $end ] && return 1
+        sleep "$FAP_POLL"
+    done
+}
+
+# --- finding the phone on the USB network --------------------------------------
+# "iface ipv4" for host interfaces with a USB-network-looking address
+# (172.16.42.x from the phone's DHCP, or 169.254.x link-local when DHCP failed).
+parse_ifconfig() {   # macOS `ifconfig` on stdin
+    awk '/^[^ \t]/ {i = $1; sub(/:$/, "", i)}
+         $1 == "inet" && ($2 ~ /^172\.16\.42\./ || $2 ~ /^169\.254\./) {print i, $2}'
+}
+parse_ip_addr() {    # Linux `ip -o -4 addr show` on stdin
+    awk '$3 == "inet" {a = $4; sub(/\/.*/, "", a)
+         if (a ~ /^172\.16\.42\./ || a ~ /^169\.254\./) print $2, a}'
+}
+host_usb_ifaces() {
+    if [ "$FAP_OS" = Darwin ]; then ifconfig | parse_ifconfig
+    else ip -o -4 addr show | parse_ip_addr; fi | {
+        if [ -n "${FAP_IF:-}" ]; then awk -v i="$FAP_IF" '$1 == i'; else cat; fi
+    }
+}
+
+# Host's own IPv6 link-local addresses on an interface.
+host_ll() {
+    if [ "$FAP_OS" = Darwin ]; then ifconfig "$1" 2>/dev/null
+    else ip -o -6 addr show dev "$1" 2>/dev/null; fi | grep -oiE 'fe80::[0-9a-f:]*[0-9a-f]' || true
+}
+
+# Ping all-nodes on an interface; print responders' link-local addresses.
+ping_all_nodes() {
+    if [ "$FAP_OS" = Darwin ]; then
+        with_timeout 4 ping6 -c 2 "ff02::1%$1" 2>/dev/null || true
+    else
+        with_timeout 4 ping -6 -c 2 -w 3 "ff02::1%$1" 2>/dev/null || true
+    fi | sed -n 's/.* from \(fe80:[0-9a-fA-F:]*[0-9a-fA-F]\).*/\1/p' | sort -u
+}
+
+# Print the phone's address: 172.16.42.1 when the host got a 172.16.42.x
+# lease, else the IPv6 link-local neighbour on a 169.254.x interface.
+find_phone() {
+    [ -n "${FAP_PHONE:-}" ] && { echo "$FAP_PHONE"; return 0; }
+    local ifaces iface ll own
+    ifaces=$(host_usb_ifaces)
+    if echo "$ifaces" | awk '$2 ~ /^172\.16\.42\./ && $2 != "172.16.42.1" {f = 1} END {exit !f}'; then
+        echo 172.16.42.1
+        return 0
+    fi
+    for iface in $(echo "$ifaces" | awk '{print $1}' | sort -u); do
+        own=$(host_ll "$iface")
+        for ll in $(ping_all_nodes "$iface"); do
+            echo "$own" | grep -qix "$ll" && continue
+            echo "$ll%$iface"
+            return 0
+        done
+    done
+    return 1
+}
+
+phone() { find_phone || die "phone not found on a USB network (no 172.16.42.x lease, no IPv6 neighbour); set FAP_PHONE or FAP_IF"; }
+
+# user@host, bracketed for scp when it's IPv6.
+scp_target() { case "$1" in *:*) echo "$FAP_USER@[$1]" ;; *) echo "$FAP_USER@$1" ;; esac; }
+
+wait_ssh() {
+    local end=$((SECONDS + ${1:-$FAP_TIMEOUT})) a
+    while :; do
+        if a=$(find_phone 2>/dev/null) && "$SSH" "${SSH_OPTS[@]}" -o BatchMode=yes "$FAP_USER@$a" true 2>/dev/null; then
+            echo "$a"; return 0
+        fi
+        [ $SECONDS -ge $end ] && return 1
+        sleep "$FAP_POLL"
+    done
+}
+
+# --- fastboot getvar all summary ----------------------------------------------
+# `fastboot getvar all` output on stdin -> Markdown summary.
+summarize_getvar() {
+    awk '
+    /^\(bootloader\)/ {
+        line = $0; sub(/^\(bootloader\)[ \t]*/, "", line)
+        c = index(line, ":"); if (!c) next
+        key = substr(line, 1, c - 1); val = substr(line, c + 1)
+        # Per-slot/partition variables carry a second colon: slot-successful:a:yes
+        if (key ~ /^(has-slot|slot-successful|slot-unbootable|slot-retry-count|partition-type|partition-size|is-logical)$/) {
+            c = index(val, ":"); if (c) { key = key ":" substr(val, 1, c - 1); val = substr(val, c + 1) }
+        }
+        gsub(/^[ \t]+|[ \t\r]+$/, "", val)
+        if (!(key in v)) order[++n] = key
+        v[key] = val
+        if (key ~ /^slot-(successful|unbootable|retry-count):/) { s = key; sub(/.*:/, "", s); slots[s] = 1 }
+    }
+    function row(k) { if (k in v) printf "| %s | %s |\n", k, v[k] }
+    END {
+        if (!n) { print "no (bootloader) lines: is the phone in fastboot?"; exit 1 }
+        print "| variable | value |"; print "|---|---|"
+        split("product variant hw-revision current-slot slot-count unlocked secure secure-boot is-userspace version-bootloader version-baseband version-cpld", want, " ")
+        for (i = 1; i in want; i++) row(want[i])
+        for (s in slots) { row("slot-successful:" s); row("slot-unbootable:" s); row("slot-retry-count:" s) }
+        # Anti-rollback counters: names differ per vendor (Pixel: ap-ar-ns,
+        # gsa-bl1-ar; others: anti, rollback-index...).
+        for (i = 1; i <= n; i++) {
+            k = order[i]
+            if (k ~ /(^|-)ar(-|$)|anti|rollback|arb/) row(k)
+        }
+        print ""
+        if (v["unlocked"] != "" && v["unlocked"] != "yes") print "- bootloader is LOCKED: fastboot boot / flashing will be refused"
+        for (s in slots) if (v["slot-unbootable:" s] == "yes")
+            print "- slot " s " is marked unbootable: do not switch to it (its bootloader version may be older)"
+        if (v["is-userspace"] == "yes") print "- this is fastbootd (userspace): `fastboot boot` needs the bootloader (fap-dev fresh-fastboot)"
+    }'
+}
+
+# --- commands -----------------------------------------------------------------
+cmd_ramboot() {
+    local img="" mode=always want_ssh=1 a
+    while [ $# -gt 0 ]; do
+        case "$1" in
+            --reuse-session) mode=if-userspace ;;
+            --no-ssh) want_ssh=0 ;;
+            -*) die "ramboot: unknown option $1" ;;
+            *) img=$1 ;;
+        esac
+        shift
+    done
+    [ -n "$img" ] || die "usage: fap-dev ramboot <img> [--reuse-session] [--no-ssh]"
+    [ -f "$img" ] || die "no such file: $img"
+    fresh_fastboot "$mode"
+    log "fastboot boot $img (RAM only)"
+    fb boot "$img" || die "fastboot boot failed (Load Error: was the session fresh? image too big?)"
+    log "waiting for the USB gadget \"$FAP_GADGET_PRODUCT\""
+    wait_gadget || die "no USB gadget after ${FAP_TIMEOUT}s (check the screen; tools/serial-shell.py)"
+    log "gadget up"
+    [ "$want_ssh" = 1 ] || return 0
+    log "waiting for SSH (needs a netroot or installed root; tiny-init alone has telnet + serial)"
+    if a=$(wait_ssh); then
+        log "ready: fap-dev ssh  (root@$a)"
+    else
+        die "no SSH after ${FAP_TIMEOUT}s; is \`fap-dev serve\` running? Try telnet 172.16.42.1 or tools/serial-shell.py"
+    fi
+}
+
+cmd_state() {
+    local out="" raw
+    [ "${1:-}" = -o ] && out=${2:?state -o <file>}
+    wait_fastboot >/dev/null
+    raw=$(fb getvar all 2>&1 || true)
+    [ -n "$out" ] && { printf '%s\n' "$raw" > "$out"; log "raw output in $out (contains the serial number)"; }
+    printf '%s\n' "$raw" | summarize_getvar
+}
+
+cmd_serve() {
+    local dir=${1:?usage: fap-dev serve <dir> [port]} port=${2:-8000} ip=${FAP_SERVE_BIND:-}
+    [ -d "$dir" ] || die "no such directory: $dir"
+    if [ -z "$ip" ]; then
+        log "waiting for a 172.16.42.x address on the host (phone's DHCP)"
+        local end=$((SECONDS + ${FAP_SERVE_WAIT:-300}))
+        until ip=$(host_usb_ifaces | awk '$2 ~ /^172\.16\.42\./ && $2 != "172.16.42.1" {print $2; exit}') && [ -n "$ip" ]; do
+            [ $SECONDS -ge $end ] && die "host never got a 172.16.42.x address; set FAP_SERVE_BIND"
+            sleep "$FAP_POLL"
+        done
+    fi
+    log "serving $dir on http://$ip:$port/ (Ctrl-C to stop)"
+    exec python3 -m http.server --bind "$ip" --directory "$dir" "$port"
+}
+
+cmd_clock() {
+    local a now
+    a=$(phone)
+    now=$(date -u '+%Y-%m-%d %H:%M:%S')
+    # Both GNU and busybox date accept this format. The RTC is left alone.
+    "$SSH" "${SSH_OPTS[@]}" "$FAP_USER@$a" "date -u -s '$now' >/dev/null && echo \"phone: \$(date -u)\"" \
+        || die "setting the clock failed"
+    echo "host:  $(date -u)"
+}
+
+usage() { sed -n '4,/^set -euo/{/^set -euo/d;s/^# \{0,1\}//;p;}' "${BASH_SOURCE[0]}"; }
+
+main() {
+    local cmd=${1:-help}
+    [ $# -gt 0 ] && shift
+    case "$cmd" in
+        wait-fastboot) wait_fastboot "${1:-$FAP_TIMEOUT}" ;;
+        fresh-fastboot) fresh_fastboot always ;;
+        ramboot) cmd_ramboot "$@" ;;
+        state) cmd_state "$@" ;;
+        addr) phone ;;
+        ssh) local a; a=$(phone); exec "$SSH" "${SSH_OPTS[@]}" "$FAP_USER@$a" "$@" ;;
+        scp-to)
+            [ $# -eq 2 ] || die "usage: fap-dev scp-to <src> <dst>"
+            local a; a=$(phone); exec "$SCP" "${SSH_OPTS[@]}" -r "$1" "$(scp_target "$a"):$2" ;;
+        scp-from)
+            [ $# -eq 2 ] || die "usage: fap-dev scp-from <src> <dst>"
+            local a; a=$(phone); exec "$SCP" "${SSH_OPTS[@]}" -r "$(scp_target "$a"):$1" "$2" ;;
+        serve) cmd_serve "$@" ;;
+        clock) cmd_clock ;;
+        audit)
+            local a; a=$(phone)
+            "$SSH" "${SSH_OPTS[@]}" "$FAP_USER@$a" sh -s < "$FAP_DEV_DIR/recon/hidden-deps-audit.sh" ;;
+        help|-h|--help) usage ;;
+        *) usage >&2; exit 2 ;;
+    esac
+}
+
+# Sourced by the tests: define functions only.
+if [ "${BASH_SOURCE[0]}" = "$0" ]; then main "$@"; fi
