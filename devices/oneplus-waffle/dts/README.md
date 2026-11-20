@@ -1,23 +1,24 @@
 <!-- SPDX-License-Identifier: (GPL-2.0+ OR BSD-3-Clause) -->
 # Device tree additions for OnePlus 12
 
-Our board DT, until its contents are upstream. It `#include`s the mainline
-board file and adds or overrides nodes (PMICs, panel, touch, remoteprocs,
-bandwidth votes). Start from `board.dts.example`: rename it to
-`<mainline-board-name>-fap.dts` (e.g. `sm4250-oneplus-billie2-fap.dts`).
+| File | What |
+|---|---|
+| `sm8650-oneplus-waffle-fap.dtsi` | first-light trim: simple-framebuffer on the splash buffer, USB peripheral (high speed), DSPs/MDSS/GPU/PCIe/audio/cameras/peripheral buses off |
+| `sm8650-oneplus-waffle-fap.dts` | plain variant: memory below 4 GiB only, debug shell |
+| `sm8650-oneplus-waffle-fap-netroot.dts` | netroot variant: full 16 GB map, `fap.netroot=` in bootargs |
 
-Build (needs podman; the Linux tag must match the kernel you boot):
-```sh
-tools/build-dtb.sh <linux-src> devices/oneplus-waffle/dts/<board>-fap.dts out/board.dtb
-RAMBOOT_DTB=out/board.dtb boot/android-bootimg/make-ramboot.sh devices/oneplus-waffle out/ramboot
-```
-CI builds every `*.dts` here against the Linux tag of the newest Fedora
-kernel (or `KERNEL_SOURCE` if it isn't `fedora`).
+They `#include "sm8650-oneplus-waffle.dts"`, the board DT from
+DaDDevil/linux `waffle-voice` (pinned in `../build-env/fap-waffle-build.sh`),
+which `fap-waffle-build.sh dtb` builds them against. **That file has no
+licence line: don't copy it (or the DTBs built from it) into this repo or
+anything we publish**; ask the author to license it first. Our files only
+add and override nodes.
 
-Rules:
-- Every value that drives a regulator, boost, amp or charger is copied from
-  the vendor DT, with the vendor node named in a comment. Wrong values can
-  damage hardware.
-- One comment per block: why it's needed, where the values come from, and
-  how it was verified (or "untested").
-- Example to read first: devices/oneplus-billie2/dts/sm4250-oneplus-billie2-fap.dts.
+Build: `devices/oneplus-waffle/build-env/fap-waffle-build.sh dtb` (outputs
+in the build volume, copied to `~/Develop/fap-build/waffle/parts/` by
+`images`). `tools/build-dtb.sh` and CI can't build these yet (they need the
+waffle-voice tree, not a Fedora/mainline tag).
+
+Rules (as for every device): regulator/boost/amp/charger values only from
+the vendor DT, named in a comment; one comment per block; say what's
+verified. Nothing here is verified on hardware yet.
