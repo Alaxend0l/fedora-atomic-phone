@@ -1,20 +1,63 @@
 # SPDX-License-Identifier: AGPL-3.0-or-later
 # Firmware manifest for OnePlus 12 (format: docs/features.md, "firmware.yaml").
-# One entry per blob (or set of split .mdt/.bNN files). Vendor blobs are never
-# committed or redistributed: the image copies them from the phone's own
-# partitions at first boot (or a helper mounts them at run time).
+# Vendor blobs are never committed or redistributed: the image copies them from
+# the phone's own partitions. Paths as DaDDevil's waffle DT expects them;
+# research/firmware.md (branch oneplus12-research) has the full inventory.
+# Nothing here is used yet: first light loads no firmware.
 schema: 1
 device: "oneplus-waffle"
 firmware:
-  # Example entry; replace it.
+  - name: gpu-zap
+    files: ["gen70900_zap.mbn"]
+    source: {partition: vendor (super), path: firmware/}
+    install: /usr/lib/firmware/qcom/sm8650/
+    consumer: gpu_zap_shader
+    redistributable: false
+    package: ""
+    status: planned
+    notes: "linux-firmware's copy is QRD/HDK-signed; the phone needs the OnePlus-signed one (guess, dossier)"
+  - name: adsp
+    files: ["adsp.mdt", "adsp.b*", "adsp_dtb.mdt", "adsp_dtb.b*"]
+    source: {partition: modem_a, path: image/}
+    install: /usr/lib/firmware/qcom/sm8650/oneplus/waffle/
+    consumer: remoteproc_adsp
+    redistributable: false
+    package: ""
+    status: planned
+    notes: "battery/charging (pmic-glink), USB-C role, audio"
   - name: modem
-    files: ["modem.mdt", "modem.b*"]       # globs allowed
-    source:
-      partition: modem_a                   # where it lives on the phone
-      path: image/                         # path inside that partition's file system
-    install: /usr/lib/firmware/qcom/SOC/VENDOR/CODENAME/  # where the kernel looks
-    consumer: remoteproc_mpss              # DT node / driver that loads it
-    redistributable: false                 # true only if a distro package ships it
-    package: ""                            # e.g. linux-firmware, qcom-firmware
-    status: planned                        # in-use | planned | unused
+    files: ["modem.mdt", "modem.b*", "modem_dtb.mdt", "modem_dtb.b*"]
+    source: {partition: modem_a, path: image/}
+    install: /usr/lib/firmware/qcom/sm8650/oneplus/waffle/
+    consumer: remoteproc_mpss
+    redistributable: false
+    package: ""
+    status: planned
+    notes: "never write modem/EFS partitions; rmtfs read-only as on the N100"
+  - name: ipa
+    files: ["ipa_fws.mbn"]
+    source: {partition: modem_a, path: image/}
+    install: /usr/lib/firmware/qcom/sm8650/oneplus/waffle/
+    consumer: ipa
+    redistributable: false
+    package: ""
+    status: planned
     notes: ""
+  - name: video
+    files: ["vpu33_4v.mbn"]
+    source: {partition: modem_a, path: image/}
+    install: /usr/lib/firmware/qcom/sm8650/oneplus/waffle/
+    consumer: iris
+    redistributable: false
+    package: ""
+    status: planned
+    notes: "location on the phone to verify"
+  - name: wifi
+    files: ["amss.bin", "m3.bin", "board-2.bin"]
+    source: {partition: "", path: ""}
+    install: /usr/lib/firmware/ath12k/WCN7850/hw2.0/
+    consumer: wifi (pcie0)
+    redistributable: true
+    package: linux-firmware
+    status: planned
+    notes: "OnePlus subsystem id 0x1107 needs DaDDevil's board-data fallback"
