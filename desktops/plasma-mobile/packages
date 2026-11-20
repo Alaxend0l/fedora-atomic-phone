@@ -75,3 +75,19 @@ mesa-dri-drivers
 # KWin/phoc dlopen() libGLESv2.so.2 at runtime (no RPM dependency); without it
 # the compositor aborts in a loop. Found on the OnePlus 12, 2026-11-20.
 libglvnd-gles
+
+# Phone essentials (user's choice, 2026-11-20): what a phone needs out of the
+# box. Everything else from Fedora's kde-mobile-apps group is the opt-in layer
+# layers/apps-extra, or installable with Discover.
+angelfish
+kalk
+kclock
+kweather
+koko
+qmlkonsole
+spacebar
+elisa-player
+haruna
+krecorder
+okular-mobile
+qrca

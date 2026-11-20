@@ -1,0 +1,10 @@
+# SPDX-License-Identifier: AGPL-3.0-or-later
+# Opt-in layer: the rest of Fedora's kde-mobile-apps group, beyond the phone
+# essentials in desktops/plasma-mobile/packages (decision 0003).
+alligator
+arianna
+kasts
+keysmith
+marknote
+neochat
+tokodon
