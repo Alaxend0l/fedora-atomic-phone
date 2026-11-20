@@ -5,6 +5,19 @@ Living document: update the "Where things stand" and "Next steps" sections
 when you stop. Newest log entries at the top.
 
 ## Where things stand (2026-11-20, end of day 1)
+- **Minimal layered images (branch `minimal-layers`, decision 0003,
+  2026-11-20):** layers carry explicit `packages` lists (no weak deps, a
+  reason per package); every bootc image starts from base-atomic; N100
+  specifics (noubwc, null sink, its fap-modem-ram) live in
+  devices/oneplus-billie2, Waydroid is the opt-in `layers/waydroid`.
+  `boot/android-bootimg/make-devroot.sh <device> <desktop> <out> [layer]`
+  builds netroot + layers for RAM boots; make-installroot.sh is now that
+  with `--installroot` (N100: 763 packages on fedora:45, was 1168).
+  OnePlus 12 Plasma Mobile RAM root built (`fap-build/waffle/plasma-netroot/`,
+  sensitive: EFS + OEM firmware), with a v6 boot image whose tiny-init takes
+  `fap.netroot_size=6g`. **Nothing of this booted yet**; lockfiles
+  regenerated. Plasma Mobile 6.8 uses plasma-keyboard (no Maliit); the
+  desktop System Settings and QtWebEngine are unavoidable hard deps.
 - **Update pipeline (branch `update-bot`, 2026-11-20):** `lock/` pins every
   image (netroot, installroot, billie2 tty + plasma-mobile) to exact NEVRAs
   and base-image digests; pinned builds are opt-in (`just PINNED=1 build`,
@@ -57,6 +70,13 @@ when you stop. Newest log entries at the top.
   verified), slot `a`, bootloader unlocked. Nothing of ours is installed.
 
 ## Next steps
+0. **Minimal layers (branch `minimal-layers`):** RAM-boot the OnePlus 12
+   Plasma root (`fap-build/waffle/plasma-netroot/`, commands in its
+   README); rebuild + reinstall the N100 installroot from the explicit list
+   and check the session (keyboard, Discover, dialer, battery); first-boot
+   user for the bootc image (SDDM autologin names `phone`); `just build`
+   itself is still untested; waffle GPU (a750 zap shader from the phone)
+   to drop software rendering.
 1. **Fedora userspace boots over the USB network (done 2026-11-20):** next,
    use it to bring up hardware (PMIC DT nodes, display, touch, Wi‑Fi), then a
    microSD-based root, then the real bootc install.

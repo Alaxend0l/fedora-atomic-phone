@@ -191,7 +191,7 @@ features:
   software:
     desktop:
       status: works
-      notes: "Fedora 45 + Plasma Mobile from userdata (installroot), autologin"
+      notes: "Fedora 45 + Plasma Mobile from userdata (installroot), autologin; shown with the old @kde-mobile-environment root, the explicit-list rebuild (decision 0003) not booted yet"
       evidence: 2c68e81
     waydroid:
       status: works

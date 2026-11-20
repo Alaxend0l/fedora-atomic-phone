@@ -28,12 +28,9 @@ fi
 # DEFAULT_HOSTNAME carries the device's codename.
 # shellcheck source=/dev/null
 DEVICE_CODENAME=$(. /ctx/device/device.env && echo "$DEVICE_CODENAME")
-set_os_release() {   # set_os_release KEY value
-    if grep -q "^$1=" /usr/lib/os-release; then
-        sed -i "s/^$1=.*/$1=\"$2\"/" /usr/lib/os-release
-    else
-        echo "$1=\"$2\"" >> /usr/lib/os-release
-    fi
+set_os_release() {   # set_os_release KEY value (replaces every KEY= line)
+    sed -i "/^$1=/d" /usr/lib/os-release
+    echo "$1=\"$2\"" >> /usr/lib/os-release
 }
 set_os_release VARIANT "${FAP_DESKTOP} dev root on ${FAP_DEVICE}"
 set_os_release DEFAULT_HOSTNAME "${DEVICE_CODENAME:-$FAP_DEVICE}"

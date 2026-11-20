@@ -30,3 +30,14 @@ it: every device must build from the same base/desktop layers.
   over-installing; prefer not installing them. Discover is kept on purpose.
 - New packages need a reason (which layer, why); the update bot's
   watched-packages list follows the same layers.
+
+## Implementation (branch `minimal-layers`, 2026-11-20)
+- Layer folders carry `packages` lists (one reason per package, no weak
+  deps; `packages.image`/`packages.devroot` for one target); bootc images
+  start from base-atomic for every desktop (docs/architecture.md).
+- The installroot is `make-devroot.sh --installroot oneplus-billie2
+  plasma-mobile waydroid`: 763 packages on fedora:45 instead of 1168.
+- Not avoidable without breaking hard deps: plasma-desktop and the desktop
+  System Settings (plasma-workspace requires plasma-desktop; hidden with
+  NoDisplay), QtWebEngine (Discover → qt6-qtwebview, ~250 MB).
+- Plasma Mobile 6.8 uses plasma-keyboard, not Maliit.

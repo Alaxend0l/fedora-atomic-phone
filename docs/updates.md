@@ -59,24 +59,27 @@ or an `ubuntu-24.04-arm` runner, both aarch64):
 4. Write the three files per target.
 
 Known simplifications: one transaction per target, so `install_weak_deps`
-is the most permissive of the target's steps (only matters for installroot,
-where the lock may list a few weak dependencies the netroot step wouldn't
-pull; harmless for pinning). Removals use `allow_erasing`, as `dnf5 remove`
+is the most permissive of the target's steps (since decision 0003 every
+step is without weak deps: layers' `packages` lists always are).
+Layer sources: a layer's `packages` and `packages.<target>` files, plus,
+for bootc targets, its `build` script; dev-root targets (`kind: devroot`)
+read the netroot Containerfile and the lists only. Removals use `allow_erasing`, as `dnf5 remove`
 does. Specs with shell variables (`"$KERNEL_PACKAGE"`) can't be resolved and
 are reported.
 
 A target that no longer resolves keeps its old lock and is reported at the
 top of the update PR (exit code 1/3). First catch, 2026-11-20:
-**`oneplus-billie2-phosh` does not resolve: `squeekboard` is no longer in
-Fedora 45** (`stevia`, Phosh's own keyboard, is). So there is no phosh lock
-yet, and the phosh image build would fail the same way.
+**`oneplus-billie2-phosh` did not resolve: `squeekboard` is no longer in
+Fedora 45** (`stevia`, Phosh's own keyboard, is). Fixed with the explicit
+phosh list; locked since.
 
 ### Pinned builds (opt-in; default stays "newest")
 | Build | Pinned | Default |
 |---|---|---|
 | bootc image | `just PINNED=1 DEVICE=… DESKTOP=… build` (or `FAP_PINNED=1` in `.env`) | `just build` |
 | netroot | `FAP_PINNED=1 boot/android-bootimg/make-netroot.sh <out>` | as before |
-| installroot | `FAP_PINNED=1 …/installroot/make-installroot.sh <out>` (after a pinned netroot) | as before |
+| dev root | `FAP_PINNED=1 boot/android-bootimg/make-devroot.sh <device> <desktop> <out>` (lock `DEVROOT_LOCK`, default `<device>-<desktop>-devroot`; netroot pinned too) | as before |
+| installroot | `FAP_PINNED=1 …/installroot/make-installroot.sh <out>` (lock `installroot`) | as before |
 | CI | `build.yml` input `pinned` | off |
 
 Mechanism: dnf5's own **versionlock** (`/etc/dnf/versionlock.toml`, one

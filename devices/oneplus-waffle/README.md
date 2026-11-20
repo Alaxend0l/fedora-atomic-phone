@@ -149,6 +149,26 @@ those ourselves.
   the USB port is the RAM boot's only link.
 - Physical mic mapping (which AMIC is bottom/top/back) unknown.
 
+## Plasma Mobile RAM root (built 2026-11-20, not booted yet)
+The generic layers (base, desktops/plasma-mobile) plus this folder's
+`packages`/`build` (FAP_TARGET=devroot), then this kernel's modules, the
+`netroot/` overlay and the unit's DSP/modem firmware and EFS copies:
+```sh
+boot/android-bootimg/make-devroot.sh oneplus-waffle plasma-mobile ~/Develop/fap-build/waffle/plasma-devroot
+NETROOT_GENERIC=~/Develop/fap-build/waffle/plasma-devroot/netroot.tar.gz NETROOT_OUTDIR=plasma-netroot \
+  PHONE_BACKUP=~/Develop/OnePlus12/backup/partitions-20261120 \
+  devices/oneplus-waffle/build-env/fap-waffle-build.sh netroot
+OUT=~/Develop/fap-build/waffle/plasma-netroot/boot devices/oneplus-waffle/build-env/fap-waffle-build.sh dtb initramfs images
+```
+`plasma-netroot/netroot.tar.gz` holds the unit's EFS/IMEI data and OEM
+firmware: **local only**, like the plain netroot. It unpacks to ~2.4 GB,
+more than tiny-init's default 2560m tmpfs leaves room for, so the netroot
+DT asks for `fap.netroot_size=6g` (16 GB phone); the boot image must come
+from a tree with that tiny-init and DT (the `plasma-netroot/boot/` build).
+The GPU stays off in the DT, so `build` sets LIBGL/GBM_ALWAYS_SOFTWARE
+(llvmpipe at 1440×3168: expect it to be slow). SDDM logs `phone` in
+(password 147147, dev only); SSH as root over USB as before.
+
 ## Known issues (v5/v6 live tests, 2026-11-20)
 - **Wi‑Fi after a warm reboot from our Linux:** ath12k works (joined a
   network, HTTPS OK) only when the previous boot was LineageOS. After

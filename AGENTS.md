@@ -46,7 +46,7 @@ checkout, built images). Pocketblue reference clones:
    kmod/ili9882n-ts, kmod/adc-ocv-battery, devices/oneplus-billie2/kmod/panel-ili9882n
 3. Firmware from the phone (never commit): touch ILI image at
    `<fw-dir>/ilitek/oneplus-billie2-ili9882n-txd.bin` (kmod/ili9882n-ts/README.md).
-4. `NETROOT_EXTRA_MODULES="<kmod-out> <kver>" NETROOT_EXTRA_FIRMWARE=<fw-dir> boot/android-bootimg/make-netroot.sh <netroot-dir>`
+4. `NETROOT_DEVICE=oneplus-billie2 NETROOT_EXTRA_MODULES="<kmod-out> <kver>" NETROOT_EXTRA_FIRMWARE=<fw-dir> boot/android-bootimg/make-netroot.sh <netroot-dir>`
 5. `RAMBOOT_DTB=<out.dtb> RAMBOOT_CMDLINE="fap.netroot=http://172.16.42.2:8000/netroot.tar.gz" boot/android-bootimg/make-ramboot.sh devices/oneplus-billie2 <img-dir>`
 6. Phone in bootloader fastboot. Terminal 1: `tools/fap-dev serve <netroot-dir>`
    (waits for the USB network, then serves on 172.16.42.2:8000). Terminal 2:
@@ -61,8 +61,8 @@ Needs `dtbo_a` erased (it is, as of 2026-11-20; backup in UBports-N100/backup/).
 ## The installed system (since 2026-11-20)
 The N100 boots on its own: `boot_a` holds our boot image, `userdata` is an
 ext4 root labelled `fap-root` (Fedora 45 + Plasma Mobile, user `phone`).
-- Rebuild the root: `make-netroot.sh` (with the extra modules/firmware), then
-  `boot/android-bootimg/installroot/make-installroot.sh <dir>`; install from a
+- Rebuild the root: `boot/android-bootimg/installroot/make-installroot.sh <dir>`
+  (same NETROOT_EXTRA_* as step 4; builds the netroot itself); install from a
   RAM boot: `mkfs.ext4 -L fap-root` on userdata, stream the tarball in, add
   the zap shader (`qcom/sm6115/OnePlus/billie2/a610_zap.*` from vendor_a).
 - Boot image: `RAMBOOT_CMDLINE="fap.root=LABEL=fap-root selinux=0" make-ramboot.sh …`;
@@ -96,6 +96,7 @@ ext4 root labelled `fap-root` (Fedora 45 + Plasma Mobile, user `phone`).
 - Don't copy Pocketblue's code (AGPL main repo; `packages` repo unlicensed).
 - Images: minimal and layered (base → desktop → device → opt-in extras); see
   docs/decisions/0003-minimal-layered-images.md.
+- Dev roots = netroot + those layers: `boot/android-bootimg/make-devroot.sh <device> <desktop> <out> [layer...]` (docs/architecture.md).
 - Licensing: repo default AGPL-3.0-or-later; kernel modules GPL-2.0-only;
   device trees (GPL-2.0+ OR BSD-3-Clause). Every new file gets an
   `SPDX-License-Identifier` line. See LICENSING.md.

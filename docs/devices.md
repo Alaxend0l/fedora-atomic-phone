@@ -39,8 +39,8 @@ Status: **works** · **partial** (works with limits or a workaround) ·
 | connectivity | USB host / OTG | broken | untested |
 | connectivity | Hotspot / USB tethering | untested | untested |
 | connectivity | NFC | untested | untested |
-| audio | Loudspeaker | broken | untested |
-| audio | Earpiece | broken | untested |
+| audio | Loudspeaker | broken | broken |
+| audio | Earpiece | broken | broken |
 | audio | Headphone jack / USB-C audio | broken | untested |
 | audio | Microphones | broken | untested |
 | power | Battery level | partial | untested |
@@ -116,7 +116,7 @@ From [devices/oneplus-billie2/features.yaml](../devices/oneplus-billie2/features
 | Mobile data | broken | needs the IPA v4.2 node (from agatti) and rmnet | [n100-telephony-bt-gnss.md](../docs/hardware/n100-telephony-bt-gnss.md) |
 | Voice calls (incl. call audio) | broken | call audio needs q6voice and a sound card | [n100-telephony-bt-gnss.md](../docs/hardware/n100-telephony-bt-gnss.md) |
 | GNSS / GPS | untested | QMI LOC + geoclue not tried | [n100-telephony-bt-gnss.md](../docs/hardware/n100-telephony-bt-gnss.md) |
-| Mobile desktop (Plasma Mobile / Phosh) | works | Fedora 45 + Plasma Mobile from userdata (installroot), autologin | `2c68e81` |
+| Mobile desktop (Plasma Mobile / Phosh) | works | Fedora 45 + Plasma Mobile from userdata (installroot), autologin; shown with the old @kde-mobile-environment root, the explicit-list rebuild (decision 0003) not booted yet | `2c68e81` |
 | Android apps (Waydroid) | works | Android 13 on Rust binder, GPU via freedreno with noubwc; no audio; ~1 min first start | [waydroid.md](../docs/waydroid.md) |
 | Image updates (bootc upgrade/rollback) | broken | installed root is a plain ext4 tarball; bootc/ostree + fap-android-boot not done | [README.md](../boot/android-bootimg/README.md) |
 
@@ -145,10 +145,10 @@ From [devices/oneplus-waffle/features.yaml](../devices/oneplus-waffle/features.y
 | USB host / OTG | untested |  |  |
 | Hotspot / USB tethering | untested |  |  |
 | NFC | untested |  |  |
-| Loudspeaker | untested |  |  |
-| Earpiece | untested |  |  |
-| Headphone jack / USB-C audio | untested |  |  |
-| Microphones | untested |  |  |
+| Loudspeaker | broken | 2x TFA9874 (i2c_hub_7): no driver, needs OnePlus tuning container from vendor; kept off | [README.md](../devices/oneplus-waffle/README.md) |
+| Earpiece | broken | most likely the top TFA9874 (stereo); blocked with the speakers | [README.md](../devices/oneplus-waffle/README.md) |
+| Headphone jack / USB-C audio | untested | v6: WCD9395 HPH path on; USB-C analog switch (wcd939x-usbss, i2c3) still off |  |
+| Microphones | untested | v6: WCD9395 AMIC1/3/4/5 via SoundWire TX, UCM Mic1/3/4/5 |  |
 | Battery level | untested |  |  |
 | Charging and charge status | untested |  |  |
 | Fast charging | untested |  |  |
@@ -169,6 +169,6 @@ From [devices/oneplus-waffle/features.yaml](../devices/oneplus-waffle/features.y
 | Mobile data | untested |  |  |
 | Voice calls (incl. call audio) | untested |  |  |
 | GNSS / GPS | untested |  |  |
-| Mobile desktop (Plasma Mobile / Phosh) | untested |  |  |
+| Mobile desktop (Plasma Mobile / Phosh) | untested | Plasma Mobile RAM-boot dev root built (make-devroot.sh + fap-waffle-build.sh netroot, llvmpipe: GPU off in the DT); not booted | [make-devroot.sh](../boot/android-bootimg/make-devroot.sh) |
 | Android apps (Waydroid) | untested |  |  |
 | Image updates (bootc upgrade/rollback) | untested |  |  |

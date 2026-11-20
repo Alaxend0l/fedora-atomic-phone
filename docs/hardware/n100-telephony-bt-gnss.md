@@ -32,7 +32,7 @@ Abbreviations: VS = vendor DT dump
 
 ### 2.1 Control plane (SIM, SMS, calls, signalling): ready in principle
 - QRTR, rmtfs (RAM copies, `-r`), tqftpserv, in-kernel pd-mapper: working
-  (`boot/android-bootimg/netroot/rootfs/usr/libexec/fap-modem-ram`).
+  (`devices/oneplus-billie2/netroot/usr/libexec/fap-modem-ram`).
 - ModemManager talks QMI directly over QRTR (libqmi QRTR backend since 1.26,
   MM QRTR modem support since 1.18). MM's `qcom-soc` plugin pairs QRTR
   control with the `ipa` net driver. Without IPA, MM should still create the

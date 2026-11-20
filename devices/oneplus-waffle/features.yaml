@@ -67,6 +67,6 @@ features:
     calls:             {title: "Voice calls (incl. call audio)", status: untested, notes: "", evidence: ""}
     gnss:              {title: "GNSS / GPS", status: untested, notes: "", evidence: ""}
   software:
-    desktop:           {title: "Mobile desktop (Plasma Mobile / Phosh)", status: untested, notes: "", evidence: ""}
+    desktop:           {title: "Mobile desktop (Plasma Mobile / Phosh)", status: untested, notes: "Plasma Mobile RAM-boot dev root built (make-devroot.sh + fap-waffle-build.sh netroot, llvmpipe: GPU off in the DT); not booted", evidence: "boot/android-bootimg/make-devroot.sh"}
     waydroid:          {title: "Android apps (Waydroid)", status: untested, notes: "", evidence: ""}
     bootc-updates:     {title: "Image updates (bootc upgrade/rollback)", status: untested, notes: "", evidence: ""}
