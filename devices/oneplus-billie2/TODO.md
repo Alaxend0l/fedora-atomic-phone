@@ -57,6 +57,7 @@ Legend: [x] done · [~] partly / workaround · [ ] not started
 - [ ] P1 Headphone jack + headset mic + button
 - [ ] P2 Earpiece (AW87359)
 - [ ] P2 Microphones
+- [~] Placeholder PipeWire null sink (apps crashed with no audio device at all)
 - [ ] P2 ALSA UCM config for sm4250
 
 ## Power and charging
@@ -68,7 +69,7 @@ Legend: [x] done · [~] partly / workaround · [ ] not started
 - [ ] P3 Fast charging
 
 ## Sensors and peripherals
-- [ ] P1 Vibrator (PMI632 vib, DT-only; keep ≤ ~73 % strength)
+- [~] P1 Vibrator (PMI632 vib enabled in board DT, image v3; untested; keep ≤ ~73 % strength)
 - [ ] P2 Sensors on the ADSP: accelerometer/gyro (rotation!), proximity, light, compass (libssc + hexagonrpcd + iio-sensor-proxy; n100-sensors-misc.md)
 - [ ] P2 microSD card (controller up; test a card)
 - [ ] P3 Notification LED (probably not fitted)
@@ -85,7 +86,8 @@ Legend: [x] done · [~] partly / workaround · [ ] not started
 - [ ] P2 Venus hardware video decode/encode (firmware on modem_a; n100-gpu-video-display.md)
 
 ## Apps and integration
-- [~] P2 Waydroid (branch `waydroid`, untested; docs/waydroid.md)
+- [x] Waydroid (docs/waydroid.md): Android 13 runs, GPU-accelerated
+- [ ] P2 Waydroid: audio (needs the sound card), app launcher integration polish, first-start delay
 - [ ] P2 Timezone / locale set up, Plasma Mobile settings polish
 - [ ] P2 On-screen keyboard check (Maliit) everywhere
 - [ ] P3 Plasma Login vs SDDM on mobile
