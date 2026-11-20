@@ -11,6 +11,7 @@
 /dts-v1/;
 
 #include "sm8650-oneplus-waffle-fap.dtsi"
+#include "sm8650-oneplus-waffle-fap-power.dtsi"
 
 / {
 	chosen {

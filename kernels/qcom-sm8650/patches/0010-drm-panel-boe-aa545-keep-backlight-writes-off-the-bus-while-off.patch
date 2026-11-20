@@ -1,0 +1,108 @@
+SPDX-License-Identifier: GPL-2.0-only
+From: fedora-atomic-phone <noreply@fedora-atomic-phone.invalid>
+Subject: [PATCH] drm/panel: boe-aa545: no DSI backlight traffic while the panel is off
+
+Screen blank/unblank (KWin DPMS off on lock, Plasma's brightness slider)
+exercises the backlight while the panel is unprepared: reset asserted,
+vddio/vci off, DSI host powered down. The driver sent the DCS brightness
+command anyway (and read it back in .get_brightness), which can only
+fail there, and on failure left MIPI_DSI_MODE_LPM cleared.
+
+- Track whether the panel is prepared; .update_status only talks to the
+  panel then. The value is kept by the backlight core and sent by
+  drm_panel_enable() -> backlight_enable() at unblank.
+- Always restore the LPM flag.
+- Drop .get_brightness: it reads back what we wrote and fails while off;
+  the core reports the cached brightness as actual_brightness, which is
+  what userspace (powerdevil, brightnessctl) wants.
+
+Upstream-Status: Pending [not submitted; against DaDDevil/linux waffle-voice
+  9359fc74, out-of-tree driver]
+Tested: not yet (built only)
+
+---
+--- a/drivers/gpu/drm/panel/panel-boe-aa545.c	2026-11-20 21:43:15.099087348 +0000
++++ b/drivers/gpu/drm/panel/panel-boe-aa545.c	2026-11-20 21:43:15.108064965 +0000
+@@ -25,6 +25,8 @@
+ 	struct regulator_bulk_data supplies[2];
+ 	struct gpio_desc *reset_gpio;
+ 	struct drm_connector *connector;
++	/* Panel powered and initialised (between prepare and unprepare). */
++	bool prepared;
+ };
+ 
+ enum panel_aa545_refresh_rate {
+@@ -467,6 +469,8 @@
+ 		return ret;
+ 	}
+ 
++	ctx->prepared = true;
++
+ 	return 0;
+ }
+ 
+@@ -476,6 +480,8 @@
+ 	struct device *dev = &ctx->dsi->dev;
+ 	int ret;
+ 
++	ctx->prepared = false;
++
+ 	ret = boe_aa545_off(ctx);
+ 	if (ret < 0)
+ 		dev_err(dev, "Failed to un-initialize panel: %d\n", ret);
+@@ -521,40 +527,32 @@
+ static int boe_aa545_bl_update_status(struct backlight_device *bl)
+ {
+ 	struct mipi_dsi_device *dsi = bl_get_data(bl);
++	struct boe_aa545 *ctx = mipi_dsi_get_drvdata(dsi);
+ 	u16 brightness = backlight_get_brightness(bl);
+ 	int ret;
+ 
+-	dsi->mode_flags &= ~MIPI_DSI_MODE_LPM;
+-
+-	ret = mipi_dsi_dcs_set_display_brightness_large(dsi, brightness);
+-	if (ret < 0)
+-		return ret;
+-
+-	dsi->mode_flags |= MIPI_DSI_MODE_LPM;
+-
+-	return 0;
+-}
+-
+-static int boe_aa545_bl_get_brightness(struct backlight_device *bl)
+-{
+-	struct mipi_dsi_device *dsi = bl_get_data(bl);
+-	u16 brightness;
+-	int ret;
++	/*
++	 * While the panel is off (screen blanked, DSI host down) there is
++	 * nobody to talk to: keep the value, drm_panel_enable() ->
++	 * backlight_enable() sends it when the panel comes back.
++	 */
++	if (!ctx || !ctx->prepared)
++		return 0;
+ 
+ 	dsi->mode_flags &= ~MIPI_DSI_MODE_LPM;
+-
+-	ret = mipi_dsi_dcs_get_display_brightness_large(dsi, &brightness);
+-	if (ret < 0)
+-		return ret;
+-
++	ret = mipi_dsi_dcs_set_display_brightness_large(dsi, brightness);
+ 	dsi->mode_flags |= MIPI_DSI_MODE_LPM;
+ 
+-	return brightness;
++	return ret < 0 ? ret : 0;
+ }
+ 
++/*
++ * No .get_brightness: reading the value back over DSI fails while the
++ * panel is off and only reports what we wrote; the backlight core then
++ * returns the cached props.brightness as actual_brightness.
++ */
+ static const struct backlight_ops boe_aa545_bl_ops = {
+ 	.update_status = boe_aa545_bl_update_status,
+-	.get_brightness = boe_aa545_bl_get_brightness,
+ };
+ 
+ static struct backlight_device *

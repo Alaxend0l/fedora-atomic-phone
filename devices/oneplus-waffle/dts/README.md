@@ -5,6 +5,7 @@
 |---|---|
 | `sm8650-oneplus-waffle-fap.dtsi` | first-light trim: simple-framebuffer on the splash buffer until msm (MDSS + DSI0 + panel) takes over, USB peripheral (high speed); v5/v6: DSPs, pmic-glink, PCIe Wi-Fi, touch, WCD9395 audio on; DP/GPU/speaker amps/cameras/other peripheral buses off |
 | `sm8650-oneplus-waffle-fap.dts` | plain variant: full memory map, debug shell |
+| `sm8650-oneplus-waffle-fap-power.dtsi` | power/display polish (netroot DT): passive 90 °C CPU trips with cpufreq cooling per cluster, torch/flash LED at low current |
 | `sm8650-oneplus-waffle-fap-netroot.dts` | netroot variant: full 16 GB map, `fap.netroot=` in bootargs |
 
 They `#include "sm8650-oneplus-waffle.dts"`, the board DT from

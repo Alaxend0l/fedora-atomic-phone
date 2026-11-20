@@ -1,0 +1,192 @@
+// SPDX-License-Identifier: (GPL-2.0+ OR BSD-3-Clause)
+/*
+ * OnePlus 12 (waffle): power and display polish on top of
+ * sm8650-oneplus-waffle-fap.dtsi (branch oneplus12-power). Our own file;
+ * it references labels/paths of sm8650.dtsi and DaDDevil's board DT, which
+ * is only read from the pinned kernel tree at build time (dts/README.md).
+ * Included by the -netroot DT. Nothing here is verified on hardware yet.
+ *
+ * 1. CPU thermal throttling. sm8650.dtsi gives the CPU tsens zones only
+ *    "hot"/"critical" trips (110/115 C): the kernel would do nothing until
+ *    the critical shutdown (the N100 lesson), and only the EPSS LMh
+ *    firmware limit sits in between. Add a passive trip at 90 C (5 C
+ *    hysteresis) with the cluster's CPUs as cpufreq cooling devices
+ *    (step_wise, re-evaluated every 100 ms while passive). One cooling
+ *    device per cpufreq policy, registered on the policy's first CPU
+ *    (qcom-cpufreq-hw, CPUFREQ_IS_COOLING_DEV). Clusters, from
+ *    the qcom,freq-domain cells: cpu0-1 A520 (domain 0), cpu2-4 A720
+ *    (domain 3), cpu5-6 A720 (domain 1), cpu7 X4 (domain 2). The GPU zones
+ *    already throttle the GPU at 95 C (sm8650.dtsi gpuN_alert0).
+ * 2. Flash/torch LED (PM8550 flash module, leds-qcom-flash). Board DT
+ *    allows 500 mA torch and 2 A flash per LED (2 channels each); we cap
+ *    torch at 100 mA and flash at 1 A per LED for a first test. Torch
+ *    only lights when someone writes brightness in /sys/class/leds.
+ */
+
+/* 1. CPU passive trips + cooling maps */
+&{/thermal-zones/cpu0-thermal} {
+	polling-delay-passive = <100>;
+
+	trips {
+		fap_cpu0_alert: fap-cpu0-alert {
+			temperature = <90000>;
+			hysteresis = <5000>;
+			type = "passive";
+		};
+	};
+
+	cooling-maps {
+		fap-map0 {
+			trip = <&fap_cpu0_alert>;
+			cooling-device = <&cpu0 THERMAL_NO_LIMIT THERMAL_NO_LIMIT>;
+		};
+	};
+};
+
+&{/thermal-zones/cpu1-thermal} {
+	polling-delay-passive = <100>;
+
+	trips {
+		fap_cpu1_alert: fap-cpu1-alert {
+			temperature = <90000>;
+			hysteresis = <5000>;
+			type = "passive";
+		};
+	};
+
+	cooling-maps {
+		fap-map0 {
+			trip = <&fap_cpu1_alert>;
+			cooling-device = <&cpu0 THERMAL_NO_LIMIT THERMAL_NO_LIMIT>;
+		};
+	};
+};
+
+&{/thermal-zones/cpu2-top-thermal} {
+	polling-delay-passive = <100>;
+
+	trips {
+		fap_cpu2_top_alert: fap-cpu2-top-alert {
+			temperature = <90000>;
+			hysteresis = <5000>;
+			type = "passive";
+		};
+	};
+
+	cooling-maps {
+		fap-map0 {
+			trip = <&fap_cpu2_top_alert>;
+			cooling-device = <&cpu2 THERMAL_NO_LIMIT THERMAL_NO_LIMIT>;
+		};
+	};
+};
+
+&{/thermal-zones/cpu3-top-thermal} {
+	polling-delay-passive = <100>;
+
+	trips {
+		fap_cpu3_top_alert: fap-cpu3-top-alert {
+			temperature = <90000>;
+			hysteresis = <5000>;
+			type = "passive";
+		};
+	};
+
+	cooling-maps {
+		fap-map0 {
+			trip = <&fap_cpu3_top_alert>;
+			cooling-device = <&cpu2 THERMAL_NO_LIMIT THERMAL_NO_LIMIT>;
+		};
+	};
+};
+
+&{/thermal-zones/cpu4-top-thermal} {
+	polling-delay-passive = <100>;
+
+	trips {
+		fap_cpu4_top_alert: fap-cpu4-top-alert {
+			temperature = <90000>;
+			hysteresis = <5000>;
+			type = "passive";
+		};
+	};
+
+	cooling-maps {
+		fap-map0 {
+			trip = <&fap_cpu4_top_alert>;
+			cooling-device = <&cpu2 THERMAL_NO_LIMIT THERMAL_NO_LIMIT>;
+		};
+	};
+};
+
+&{/thermal-zones/cpu5-top-thermal} {
+	polling-delay-passive = <100>;
+
+	trips {
+		fap_cpu5_top_alert: fap-cpu5-top-alert {
+			temperature = <90000>;
+			hysteresis = <5000>;
+			type = "passive";
+		};
+	};
+
+	cooling-maps {
+		fap-map0 {
+			trip = <&fap_cpu5_top_alert>;
+			cooling-device = <&cpu5 THERMAL_NO_LIMIT THERMAL_NO_LIMIT>;
+		};
+	};
+};
+
+&{/thermal-zones/cpu6-top-thermal} {
+	polling-delay-passive = <100>;
+
+	trips {
+		fap_cpu6_top_alert: fap-cpu6-top-alert {
+			temperature = <90000>;
+			hysteresis = <5000>;
+			type = "passive";
+		};
+	};
+
+	cooling-maps {
+		fap-map0 {
+			trip = <&fap_cpu6_top_alert>;
+			cooling-device = <&cpu5 THERMAL_NO_LIMIT THERMAL_NO_LIMIT>;
+		};
+	};
+};
+
+&{/thermal-zones/cpu7-top-thermal} {
+	polling-delay-passive = <100>;
+
+	trips {
+		fap_cpu7_top_alert: fap-cpu7-top-alert {
+			temperature = <90000>;
+			hysteresis = <5000>;
+			type = "passive";
+		};
+	};
+
+	cooling-maps {
+		fap-map0 {
+			trip = <&fap_cpu7_top_alert>;
+			cooling-device = <&cpu7 THERMAL_NO_LIMIT THERMAL_NO_LIMIT>;
+		};
+	};
+};
+
+/* 2. Flash/torch LED, low current (fap.dtsi disables it; the board DT has 500 mA / 2 A) */
+&pm8550_flash {
+	status = "okay";
+
+	led-0 {
+		led-max-microamp = <100000>;
+		flash-max-microamp = <1000000>;
+	};
+
+	led-1 {
+		led-max-microamp = <100000>;
+		flash-max-microamp = <1000000>;
+	};
+};
