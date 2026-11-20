@@ -94,6 +94,8 @@ ext4 root labelled `fap-root` (Fedora 45 + Plasma Mobile, user `phone`).
   `Co-Authored-By: Claude …` trailer (see CONTRIBUTING.md AI policy).
   Commit when a step is done; push only when the user asks.
 - Don't copy Pocketblue's code (AGPL main repo; `packages` repo unlicensed).
+- Images: minimal and layered (base → desktop → device → opt-in extras); see
+  docs/decisions/0003-minimal-layered-images.md.
 - Licensing: repo default AGPL-3.0-or-later; kernel modules GPL-2.0-only;
   device trees (GPL-2.0+ OR BSD-3-Clause). Every new file gets an
   `SPDX-License-Identifier` line. See LICENSING.md.
