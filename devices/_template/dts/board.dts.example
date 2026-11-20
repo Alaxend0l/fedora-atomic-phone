@@ -1,0 +1,11 @@
+// SPDX-License-Identifier: (GPL-2.0+ OR BSD-3-Clause)
+/*
+ * @DEVICE_NAME@: our additions to the mainline board DT. Rename to
+ * <mainline-board-name>-fap.dts (see README.md).
+ */
+
+#include "@VENDOR@-@CODENAME@.dts"   /* the mainline board file */
+
+/ {
+	/* ramoops first: crash logs survive a reset (read /sys/fs/pstore) */
+};

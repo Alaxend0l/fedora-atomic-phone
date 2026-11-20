@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# SPDX-License-Identifier: AGPL-3.0-or-later
 # Device layer. Runs inside the container build, after base/ and the desktop.
 # Files in ./rootfs are already installed. Keep this script about *this*
 # phone; anything shared by a whole SoC family belongs in kernels/<soc>/ or a

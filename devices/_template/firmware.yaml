@@ -1,0 +1,20 @@
+# SPDX-License-Identifier: AGPL-3.0-or-later
+# Firmware manifest for @DEVICE_NAME@ (format: docs/features.md, "firmware.yaml").
+# One entry per blob (or set of split .mdt/.bNN files). Vendor blobs are never
+# committed or redistributed: the image copies them from the phone's own
+# partitions at first boot (or a helper mounts them at run time).
+schema: 1
+device: "@DEVICE_ID@"
+firmware:
+  # Example entry; replace it.
+  - name: modem
+    files: ["modem.mdt", "modem.b*"]       # globs allowed
+    source:
+      partition: modem_a                   # where it lives on the phone
+      path: image/                         # path inside that partition's file system
+    install: /usr/lib/firmware/qcom/SOC/VENDOR/CODENAME/  # where the kernel looks
+    consumer: remoteproc_mpss              # DT node / driver that loads it
+    redistributable: false                 # true only if a distro package ships it
+    package: ""                            # e.g. linux-firmware, qcom-firmware
+    status: planned                        # in-use | planned | unused
+    notes: ""
