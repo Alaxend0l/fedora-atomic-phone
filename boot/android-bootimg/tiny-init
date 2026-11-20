@@ -11,6 +11,8 @@ mount -t sysfs sysfs /sys
 mount -t devtmpfs devtmpfs /dev
 mount -t debugfs debugfs /sys/kernel/debug 2>/dev/null
 mount -t configfs configfs /sys/kernel/config 2>/dev/null
+mkdir -p /dev/pts && mount -t devpts devpts /dev/pts
+mount -t pstore pstore /sys/fs/pstore 2>/dev/null
 echo "fap-init: starting" > /dev/kmsg
 
 # Modules in dependency order (generated at build time).
@@ -25,13 +27,28 @@ udc=$(ls /sys/class/udc 2>/dev/null | head -n 1)
 if [ -n "$udc" ]; then
     G=/sys/kernel/config/usb_gadget/fap
     mkdir -p $G/strings/0x409 $G/configs/c.1/strings/0x409 $G/functions/acm.usb0
+    # USB networking too, if the kernel has NCM (host gets an interface; the
+    # phone is 172.16.42.1).
+    mkdir -p $G/functions/ncm.usb0 2>/dev/null
     echo 0x1d6b > $G/idVendor
     echo 0x0104 > $G/idProduct
     echo fedora-atomic-phone > $G/strings/0x409/manufacturer
     echo "ramboot debug shell" > $G/strings/0x409/product
     echo ACM > $G/configs/c.1/strings/0x409/configuration
     ln -s $G/functions/acm.usb0 $G/configs/c.1/
+    [ -d $G/functions/ncm.usb0 ] && ln -s $G/functions/ncm.usb0 $G/configs/c.1/
     echo "$udc" > $G/UDC
+    if [ -d $G/functions/ncm.usb0 ]; then
+        ifname=$(cat $G/functions/ncm.usb0/ifname)
+        ifconfig "$ifname" 172.16.42.1 netmask 255.255.255.0 up
+        ifconfig lo 127.0.0.1 up
+        # Hand the host an address (172.16.42.2), then a telnet root shell.
+        mkdir -p /var/lib/misc; touch /var/lib/misc/udhcpd.leases
+        printf "start 172.16.42.2\nend 172.16.42.2\ninterface %s\noption subnet 255.255.255.0\n" "$ifname" > /etc/udhcpd.conf
+        udhcpd /etc/udhcpd.conf
+        telnetd -l /bin/sh
+        echo "fap-init: USB network $ifname 172.16.42.1 (telnet)" > /dev/kmsg
+    fi
     echo "fap-init: USB serial gadget up on $udc" > /dev/kmsg
     ( while :; do setsid sh -c 'exec sh </dev/ttyGS0 >/dev/ttyGS0 2>&1'; sleep 1; done ) &
 else

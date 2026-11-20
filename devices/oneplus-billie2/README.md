@@ -4,7 +4,10 @@ Status: **boots from RAM** (2026-11-20): Fedora 45 kernel 7.3.4 with the
 mainline DT via `boot/android-bootimg/make-ramboot.sh` and `fastboot boot`
 (dtbo erased). Working: UFS (all LUNs, 101 named partitions, same names as
 Android), USB device mode (serial shell), 8 CPUs, 3.6 GB RAM, simpledrm
-720×1600. Nothing installed on storage.
+720×1600, 16 thermal zones, cpufreq, SD controller, pstore, USB networking
+(172.16.42.1). Missing in the mainline DT: PMIC (power key, battery, charger),
+panel, touch, Wi‑Fi, audio. `dt-modules.txt` maps every enabled DT node to its
+module (tools/dt-modules.py). Nothing installed on storage.
 
 Hardware facts below come from a running UBports system (Halium, vendor kernel
 4.19), collected with `tools/hw-inventory.sh` in the UBports-N100 notes repo

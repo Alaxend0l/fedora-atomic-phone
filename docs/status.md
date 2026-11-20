@@ -23,18 +23,19 @@ when you stop. Newest log entries at the top.
   verified), slot `a`, bootloader unlocked. Nothing of ours is installed.
 
 ## Next steps
-1. **Next on the RAM-boot loop:** read the partitions (read-only), check what
-   else probes (PMIC, power key, battery, thermal, Wi‑Fi firmware needs),
-   USB networking (NCM) + SSH-able userspace, then boot a real Fedora rootfs
-   (e.g. from a microSD card or an NBD export) before deciding the ESP/root
-   layout. U-Boot UFS/PMIC support for SM6115 stays upstream work.
-2. Consider restoring stock OxygenOS (EU 10.5.2 MSM, needs Windows) for a day
+1. **Boot a real Fedora rootfs, still without writing UFS:** from a microSD
+   card (sdhci works) or over the USB network (NBD/NFS from the Mac).
+2. **Mainline DT gaps for billie2** (devices/oneplus-billie2/dt-modules.txt):
+   no PMIC nodes (pm6125/pmi632 on SPMI) → no power key, battery, charger,
+   PMIC ADC/thermal; no panel, touch, Wi‑Fi, audio nodes. DT work, ideally
+   upstream. U-Boot UFS/PMIC support for SM6115 is upstream work too.
+3. Consider restoring stock OxygenOS (EU 10.5.2 MSM, needs Windows) for a day
    to tell whether the random resets are hardware or Ubuntu Touch.
-3. Decide the ESP partition (devices/oneplus-billie2/README.md); extract
+4. Decide the ESP partition (devices/oneplus-billie2/README.md); extract
    `vendor` firmware first if it's `super`.
-4. Get `just build` green for `oneplus-billie2` + `tty` (may need more
+5. Get `just build` green for `oneplus-billie2` + `tty` (may need more
    podman machine memory).
-5. Porting tooling from docs/roadmap.md, top three: no-flash dev loop,
+6. Porting tooling from docs/roadmap.md, top three: no-flash dev loop,
    crash logs by default, inventory → draft device.
 
 ## Constraints discovered
@@ -90,6 +91,7 @@ when you stop. Newest log entries at the top.
 | 2026-11-20 | Fedora kernel + tiny busybox initramfs (1.7 MB) | boots; `/init` runs; USB not up; deferred list shows everything waiting on the RPM link |
 | 2026-11-20 | + `qcom_apcs_ipc_mailbox`, `rpm_proc` | RPM up: **UFS works** (sda–sdf); USB still missing |
 | 2026-11-20 | + `dwc3_qcom_legacy` (legacy nested DT layout) | **USB serial shell** (`/dev/cu.usbmodem101`); nothing deferred |
+| 2026-11-20 | round 1: + ramoops, tsens, cpufreq-hw, sdhci-msm, rng, NCM | **USB networking** (Mac gets 172.16.42.2 via DHCP, telnet root shell on 172.16.42.1), 16 thermal zones (~33 °C), cpufreq 0.3–1.8 GHz, SD controller up (no card), pstore mounted (empty). Reboot from the shell (`reboot -f`) lands in ABL fastboot in ~6 s: no buttons needed while Linux runs |
 | 2026-11-20 | **dtbo_a erased**, fresh session, `uboot.img` (mainline DT) | **ABL hands over**; U-Boot resets within seconds; phone returns to ABL fastboot |
 | 2026-11-20 | no-op dtbo, fresh session, variant v3 | no handoff. dtbo_a restored, hash verified |
 | 2026-11-20 | v2, v3 booted right after a failed boot in the same ABL session | `Load Error`, which turned out to be a session artifact (see Constraints) |

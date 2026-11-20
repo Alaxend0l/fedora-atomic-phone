@@ -1,0 +1,57 @@
+arm,armv7-timer-mem                           timer@f120000                  -> (built-in or none)
+arm,armv8-pmuv3                               pmu                            -> (built-in or none)
+arm,armv8-timer                               timer                          -> (built-in or none)
+arm,gic-v3                                    interrupt-controller@f200000   -> (built-in or none)
+arm,idle-state                                cpu-sleep-1-0                  -> (built-in or none)
+arm,psci-1.0                                  psci                           -> (built-in or none)
+cache                                         l2-cache                       -> (built-in or none)
+domain-idle-state                             cluster-sleep-0-1              -> (built-in or none)
+fixed-clock                                   sleep-clk                      -> (built-in or none)
+operating-points-v2                           opp-table-qup                  -> (built-in or none)
+qcom,adreno-gmu-wrapper                       gmu@596a000                    -> (built-in or none)
+qcom,apr-v2                                   apr                            -> apr
+qcom,apss-wdt-sm6115                          watchdog@f017000               -> qcom_wdt
+qcom,bam-v1.7.4                               dma-controller@1b04000         -> (built-in or none)
+qcom,fastrpc                                  fastrpc                        -> fastrpc
+qcom,fastrpc-compute-cb                       compute-cb@4                   -> (built-in or none)
+qcom,gcc-sm6115                               clock-controller@1400000       -> gcc_sm6115
+qcom,kryo240                                  cpu@1                          -> (built-in or none)
+qcom,prng-ee                                  rng@1b53000                    -> qcom_rng
+qcom,q6adm                                    service@8                      -> q6adm
+qcom,q6afe                                    service@4                      -> q6afe
+qcom,q6afe-clocks                             clock-controller               -> q6afe_clocks
+qcom,q6asm                                    service@7                      -> q6asm
+qcom,rmtfs-mem                                memory@89b01000                -> rmtfs_mem
+qcom,rpm-msg-ram                              sram@45f0000                   -> (built-in or none)
+qcom,rpm-pm6125-regulators                    regulators-0                   -> qcom_smd_regulator
+qcom,rpm-sm6115                               rpm-requests                   -> smd_rpm
+qcom,rpm-stats                                sram@4690000                   -> qcom_stats
+qcom,sm4250-lpass-lpi-pinctrl                 pinctrl@a7c0000                -> pinctrl_sm4250_lpass_lpi
+qcom,sm6115-apcs-hmss-global                  mailbox@f111000                -> qcom_apcs_ipc_mailbox
+qcom,sm6115-bimc                              interconnect@4480000           -> qnoc_sm6115
+qcom,sm6115-cnoc                              interconnect@1900000           -> qnoc_sm6115
+qcom,sm6115-cpu-bwmon                         pmu@1b8e300                    -> icc_bwmon
+qcom,sm6115-cpufreq-hw                        cpufreq@f521000                -> qcom_cpufreq_hw
+qcom,sm6115-dispcc                            clock-controller@5f00000       -> dispcc_sm6115
+qcom,sm6115-dwc3                              usb@4ef8800                    -> dwc3_qcom_legacy
+qcom,sm6115-gpucc                             clock-controller@5990000       -> gpucc_sm6115
+qcom,sm6115-mmnrt-virt                        interconnect-mmnrt             -> qnoc_sm6115
+qcom,sm6115-mmrt-virt                         interconnect-mmrt              -> qnoc_sm6115
+qcom,sm6115-qce                               crypto@1b3a000                 -> (built-in or none)
+qcom,sm6115-qfprom                            qfprom@1b40000                 -> nvmem_qfprom
+qcom,sm6115-qmp-ufs-phy                       phy@4807000                    -> phy_qcom_qmp_ufs
+qcom,sm6115-qusb2-phy                         phy@1613000                    -> phy_qcom_qusb2
+qcom,sm6115-rpm-proc                          remoteproc                     -> rpm_proc
+qcom,sm6115-rpmpd                             power-controller               -> rpmpd
+qcom,sm6115-sdhci                             mmc@4784000                    -> sdhci_msm
+qcom,sm6115-smmu-500                          iommu@59a0000                  -> (built-in or none)
+qcom,sm6115-snoc                              interconnect@1880000           -> qnoc_sm6115
+qcom,sm6115-tcsr                              syscon@3c0000                  -> (built-in or none)
+qcom,sm6115-tlmm                              pinctrl@500000                 -> pinctrl_sm6115
+qcom,sm6115-tsens                             thermal-sensor@4411000         -> qcom_tsens
+qcom,sm6115-ufshc                             ufshc@4804000                  -> ufs_qcom
+qcom,smem                                     memory@46000000                -> qcom_smem
+qcom,smp2p                                    smp2p-adsp                     -> smp2p
+qcom,spmi-pmic-arb                            spmi@1c40000                   -> (built-in or none)
+ramoops                                       ramoops@cbe00000               -> ramoops
+simple-bus                                    soc@0                          -> (built-in or none)
