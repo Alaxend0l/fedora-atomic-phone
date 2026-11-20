@@ -17,11 +17,10 @@ when you stop. Newest log entries at the top.
   verified), slot `a`, bootloader unlocked. Nothing of ours is installed.
 
 ## Next steps
-1. Find what ABL needs in a DT. Stock base DTs have `__symbols__`, `/memory`
-   and `/soc`; mainline has no `__symbols__`, `/memory@80000000`, `/soc@0`.
-   Variants built in fap-build/dtvariants/ (v1 +symbols, v2 renamed nodes,
-   v3 both). RAM-boot each with stock dtbo; then with the no-op dtbo if
-   needed (a write: ask). Then `qcom-phone.config`.
+1. Retest from a **fresh bootloader session** each (writes dtbo_a: ask):
+   (a) dtbo erased + `uboot.img`; (b) no-op dtbo + variant v3. DT variants
+   (v1 +`__symbols__`, v2 renamed `/memory` `/soc`, v3 both) alone didn't help
+   with the stock dtbo. Then `qcom-phone.config`.
 2. If U-Boot still won't start: try header v0 with appended DTB; check the
    Image header; or fall back to `BOOT_METHOD=android-bootimg` (kernel +
    initramfs directly, same dtbo constraint applies).
@@ -35,14 +34,21 @@ when you stop. Newest log entries at the top.
 ## Constraints discovered
 - N100 ABL picks a `dtbo` overlay by hardware board id `0x1000b` + OnePlus
   `oem,project-id` 12 (stock entry 23 "Bengal OEM QRD") and applies it to any
-  DT. With `dtbo` erased ABL refuses: "Failed to load/authenticate boot
-  image: Load Error". A no-op dtbo (boot/noop-dtbo.sh) loads fine but didn't
-  make U-Boot start.
+  DT. A no-op dtbo (boot/noop-dtbo.sh) didn't make U-Boot start (tested in a
+  fresh session? yes: flashed, then first boot).
+- **After a `fastboot boot` that doesn't hand over, the next `fastboot boot` in
+  the same ABL session fails with `Load Error`.** Always `fastboot reboot
+  bootloader` between attempts. Consequence: both "dtbo erased → Load Error"
+  results were second attempts in a session, so **whether ABL boots with dtbo
+  erased is still unknown** and must be retested from a fresh session.
 - `fastboot boot` only works in the **bootloader** fastboot
   (`getvar is-userspace` = no), not Android's fastbootd. From Ubuntu Touch use
   `sudo systemctl reboot --reboot-argument=bootloader` (adb reboot is refused).
 - In bootloader fastboot the N100 reports `product: bengal`; fastbootd says
   `billie2`.
+- After a reboot Ubuntu Touch sometimes brings USB up as file transfer only
+  (`05c6:0afe`) even with Developer Mode on; unplug and replug the cable to get
+  ADB (`05c6:9039`).
 - Fedora's aarch64 vmlinuz is EFI zboot (zstd); Android bootloaders need
   `Image.gz` (handled in boot/android-bootimg).
 - Both vbmeta slots have AVB verification enabled (flags 0); postmarketOS's
@@ -63,4 +69,6 @@ when you stop. Newest log entries at the top.
 | 2026-11-20 | `vbmeta_a` flags 0→2 (verification disabled) + stock dtbo + `uboot.img` | no handoff |
 | 2026-11-20 | swap B: U-Boot + **stock** DTB section, stock dtbo | **ABL hands over** (fastboot gone in <3 s); U-Boot resets the phone almost at once (user: "restarted right after the OnePlus logo"); Ubuntu Touch then boots normally. First proof U-Boot runs. |
 | 2026-11-20 | swap A: **stock kernel** + mainline DTB, stock dtbo | no handoff: ABL rejects the mainline DT itself |
+| 2026-11-20 | U-Boot + mainline DT variants v1 (+`__symbols__`), v2 (`/memory`, `/soc` renamed), v3 (both); stock dtbo; each from a fresh bootloader | no handoff for any |
+| 2026-11-20 | v2, v3 booted right after a failed boot in the same ABL session | `Load Error`, which turned out to be a session artifact (see Constraints) |
 | 2026-11-20 | same vbmeta + `dtbo_a` erased + `uboot.img` | `Load Error` again: ABL needs a loadable dtbo regardless of AVB flags. vbmeta_a and dtbo_a restored, both hashes verified |

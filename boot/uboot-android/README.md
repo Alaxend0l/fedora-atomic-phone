@@ -75,15 +75,15 @@ Follow-up tests the same day:
 | Test | Result |
 |---|---|
 | set `os_version` 10.0.0 / `os_patch_level` 2020-10 (as stock) | no change: accepted, never started |
-| `fastboot erase dtbo_a`, then boot | ABL: `Failed to load/authenticate boot image: Load Error` (dtbo_a restored from backup afterwards, hash verified) |
+| `fastboot erase dtbo_a`, then boot | ABL: `Failed to load/authenticate boot image: Load Error` (dtbo_a restored from backup afterwards, hash verified). **Invalid test, see below:** this was a second `fastboot boot` in the same ABL session |
 
 **Diagnosis.** ABL picks a `dtbo` overlay by the phone's *hardware* board id
 (CDT), `0x1000b` (QRD): entries 5 "Bengal QRD" and 23 "Bengal OEM QRD" in this
 phone's 33-entry dtbo table. It applies it to whatever DT the boot image holds;
 the overlay references vendor-only labels, so on the mainline DT it fails and
 ABL doesn't start the image. Changing our DT's ids can't avoid it (selection
-uses the hardware id). And unlike e.g. the OnePlus 6, this ABL refuses to boot
-with `dtbo` erased.
+uses the hardware id). ~~This ABL refuses to boot with `dtbo` erased~~: not
+shown, see the session artifact below.
 
 **Fix to try next:** a minimal valid dtbo (`mkdtboimg`): one empty overlay for
 board-id `0x1000b` and msm-id `0x1a1`/`0x1bc`, so ABL loads it and applies a
@@ -126,11 +126,24 @@ Ubuntu Touch boots. So the stock overlay wasn't the only blocker.
    verification, which explains the `Load Error` with dtbo erased. Custom-OS
    installs (incl. postmarketOS) flash a vbmeta with verification disabled
    (flags `2`). **Tested 2026-11-20:** patched only that field (1 byte) in a
-   copy of vbmeta_a and flashed it: U-Boot still not started with stock dtbo,
-   and with dtbo erased still `Load Error`. ABL needs a loadable dtbo
-   regardless of AVB. vbmeta_a and dtbo_a restored, hashes verified.
-6. **Bisect:** RAM-boot stock kernel + our DTB, and U-Boot + stock DTB section,
-   to see which half ABL rejects.
+   copy of vbmeta_a and flashed it: U-Boot still not started with stock dtbo.
+   The dtbo-erased attempt was again a second boot in one session, so its
+   `Load Error` proves nothing. vbmeta_a and dtbo_a restored, hashes verified.
+6. **Bisect (done):** U-Boot + the stock DTB section → ABL hands over (U-Boot
+   then resets at once: it got a vendor DT). Stock kernel + mainline DTB → no
+   handoff. **ABL rejects the mainline DT.**
+7. **DT structure (done, no effect alone):** variants with `__symbols__`
+   (compiled from source with `-@`; decompiling a DTB loses labels), with
+   `/memory` and `/soc` renamed from `/memory@80000000` and `/soc@0`, and both.
+   None hands over with the stock dtbo.
+8. **Retest dtbo erased from a fresh session**, and no-op dtbo + variant v3.
+
+### Session artifact: `Load Error` after a failed boot
+After a `fastboot boot` that ABL accepts but doesn't start, the next
+`fastboot boot` in the same session fails with `Failed to load/authenticate
+boot image: Load Error`, whatever the image. Seen 2026-11-20 with DT variants
+v2/v3, which booted normally ("no handoff") from a fresh session. Always run
+`fastboot reboot bootloader` between attempts.
 
 ### postmarketOS billie2 port (read 2026-11-20)
 From the gitlab.com mirror (`device/testing/device-oneplus-billie2/deviceinfo`;
