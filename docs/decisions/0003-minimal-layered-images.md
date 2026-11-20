@@ -10,7 +10,9 @@ Images are as close to the basics as possible, built in layers:
 2. **desktop** (one per UI, e.g. `desktops/plasma-mobile`): Wayland compositor,
    the shell, and only the apps the shell needs or ships as its core set.
    Explicit package lists, `install_weak_deps=False`; no package groups that
-   pull in desktop extras (Discover, desktop System Settings, ...).
+   pull in desktop extras (desktop System Settings, ...). **Discover stays**
+   (user's choice: the app store/updates UI), but not its background notifier
+   autostart on low-RAM devices.
 3. **device** (`devices/<id>/`): kernel/DT/modules, boot method, firmware
    extraction, quirks. Nothing generic goes here; anything two devices need
    moves down a layer.
@@ -24,7 +26,7 @@ it: every device must build from the same base/desktop layers.
 - The N100 installroot (`boot/android-bootimg/installroot/`) currently installs
   `@kde-mobile-environment` with weak deps and has Waydroid merged in: to be
   trimmed to an explicit list and Waydroid moved to an opt-in layer.
-- Hiding unwanted apps (Discover notifier, desktop System Settings) is a
-  symptom of over-installing; prefer not installing them.
+- Hiding unwanted apps (desktop System Settings) is a symptom of
+  over-installing; prefer not installing them. Discover is kept on purpose.
 - New packages need a reason (which layer, why); the update bot's
   watched-packages list follows the same layers.
