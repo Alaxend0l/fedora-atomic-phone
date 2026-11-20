@@ -1,6 +1,10 @@
 # OnePlus Nord N100 (`oneplus-billie2`)
 
-Status: **planned**. Nothing has been flashed.
+Status: **boots from RAM** (2026-11-20): Fedora 45 kernel 7.3.4 with the
+mainline DT via `boot/android-bootimg/make-ramboot.sh` and `fastboot boot`
+(dtbo erased). Working: UFS (all LUNs, 101 named partitions, same names as
+Android), USB device mode (serial shell), 8 CPUs, 3.6 GB RAM, simpledrm
+720×1600. Nothing installed on storage.
 
 Hardware facts below come from a running UBports system (Halium, vendor kernel
 4.19), collected with `tools/hw-inventory.sh` in the UBports-N100 notes repo
@@ -41,7 +45,17 @@ volumes inside `super` (10 GiB).
 | `userdata` | 44.8 GiB | root filesystem |
 | ESP | 64–256 MiB | **open**, see below |
 
-**Open: where the ESP goes.** Candidates:
+**Open: where the ESP goes.** What mainline Linux sees (2026-11-20, read-only
+`blkid` and `ro,noload` mounts from the RAM-boot shell):
+- `op1` (sde61, 300 MiB partition, 92 MiB ext4): only `info.txt` ("Build time =
+  2018-11-05 13:02:59, Target ID = df000, Version = 0") and `lost+found`.
+  Looks like a factory placeholder; best ESP candidate if nothing checks it.
+- `op2` (sda8, 256 MiB ext4): **OnePlus data, keep**: boot logs, APN config,
+  `dm.db`, `sec/`, recovery and update-engine logs.
+- `recovery_b` (sda12): holds an Android boot image (recovery for slot b).
+
+Candidates:
+0. `op1` (300 MiB): see above; back it up first.
 1. `recovery_b` (96 MiB): unused slot copy. ESP would have to shrink to ~90 MiB.
 2. `super` (10 GiB): plenty of room, but holds `vendor`, which contains
    firmware we need (see below). Only after that firmware is extracted.
