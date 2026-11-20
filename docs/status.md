@@ -17,10 +17,10 @@ when you stop. Newest log entries at the top.
   verified), slot `a`, bootloader unlocked. Nothing of ours is installed.
 
 ## Next steps
-1. Disable AVB verification in vbmeta_a (patch flags 0→2 on the backup copy;
-   ask first), then RAM-boot U-Boot with stock dtbo and with dtbo erased.
-   Also rebuild U-Boot with `qcom-phone.config`. See
-   boot/uboot-android/README.md "Open leads".
+1. Bisect ABL vs U-Boot, RAM-only, stock dtbo: (a) stock kernel + our
+   mainline DTB, (b) U-Boot + the stock DTB section. Whichever hands over
+   (ABL fastboot disappears from USB) shows which half ABL rejects. Then
+   rebuild U-Boot with `qcom-phone.config`. See boot/uboot-android/README.md.
 2. If U-Boot still won't start: try header v0 with appended DTB; check the
    Image header; or fall back to `BOOT_METHOD=android-bootimg` (kernel +
    initramfs directly, same dtbo constraint applies).
@@ -45,7 +45,8 @@ when you stop. Newest log entries at the top.
 - Fedora's aarch64 vmlinuz is EFI zboot (zstd); Android bootloaders need
   `Image.gz` (handled in boot/android-bootimg).
 - Both vbmeta slots have AVB verification enabled (flags 0); postmarketOS's
-  (downstream) billie2 port flashes its own vbmeta.
+  (downstream) billie2 port flashes its own vbmeta. Disabling verification
+  (flags 2) didn't change anything for our image, and dtbo still can't be erased.
 - Backups of the N100's boot/dtbo/vbmeta (both slots) and identity
   partitions are in the UBports-N100 repo under `backup/` (git-ignored).
 
@@ -58,3 +59,5 @@ when you stop. Newest log entries at the top.
 | 2026-11-20 | `uboot.img` with stock os_version/patch level | no change |
 | 2026-11-20 | `dtbo_a` erased + `uboot.img` | `Load Error`; dtbo restored, verified |
 | 2026-11-20 | `dtbo_a` = no-op dtbo + `uboot.img` | no handoff; dtbo restored, verified |
+| 2026-11-20 | `vbmeta_a` flags 0→2 (verification disabled) + stock dtbo + `uboot.img` | no handoff |
+| 2026-11-20 | same vbmeta + `dtbo_a` erased + `uboot.img` | `Load Error` again: ABL needs a loadable dtbo regardless of AVB flags. vbmeta_a and dtbo_a restored, both hashes verified |

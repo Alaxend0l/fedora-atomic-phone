@@ -49,7 +49,18 @@ things impossible. Top three first.
        time. Would have caught the UBports N100 audio bug immediately.
 6. [ ] **One kernel per chip family, devices as data:** a new phone = DT +
        panel + touch driver. The device folder format is shaped for this.
-7. [ ] **Real-device CI:** phones on USB-controlled power with automated EDL
+7. [ ] **Device feature test suite (`fap-hwtest`).** One command that checks
+       every feature a phone should have and writes a feature matrix:
+       display (resolution, refresh, backlight), touch (evdev events, slots),
+       buttons, Wi‑Fi (scan/connect), Bluetooth, modem (ModemManager: SIM,
+       registration, SMS, call audio), audio (playback/capture loopback per
+       UCM verb), sensors (iio), charging/battery (power_supply), cameras,
+       GPS, USB gadget, suspend/resume, reboot/uptime stability, crash-log
+       collection. Runs on the phone (over SSH from the host), uses each
+       device's declared features, never writes hardware state outside
+       safe limits, and regenerates the hardware table in the device README.
+       Same suite for vendor (Halium/stock) and mainline, so results diff.
+8. [ ] **Real-device CI:** phones on USB-controlled power with automated EDL
        recovery, booting every build (LAVA-style, as Linaro does).
 
 Runtime-swappable drivers: modules and DT overlays already load at runtime and

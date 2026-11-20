@@ -125,8 +125,12 @@ Ubuntu Touch boots. So the stock overlay wasn't the only blocker.
    `0` (verification enabled). With AVB on, ABL loads `dtbo` as part of
    verification, which explains the `Load Error` with dtbo erased. Custom-OS
    installs (incl. postmarketOS) flash a vbmeta with verification disabled
-   (flags `2`). Test: patch only the flags field of the backed-up vbmeta_a,
-   flash it, RAM-boot U-Boot with stock dtbo, then with dtbo erased.
+   (flags `2`). **Tested 2026-11-20:** patched only that field (1 byte) in a
+   copy of vbmeta_a and flashed it: U-Boot still not started with stock dtbo,
+   and with dtbo erased still `Load Error`. ABL needs a loadable dtbo
+   regardless of AVB. vbmeta_a and dtbo_a restored, hashes verified.
+6. **Bisect:** RAM-boot stock kernel + our DTB, and U-Boot + stock DTB section,
+   to see which half ABL rejects.
 
 ### postmarketOS billie2 port (read 2026-11-20)
 From the gitlab.com mirror (`device/testing/device-oneplus-billie2/deviceinfo`;
