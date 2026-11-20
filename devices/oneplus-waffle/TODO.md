@@ -23,5 +23,8 @@ Legend: [x] done · [~] partly / workaround · [ ] not started
 - [ ] P1 Panel (panel-boe-aa545, MDSS on; Iris7 left in bypass), touch (S3910)
 - [ ] P1 Battery/charging via ADSP + pmic-glink (never set charger values ourselves)
 - [ ] P1 Wi‑Fi (ath12k, 0x1107 board data), GPU (OnePlus-signed zap)
-- [ ] P2 Audio (WCD9395 + TFA9874), haptics, alert slider
+- [~] P2 Audio: v6 enables the WCD9395 path (sound card, SoundWire, LPASS macros, Fedora AudioReach topology, ucm/); mics testable, HPH not routed to USB-C yet
+- [ ] P2 Speakers/earpiece: TFA9874 x2 need a driver + OnePlus tuning container (vendor, not backed up); SECONDARY_MI2S topology
+- [ ] P2 USB-C analog headset: i2c3 wcd939x-usbss + codec graph link + altmode
+- [ ] P2 Haptics, alert slider
 - [ ] P3 Modem, cameras, sensors (SSC)

@@ -513,6 +513,42 @@ netroot_phone_files() {   # netroot_phone_files <root>
   echo "EFS copies: $(ls "$R/usr/lib/fap-efs" | tr '\n' ' ')"
 }
 
+# v6: Fedora packages for audio tests, the USB DHCP server and time sync, the AudioReach
+# topology for the sound card and our UCM config. Everything comes from
+# Fedora 45's repositories (signature-checked rpms); nothing from the phone.
+# chrony: v5's netroot had none, so the clock stayed wrong after boot (no
+# RTC time the kernel trusts); it syncs once Wi-Fi is up.
+NETROOT_PKGS="alsa-utils alsa-ucm alsa-ucm-utils dnsmasq chrony"
+# The card is driver "sm8650", name "OnePlus 12" (board DT model), so q6apm
+# asks for qcom/sm8650/OnePlus 12-tplg.bin. Its back ends are SM8650-QRD's
+# (RX_CODEC_DMA_RX_0, TX_CODEC_DMA_TX_3); qcom-firmware's SM8650-QRD/MTP/HDK
+# topologies are all symlinks to this one generic file.
+TPLG_SRC=usr/lib/firmware/qcom/kaanapali/Kaanapali-MTP-tplg.bin.xz
+TPLG_NAME="qcom/sm8650/OnePlus 12-tplg.bin.xz"
+netroot_audio_dhcp() {   # netroot_audio_dhcp <root>
+  local R=$1 P=/work/stage/netroot-rpms
+  say "netroot: $NETROOT_PKGS (Fedora 45) + AudioReach topology + UCM"
+  dnf5 -y -q --installroot="$R" --use-host-config --releasever=45 \
+    --setopt=install_weak_deps=False install $NETROOT_PKGS
+  dnf5 -y -q --installroot="$R" --use-host-config --releasever=45 clean all >/dev/null
+  rm -rf "$P" && mkdir -p "$P"
+  (cd "$P" && dnf5 -q --releasever=45 download qcom-firmware >/dev/null)
+  rpmkeys -K "$P"/qcom-firmware-*.rpm | grep -q 'digests signatures OK' || die "qcom-firmware rpm signature"
+  (cd "$P" && rpm2cpio qcom-firmware-*.rpm | cpio -idm --quiet "./$TPLG_SRC")
+  [[ -s $P/$TPLG_SRC ]] || die "qcom-firmware has no $TPLG_SRC"
+  install -D -m 644 "$P/$TPLG_SRC" "$R/usr/lib/firmware/$TPLG_NAME"
+  echo "topology: $(basename "$P"/qcom-firmware-*.rpm) $TPLG_SRC -> /usr/lib/firmware/$TPLG_NAME ($(sha256sum < "$P/$TPLG_SRC" | cut -c1-16)…)"
+  mkdir -p "$R/usr/share/alsa/ucm2/conf.d/sm8650"
+  cp -a "$DEV/ucm/OnePlus" "$R/usr/share/alsa/ucm2/"
+  ln -sf ../../OnePlus/waffle/waffle.conf "$R/usr/share/alsa/ucm2/conf.d/sm8650/OnePlus 12.conf"
+  [[ -f $R/usr/share/alsa/ucm2/codecs/wcd939x/init.conf ]] || die "alsa-ucm lacks codecs/wcd939x"
+  [[ -x $R/usr/sbin/dnsmasq ]] || die "no dnsmasq in the netroot"
+  # (chrony's preset scriptlet usually does this already; no systemctl here)
+  mkdir -p "$R/etc/systemd/system/multi-user.target.wants"
+  ln -sf /usr/lib/systemd/system/chronyd.service "$R/etc/systemd/system/multi-user.target.wants/chronyd.service"
+  rm -rf "$P"
+}
+
 cmd_netroot() {
   [[ -f /netroot-generic.tar.gz ]] || die "set NETROOT_GENERIC=<generic netroot.tar.gz>"
   local kver R=/work/netroot-root D=/out/$NETROOT_OUTDIR; kver=$(cat "$S/kernel-release-waffle")
@@ -525,6 +561,7 @@ cmd_netroot() {
   cp -a "$S/modroot-waffle/lib/modules/$kver" "$R/usr/lib/modules/"
   # Waffle overlay (replaces the N100 fap-modem-ram of the generic tarball).
   cp -a "$DEV/netroot/." "$R/"
+  netroot_audio_dhcp "$R"
   if [[ -d /backup ]]; then
     netroot_phone_files "$R"
   else

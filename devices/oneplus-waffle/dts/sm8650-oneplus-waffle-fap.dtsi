@@ -7,11 +7,12 @@
  * build time and never copied into this repository: it carries no licence
  * line yet (research/mainline-status.md), so we must not redistribute it.
  *
- * What stays on (v5): simplefb until msm, MDSS/DSI panel, UFS, touch,
- * ADSP/CDSP/MPSS/IPA, pmic-glink, PCIe0 Wi-Fi, reboot-mode,
- * USB in device mode (gadget), power/volume keys, ramoops. Off: GPU, video,
- * DP, audio, cameras, Bluetooth, IR, flash LED, haptics, the charger/redriver
- * I2C buses.
+ * What stays on (v6): simplefb until msm, MDSS/DSI panel, UFS, touch,
+ * ADSP/CDSP/MPSS/IPA, pmic-glink, PCIe0 Wi-Fi, reboot-mode, the WCD9395
+ * audio path (sound card, RX/TX SoundWire, LPASS macros), USB in device
+ * mode (gadget), power/volume keys, ramoops. Off: GPU, video, DP, the
+ * speaker amplifiers and their I2S link, cameras, Bluetooth, IR, flash LED,
+ * haptics, the charger/redriver/USB-C-audio-switch I2C buses.
  */
 
 #include "sm8650-oneplus-waffle.dts"
@@ -47,11 +48,33 @@
 			no-map;
 		};
 	};
-
-	sound {
-		status = "disabled";
-	};
 };
+
+/*
+ * v6 audio: the board DT's sound card (qcom,sm8650-sndcard, AudioReach on
+ * the ADSP) with its two WCD9395 links: RX_CODEC_DMA_RX_0 -> RX macro ->
+ * SoundWire RX (swr1) -> WCD9395 HPH/EAR, and WCD9395 ADCs (AMIC1-5) ->
+ * SoundWire TX (swr2) -> TX macro -> TX_CODEC_DMA_TX_3. Those are the same
+ * back ends as SM8650-QRD, so the generic AudioReach topology from Fedora's
+ * qcom-firmware serves them (netroot installs it as
+ * qcom/sm8650/OnePlus 12-tplg.bin.xz: card driver "sm8650" + the board DT's
+ * model "OnePlus 12"; the same names select the UCM config).
+ *
+ * Not the speakers: the board DT's third link sends SECONDARY_MI2S_RX to a
+ * max98357a placeholder, but the real amplifiers are two NXP TFA9874 on
+ * i2c_hub_7, which have no driver here (tfa989x knows 9890/9895/9897 only)
+ * and need OnePlus's tuning container from the vendor partition (not in our
+ * backup). Smart amps with a boost converter must not be run on guessed
+ * settings, so the link, its pins and the placeholder go, and i2c_hub_7
+ * stays off (below): the amplifiers are never touched.
+ */
+&{/sound} {
+	/delete-property/ pinctrl-0;
+	/delete-property/ pinctrl-names;
+	/delete-node/ sec-mi2s-playback-dai-link;
+};
+
+/delete-node/ &max98357a;
 
 /*
  * USB: device mode, high speed only. The board DT runs dwc3 as OTG with
@@ -83,16 +106,24 @@
 &gpu { status = "disabled"; };
 &iris { status = "disabled"; };
 
-/* Bluetooth (UART14), cameras, audio buses. */
+/*
+ * Bluetooth (UART14), cameras, and the speaker amplifiers' I2C bus (TFA9874
+ * x2, see the audio comment above). swr1/swr2 (WCD9395 RX/TX) are on as of
+ * v6, as the board DT has them.
+ */
 &uart14 { status = "disabled"; };
 &camss { status = "disabled"; };
 &cci0 { status = "disabled"; };
 &cci1 { status = "disabled"; };
-&swr1 { status = "disabled"; };
-&swr2 { status = "disabled"; };
 &i2c_hub_7 { status = "disabled"; };
 
-/* IR (SPI11), the I2C buses with charger/redriver/sensor parts. */
+/*
+ * IR (SPI11), the I2C buses with charger/redriver/sensor parts. i2c3 also
+ * holds the WCD9395 USB-C audio switch (wcd939x-usbss): analog headsets on
+ * the USB-C port need it plus pmic-glink altmode, and the board DT doesn't
+ * link the codec to it (no MBHC plug events). Later: the USB port is our
+ * only link to the phone during RAM boots.
+ */
 &spi11 { status = "disabled"; };
 &i2c3 { status = "disabled"; };
 &i2c6 { status = "disabled"; };
