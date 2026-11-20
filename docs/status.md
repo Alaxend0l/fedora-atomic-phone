@@ -30,9 +30,10 @@ when you stop. Newest log entries at the top.
 1. **Fedora userspace boots over the USB network (done 2026-11-20):** next,
    use it to bring up hardware (PMIC DT nodes, display, touch, Wi‑Fi), then a
    microSD-based root, then the real bootc install.
-2. **Mainline DT gaps for billie2** (devices/oneplus-billie2/dt-modules.txt):
-   no PMIC nodes (pm6125/pmi632 on SPMI) → no power key, battery, charger,
-   PMIC ADC/thermal; no panel, touch, Wi‑Fi, audio nodes. DT work, ideally
+2. **Mainline DT gaps for billie2:** PMIC + keys done in our DT
+   (`devices/oneplus-billie2/dts/`, built with `tools/build-dtb.sh`, used via
+   `RAMBOOT_DTB=`). Still missing: battery/charger (PMI632), panel (and its
+   LCDB supply), touch, Wi‑Fi, audio. DT work, ideally
    upstream. U-Boot UFS/PMIC support for SM6115 is upstream work too.
 3. Consider restoring stock OxygenOS (EU 10.5.2 MSM, needs Windows) for a day
    to tell whether the random resets are hardware or Ubuntu Touch.
@@ -58,6 +59,9 @@ when you stop. Newest log entries at the top.
   `sudo systemctl reboot --reboot-argument=bootloader` (adb reboot is refused).
 - In bootloader fastboot the N100 reports `product: bengal`; fastbootd says
   `billie2`.
+- systemd-logind powers the phone off on KEY_POWER by default; for tests,
+  `HandlePowerKey=ignore` in /run/systemd/logind.conf.d/.
+- Without D-Bus, `systemctl reboot` fails; use `reboot -f`.
 - Forced restart: **Power + Volume Up** ~15 s (Power alone does nothing).
 - Fedora's kernel `Image` needs 76.5 MB from 0x8000; ramdisk/DTB offsets must
   sit above it (billie2: 0x06000000 / 0x05800000).
@@ -98,6 +102,7 @@ when you stop. Newest log entries at the top.
 | 2026-11-20 | + `dwc3_qcom_legacy` (legacy nested DT layout) | **USB serial shell** (`/dev/cu.usbmodem101`); nothing deferred |
 | 2026-11-20 | round 1: + ramoops, tsens, cpufreq-hw, sdhci-msm, rng, NCM | **USB networking** (Mac gets 172.16.42.2 via DHCP, telnet root shell on 172.16.42.1), 16 thermal zones (~33 °C), cpufreq 0.3–1.8 GHz, SD controller up (no card), pstore mounted (empty). Reboot from the shell (`reboot -f`) lands in ABL fastboot in ~6 s: no buttons needed while Linux runs |
 | 2026-11-20 | **netroot**: tiny-init downloads a 278 MB Fedora 45 rootfs (make-netroot.sh) over USB HTTP into tmpfs, `switch_root` to systemd | **Fedora 45 userspace on the N100**, SSH as root over USB (key auth) ~35 s after boot; udev loads 66 modules; only `a7c0000.pinctrl` (LPASS, audio) deferred; logind failed (no D-Bus in the rootfs, fixed for next build) |
+| 2026-11-20 | netroot + our DT (`devices/oneplus-billie2/dts/…-fap.dts`: PM6125 + PMI632 + keys) | systemd `running` (D-Bus fixed); **all three buttons verified with evtest**; PMIC ADC5, temp-alarm, GPIO, RTC (`rtc-pm8xxx`, unset) drivers bound |
 | 2026-11-20 | **dtbo_a erased**, fresh session, `uboot.img` (mainline DT) | **ABL hands over**; U-Boot resets within seconds; phone returns to ABL fastboot |
 | 2026-11-20 | no-op dtbo, fresh session, variant v3 | no handoff. dtbo_a restored, hash verified |
 | 2026-11-20 | v2, v3 booted right after a failed boot in the same ABL session | `Load Error`, which turned out to be a session artifact (see Constraints) |

@@ -25,7 +25,14 @@ mkdir -p "$out"
 out=$(realpath "$out")
 boot=$(cd "$(dirname "$0")/.." && pwd)
 
-podman run --rm -e RAMBOOT_CMDLINE="${RAMBOOT_CMDLINE:-}" \
+# RAMBOOT_DTB: use this DTB (e.g. from tools/build-dtb.sh) instead of the
+# kernel's own copy of KERNEL_DTB.
+dtb_mount=()
+if [ -n "${RAMBOOT_DTB:-}" ]; then
+    dtb_mount=(-v "$(realpath "$RAMBOOT_DTB"):/custom.dtb:ro")
+fi
+
+podman run --rm -e RAMBOOT_CMDLINE="${RAMBOOT_CMDLINE:-}" "${dtb_mount[@]}" \
     -v "$dev:/device:ro" -v "$boot:/boot-methods:ro" -v "$out:/out" "$image" bash -euc '
     source /device/device.env
     source /boot-methods/bootimg-args.sh
@@ -34,7 +41,9 @@ podman run --rm -e RAMBOOT_CMDLINE="${RAMBOOT_CMDLINE:-}" \
     kver=$(ls /usr/lib/modules | sort -V | tail -1)
     vmlinuz=/usr/lib/modules/$kver/vmlinuz
     dtb=/usr/lib/modules/$kver/dtb/$KERNEL_DTB
+    [ -f /custom.dtb ] && dtb=/custom.dtb
     [ -f "$dtb" ] || { echo "no $KERNEL_DTB in $kver" >&2; exit 1; }
+    echo "dtb: $dtb"
 
     # Fedora aarch64 vmlinuz is EFI zboot: MZ stub + compressed Image.
     if [ "$(dd if=$vmlinuz bs=1 skip=4 count=4 status=none)" = zimg ]; then

@@ -1,0 +1,60 @@
+// SPDX-License-Identifier: (GPL-2.0+ OR BSD-3-Clause)
+/*
+ * OnePlus Nord N100: additions on top of mainline's sm4250-oneplus-billie2.dts,
+ * kept here until they're upstreamed. Build: tools/build-dtb.sh.
+ *
+ * Adds the PMICs (PM6125 + PMI632, same pair as sm6115-fxtec-pro1x) and the
+ * three keys. Key codes follow the vendor DT (verified 2026-11-20):
+ *   kpdpwr (PON)            0x74 KEY_POWER
+ *   resin  (PON type 1)     0x73 KEY_VOLUMEUP
+ *   pm6125 GPIO 5, active low  0x72 KEY_VOLUMEDOWN  (vendor label says
+ *                                "volume_up"; the code is what Android used)
+ * Confirmed on hardware with evtest (2026-11-20): Power → KEY_POWER on
+ * pm8941_pwrkey, Volume Up → KEY_VOLUMEUP on pm8941_resin, Volume Down →
+ * KEY_VOLUMEDOWN on gpio-keys.
+ *
+ * Deliberately left disabled (they write hardware state; separate reviewed
+ * steps): PMI632 VBUS regulator, Type-C, charger, LPG LEDs, vibrator.
+ */
+
+#include "sm4250-oneplus-billie2.dts"
+#include "pm6125.dtsi"
+#include "pmi632.dtsi"
+#include <dt-bindings/input/input.h>
+#include <dt-bindings/gpio/gpio.h>
+
+/ {
+	gpio-keys {
+		compatible = "gpio-keys";
+		pinctrl-0 = <&vol_down_n>;
+		pinctrl-names = "default";
+
+		key-volume-down {
+			label = "Volume Down";
+			linux,code = <KEY_VOLUMEDOWN>;
+			gpios = <&pm6125_gpios 5 GPIO_ACTIVE_LOW>;
+			debounce-interval = <15>;
+			linux,can-disable;
+			wakeup-source;
+		};
+	};
+};
+
+&pm6125_gpios {
+	vol_down_n: vol-down-n-state {
+		pins = "gpio5";
+		function = "normal";
+		power-source = <0>;
+		bias-pull-up;
+		input-enable;
+	};
+};
+
+&pon_pwrkey {
+	status = "okay";
+};
+
+&pon_resin {
+	linux,code = <KEY_VOLUMEUP>;
+	status = "okay";
+};
