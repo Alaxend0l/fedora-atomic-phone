@@ -55,7 +55,7 @@ rewrite slot b. Re-enable: `adb shell pm enable org.lineageos.updater`.
 | Brightness, flash LED, CPU thermal throttling at 90 °C | works in the `oneplus12-power` RAM build; not in the installed image yet |
 | USB gadget (SSH over USB) on the installed boot | works since `qcom,select-utmi-as-pipe-clk` (same hidden dependency as the N100) |
 | Wi‑Fi on the installed boot | works; Plasma's connection-details page stays blank (cosmetic) |
-| Speakers/earpiece (TFA9874) | driver in `oneplus12-hw`, never played. **Only with the owner's explicit OK, lowest gain** (`FAP_SPEAKER_APPROVED=yes fap-hw-speaker-test`) |
+| Speakers/earpiece (TFA9874) | first test 2026-11-20 (owner's OK, -40 dBFS, bottom): amp on/off fine, **TDMERR** → silent; OVERTEMP/UNDERVOLTAGE already latched while off. Fix the MI2S/TDM frame format (oneplus12-hw, HW.md open question); test script fixed to use `hw:N` (712b348) |
 | Sensors (SSC via hexagonrpcd/libssc) | **starting them reset the phone**; debug with dmesg -w over Wi‑Fi, then pstore |
 | Cameras, USB‑C headset | built in `oneplus12-hw`, untested |
 | GPS | `qmicli --loc-start` → QMI GeneralError; untested via ModemManager |
@@ -81,13 +81,11 @@ EFS/IMEI copies and OEM firmware; never commit or upload):
 `~/Develop/fap-build/waffle/{bisect,plasma-netroot-gpu,hw,power,tel,install}/`.
 
 ## Next steps, in order
-0. **Leave the slim kernel config** (owner's request, 2026-11-20): the slim
-   config cost three rounds in one evening (binder → Rust, then Waydroid
-   networking: policy routing + legacy iptables). Build with Fedora's full
-   config (`fap-waffle-build.sh --full kernel …`, background, expect > 1 h),
-   check `image_size` against uniLoader's 78 MiB limit (if too big: keep
-   Fedora's config but move large built-ins to modules), then update the
-   installed system (boot_b + all modules).
+0. **Full-config kernel: built, not booted.** `fap-waffle-build.sh --full`
+   took 17 min (16 GiB VM); image_size 65 MiB (< 78 MiB uniLoader limit);
+   output `~/Develop/fap-build/waffle/install-full/` (modules 99 MB). Test by
+   installing its modules (keep a backup) and `fastboot boot` its
+   `ramboot/waffle-uniloader-v4-install.img` before flashing boot_b.
 1. **Merge** `oneplus12-dualboot` (install + USB fix + Rust binder) with
    `-power` and `-tel`, rebuild, and update the installed system (boot_b +
    modules, as done on 2026-11-20 for Waydroid).
