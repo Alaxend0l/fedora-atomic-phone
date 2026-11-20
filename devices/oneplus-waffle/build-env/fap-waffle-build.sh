@@ -18,6 +18,13 @@
 #   images        uniLoader per variant, wrapped in boot images (ramboot/)
 #   netroot       generic netroot tarball + this kernel's modules (optional)
 #   all           kernel dtb initramfs images
+#   bisect        crash-bisect variants in OUT/bisect (needs 'all' and
+#                 '--daddevil kernel' first): v1 = DaDDevil's own recipe
+#                 (his waffle_defconfig + his unmodified board DTB, stock
+#                 uniLoader), v2 = our plain image with uniLoader's
+#                 self-relocation made overlap-safe (BISECT.md there)
+#   --daddevil    with kernel/config-check: DaDDevil's waffle_defconfig as is
+#                 (no fragments), stage files *-waffle-daddevil
 #   shell         a shell in the build container
 #
 # Runs on the host (macOS or Linux, podman) and re-executes itself inside
@@ -99,14 +106,22 @@ case $KERNEL_TREE in
   fedora) K=/work/linux ;;
   *) die "KERNEL_TREE must be waffle or fedora" ;;
 esac
-# --full anywhere on the command line selects Fedora's whole config.
+# --full anywhere on the command line selects Fedora's whole config,
+# --daddevil the waffle tree's own waffle_defconfig (bisect variant 1).
 CONFIG_MODE=slim
 args=()
 for a in "$@"; do
-  if [[ $a == --full ]]; then CONFIG_MODE=full; else args+=("$a"); fi
+  case $a in
+    --full) CONFIG_MODE=full ;;
+    --daddevil) CONFIG_MODE=daddevil ;;
+    *) args+=("$a") ;;
+  esac
 done
 set -- ${args[@]+"${args[@]}"}
 KO=/work/out-$KERNEL_TREE-$CONFIG_MODE
+# Stage name of the kernel outputs: daddevil builds must not replace ours.
+KT=$KERNEL_TREE; [[ $CONFIG_MODE == daddevil ]] && KT=$KERNEL_TREE-daddevil
+[[ $CONFIG_MODE == daddevil && $KERNEL_TREE != waffle ]] && die "--daddevil needs KERNEL_TREE=waffle"
 MK=(make -s ARCH=arm64 O="$KO")
 
 fetch_srpm() {   # Fedora's src.rpm: config for both trees, source for 'fedora'
@@ -144,6 +159,14 @@ fetch_tree() {
 }
 
 kconfig() {
+  if [[ $CONFIG_MODE == daddevil ]]; then
+    say "Config (daddevil): the tree's arch/arm64/configs/waffle_defconfig, unchanged"
+    mkdir -p "$KO"
+    (cd "$K" && make -s ARCH=arm64 O="$KO" waffle_defconfig >/dev/null)
+    cp "$KO/.config" "$S/kernel-$KT.config"
+    echo "$CONFIG_MODE" > "$S/kernel-config-mode-$KT"
+    return
+  fi
   local base="arm64 defconfig"; [[ $CONFIG_MODE == full ]] && base="Fedora kernel-aarch64-fedora.config"
   say "Config ($CONFIG_MODE): $base + kernels/qcom-sm8650/fap.config$([[ $KERNEL_TREE == waffle ]] && echo ' + waffle.config') + build.config"
   mkdir -p "$KO"
@@ -201,12 +224,12 @@ cmd_kernel() {
   (cd "$K" && "${MK[@]}" -j"$JOBS" Image modules)
   local kver; kver=$(cat "$KO/include/config/kernel.release")
   say "Modules install ($kver)"
-  rm -rf "$S/modroot-$KERNEL_TREE"
-  (cd "$K" && "${MK[@]}" INSTALL_MOD_PATH="$S/modroot-$KERNEL_TREE" INSTALL_MOD_STRIP=1 modules_install)
-  rm -f "$S/modroot-$KERNEL_TREE/lib/modules/$kver/build" "$S/modroot-$KERNEL_TREE/lib/modules/$kver/source"
-  cp "$KO/arch/arm64/boot/Image" "$S/Image-$KERNEL_TREE"
-  echo "$kver" > "$S/kernel-release-$KERNEL_TREE"
-  image_size_check "$S/Image-$KERNEL_TREE"
+  rm -rf "$S/modroot-$KT"
+  (cd "$K" && "${MK[@]}" INSTALL_MOD_PATH="$S/modroot-$KT" INSTALL_MOD_STRIP=1 modules_install)
+  rm -f "$S/modroot-$KT/lib/modules/$kver/build" "$S/modroot-$KT/lib/modules/$kver/source"
+  cp "$KO/arch/arm64/boot/Image" "$S/Image-$KT"
+  echo "$kver" > "$S/kernel-release-$KT"
+  image_size_check "$S/Image-$KT"
 }
 
 image_size_check() {   # the kernel's image_size (incl. BSS) must end below uniLoader
@@ -270,8 +293,71 @@ cmd_initramfs() {
   ls -l "$S/initramfs.cpio.gz"
 }
 
-uniloader_build() {   # uniloader_build <variant>
+# uniLoader's arch/aarch64/reloc.S copies itself (with the embedded kernel,
+# ~33 MiB) from where ABL put it to TEXT_BASE with a forward 16-byte loop.
+# If ABL's load address is below TEXT_BASE by less than the image size
+# (e.g. 0xa8000000 vs 0xa8010000), the source is overwritten before it is
+# read: kernel, DTB, strings and driver table become copies of the first
+# 64 KiB and uniLoader dies before it draws anything. This patch copies
+# backwards in that case (memmove) and invalidates the I-cache before the
+# jump; nothing else changes. Used by bisect variant 2.
+reloc_safe_patch() {   # reloc_safe_patch <uniLoader tree>
+  python3 - "$1/arch/aarch64/reloc.S" <<'PY'
+import sys
+p = sys.argv[1]
+s = open(p).read()
+old = """	beq	_entry
+	ldr	x6,  _rel_stack_size
+
+_copy:
+	ldp	x2, x3, [x4], #16
+	stp	x2, x3, [x5], #16
+	subs	x6, x6, #16
+	b.ne	_copy
+	ldr	x5, _rel_stack_base
+
+_entry:
+	br	x5
+"""
+new = """	beq	_entry
+	ldr	x6,  _rel_stack_size
+	b.hi	_copy			/* src above dst: forward copy is safe */
+	add	x4, x4, x6		/* src below dst: copy backwards */
+	add	x7, x5, x6
+_copy_back:
+	ldp	x2, x3, [x4, #-16]!
+	stp	x2, x3, [x7, #-16]!
+	subs	x6, x6, #16
+	b.ne	_copy_back
+	b	_copied
+
+_copy:
+	ldp	x2, x3, [x4], #16
+	stp	x2, x3, [x5], #16
+	subs	x6, x6, #16
+	b.ne	_copy
+_copied:
+	dsb	sy
+	ic	iallu
+	dsb	sy
+	isb
+	ldr	x5, _rel_stack_base
+
+_entry:
+	br	x5
+"""
+assert s.count(old) == 1, "reloc.S changed upstream"
+open(p, "w").write(s.replace(old, new))
+PY
+}
+
+# uniloader_build <name> [<Image> <dtb> <ramdisk> [reloc-safe]]: defaults are
+# the first-light inputs of variant <name> (plain|netroot).
+uniloader_build() {
   local v=$1 U=/work/uniloader-$1
+  local img=${2:-$S/Image-waffle}
+  local dtb=${3:-$S/sm8650-oneplus-waffle-fap$([[ $v == plain ]] || echo "-$v").dtb}
+  local rd=${4:-$S/initramfs.cpio.gz}
   rm -rf "$U"
   if [[ ! -d /work/src/uniLoader/.git ]]; then
     git clone -q "$UNILOADER_URL" /work/src/uniLoader
@@ -279,9 +365,10 @@ uniloader_build() {   # uniloader_build <variant>
   git -C /work/src/uniLoader fetch -q origin 2>/dev/null || true
   git -C /work/src/uniLoader checkout -q -f --detach "$UNILOADER_COMMIT"
   cp -a /work/src/uniLoader "$U"
-  cp "$S/Image-waffle" "$U/blob/Image"
-  cp "$S/sm8650-oneplus-waffle-fap$([[ $v == plain ]] || echo "-$v").dtb" "$U/blob/dtb"
-  cp "$S/initramfs.cpio.gz" "$U/blob/ramdisk"
+  [[ ${5:-} == reloc-safe ]] && reloc_safe_patch "$U"
+  cp "$img" "$U/blob/Image"
+  cp "$dtb" "$U/blob/dtb"
+  cp "$rd" "$U/blob/ramdisk"
   (cd "$U" && make -s ARCH=aarch64 waffle_defconfig >/dev/null)
   grep -qx "CONFIG_TEXT_BASE=$UL_TEXT_BASE" "$U/.config" || die "uniLoader TEXT_BASE changed"
   grep -qx "CONFIG_PAYLOAD_ENTRY=$UL_PAYLOAD_ENTRY" "$U/.config" || die "uniLoader PAYLOAD_ENTRY changed"
@@ -292,12 +379,13 @@ uniloader_build() {   # uniloader_build <variant>
     die "uniLoader-$v.bin has no arm64 Image header"
   # Layout: uniLoader + its blobs from TEXT_BASE, the ramdisk copy above it,
   # all inside the free bank.
-  local sz rd
-  sz=$(stat -c %s "$S/uniLoader-$v.bin"); rd=$(stat -c %s "$S/initramfs.cpio.gz")
-  (( UL_TEXT_BASE + sz + (4 << 20) < UL_RAMDISK_ENTRY )) || die "uniLoader-$v.bin overlaps RAMDISK_ENTRY"
-  (( UL_RAMDISK_ENTRY + rd < UL_BANK_END )) || die "ramdisk leaves the bank"
-  printf 'uniLoader-%s.bin: %d MiB (ends %#x; ramdisk %#x-%#x)\n' "$v" $((sz >> 20)) \
-    $((UL_TEXT_BASE + sz)) "$UL_RAMDISK_ENTRY" $((UL_RAMDISK_ENTRY + rd))
+  local sz rds isz
+  sz=$(stat -c %s "$S/uniLoader-$v.bin"); rds=$(stat -c %s "$rd")
+  isz=$(od -An -t u8 -j 16 -N 8 "$S/uniLoader-$v.bin" | tr -d ' ')   # incl. BSS + stack
+  (( UL_TEXT_BASE + isz + (4 << 20) < UL_RAMDISK_ENTRY )) || die "uniLoader-$v.bin overlaps RAMDISK_ENTRY"
+  (( UL_RAMDISK_ENTRY + rds < UL_BANK_END )) || die "ramdisk leaves the bank"
+  printf 'uniLoader-%s.bin: file %#x, image_size %#x (ends %#x; ramdisk %#x-%#x)\n' "$v" "$sz" "$isz" \
+    $((UL_TEXT_BASE + isz)) "$UL_RAMDISK_ENTRY" $((UL_RAMDISK_ENTRY + rds))
 }
 
 cmd_images() {
@@ -391,7 +479,44 @@ cmd_netroot() {
   (cd /out/netroot && sha256sum netroot.tar.gz > SHA256SUMS && ls -l)
 }
 
-[[ $# -ge 1 ]] || die "usage: fap-waffle-build.sh [--full] kernel|config-check|dtb|initramfs|images|netroot|all|shell"
+# Crash bisect (first RAM boot ended in crashdump 900e with no uniLoader or
+# kernel text). Each variant changes one thing; see OUT/bisect/BISECT.md.
+cmd_bisect() {
+  local B=$S/bisect f
+  for f in Image-waffle Image-waffle-daddevil initramfs/init sm8650-oneplus-waffle-fap.dtb; do
+    [[ -e $S/$f ]] || die "missing $S/$f: run 'all' and '--daddevil kernel' first"
+  done
+  rm -rf "$B" && mkdir -p "$B"
+  # v1: DaDDevil's recipe. His board DTB exactly as the tree builds it (his
+  # memory map, his bootargs: root=PARTUUID of his unit, rootwait), his
+  # waffle_defconfig kernel, stock uniLoader waffle_defconfig. Ramdisk: our
+  # busybox + tiny-init without modules (theirs wouldn't match his kernel).
+  say "bisect v1: DaDDevil recipe"
+  (cd "$K" && make -s ARCH=arm64 O=/work/out-dtb qcom/sm8650-oneplus-waffle.dtb)
+  cp /work/out-dtb/arch/arm64/boot/dts/qcom/sm8650-oneplus-waffle.dtb "$B/board.dtb"
+  echo "board DTB bootargs: $(fdtget "$B/board.dtb" /chosen bootargs)"
+  rm -rf "$B/rd" && cp -a "$S/initramfs" "$B/rd" && rm -f "$B/rd/lib/modules/"* && : > "$B/rd/etc/modules.order"
+  (cd "$B/rd" && find . | LC_ALL=C sort | cpio -o -H newc --quiet -R 0:0 | gzip -9n) > "$B/initramfs-nomod.cpio.gz"
+  image_size_check "$S/Image-waffle-daddevil"
+  uniloader_build bisect-v1 "$S/Image-waffle-daddevil" "$B/board.dtb" "$B/initramfs-nomod.cpio.gz"
+  # v2: our first image (plain), only uniLoader's relocation made overlap-safe.
+  say "bisect v2: our plain image, overlap-safe uniLoader relocation"
+  uniloader_build bisect-v2 "$S/Image-waffle" "$S/sm8650-oneplus-waffle-fap.dtb" "$S/initramfs.cpio.gz" reloc-safe
+  mkdir -p /out/bisect
+  local v n
+  for v in v1 v2; do
+    case $v in v1) n=waffle-bisect-v1-daddevil.img ;; v2) n=waffle-bisect-v2-relocsafe.img ;; esac
+    mkbootimg --header_version 4 --kernel "$S/uniLoader-bisect-$v.bin" --cmdline '' \
+      --os_version "$OS_VERSION" --os_patch_level "$OS_PATCH_LEVEL" --output "/out/bisect/$n"
+    unpack_bootimg --boot_img "/out/bisect/$n" --out /tmp/unpack | grep -E "header version|kernel_size" | tr '\n' ' '
+    echo " <- $n"
+    cp "$S/uniLoader-bisect-$v.bin" "/out/bisect/uniLoader-bisect-$v.bin"
+  done
+  cp "$S/kernel-waffle-daddevil.config" /out/bisect/kernel-daddevil.config
+  (cd /out/bisect && sha256sum waffle-bisect-*.img uniLoader-bisect-*.bin kernel-daddevil.config > SHA256SUMS && cat SHA256SUMS)
+}
+
+[[ $# -ge 1 ]] || die "usage: fap-waffle-build.sh [--full|--daddevil] kernel|config-check|dtb|initramfs|images|netroot|all|bisect|shell"
 for c in "$@"; do
   case $c in
     kernel) cmd_kernel ;;
@@ -401,6 +526,7 @@ for c in "$@"; do
     images) cmd_images ;;
     netroot) cmd_netroot ;;
     all) cmd_kernel; cmd_dtb; cmd_initramfs; cmd_images ;;
+    bisect) cmd_bisect ;;
     shell) exec bash ;;
     *) die "unknown command $c" ;;
   esac
