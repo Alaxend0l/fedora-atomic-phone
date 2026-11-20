@@ -81,13 +81,21 @@ EFS/IMEI copies and OEM firmware; never commit or upload):
 3. **Update the installed system** with the power + telephony work: build a
    boot_b + root update from a merge of `oneplus12-dualboot`, `-power`,
    `-tel`; flash only `boot_b` / `fap_root` (runbook W9), never slot a.
-4. **Waydroid**: `CONFIG_ANDROID_BINDER_IPC=y` etc. were added to
-   `waffle.config` (`oneplus12-dualboot` 7d79a01) but the fragment check
-   reported "want y, got n" although Kconfig only needs MMU + NET. Find what
-   drops it (look at the merged `.config` in the `waffle-build-inst` volume,
-   `make savedefconfig`, `scripts/kconfig/merge_config.sh` output without
-   `>/dev/null`). Then add `layers/waydroid` to the install root and
-   `fap-waydroid-init` (see `docs/waydroid.md`).
+4. **Waydroid**: root cause found (`oneplus12-dualboot` 7496467): DaDDevil's
+   7.4-rc tree has **only the Rust binder** (`ANDROID_BINDER_IPC_RUST`,
+   `depends on RUST`, binderfs built in; the C binder and
+   `ANDROID_BINDERFS` are gone), and the build container had no Rust.
+   Fixed: `CONFIG_RUST=y` + `CONFIG_ANDROID_BINDER_IPC_RUST=y` in
+   `waffle.config`, `rust rust-src bindgen-cli clang-libs` in the build
+   Containerfile (rebuild the image: `podman build -t
+   localhost/fap-waffle-build -f Containerfile .`). Build:
+   `FAP_WAFFLE_VOLUME=waffle-build-inst OUT=~/Develop/fap-build/waffle/install-waydroid
+   devices/oneplus-waffle/build-env/fap-waffle-build.sh kernel dtb initramfs images`
+   (if `make rustavailable` complains, the Fedora rustc/bindgen versions vs
+   this tree's minimums are the suspect). Then: flash the new
+   `boot_b/fap-boot_b.img` to `boot_b` only, copy the new
+   `parts/modules-*.tar.gz` into the installed root's `/usr/lib/modules`,
+   `dnf install waydroid` on the phone, `waydroid init` (see `docs/waydroid.md`).
 5. Sensors reset, speakers (with OK), cameras, headset, GPS, alert slider.
 
 ## Safety rules (summary; full list in the notebooks' AGENTS.md)
