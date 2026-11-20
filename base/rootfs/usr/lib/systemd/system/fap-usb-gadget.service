@@ -1,7 +1,9 @@
 # SPDX-License-Identifier: AGPL-3.0-or-later
 [Unit]
 Description=USB network gadget for debug access (172.16.42.1)
-After=systemd-modules-load.service
+After=systemd-modules-load.service sys-kernel-config.mount
+# A RAM boot's tiny-init already set up this gadget (it survives switch_root).
+ConditionPathExists=!/sys/kernel/config/usb_gadget/fap
 Before=sshd.service
 
 [Service]

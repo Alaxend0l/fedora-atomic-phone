@@ -1,0 +1,19 @@
+#!/usr/bin/env bash
+# SPDX-License-Identifier: AGPL-3.0-or-later
+# Install a layer's package list. Runs inside the image/dev-root build.
+#   install-packages <layer>/packages
+#
+# Format: one package per line; `#` starts a comment (say why the package is
+# there, docs/decisions/0003). Always without weak dependencies: what a
+# layer gets is exactly its list plus hard dependencies. tools/update/lock.py
+# reads the same files.
+set -euo pipefail
+
+list=${1:?usage: install-packages <packages-file>}
+mapfile -t pkgs < <(sed -e 's/#.*//' -e 's/[[:space:]]\+/\n/g' "$list" | grep -v '^$')
+if [ ${#pkgs[@]} -eq 0 ]; then
+    echo "install-packages: $list is empty"
+    exit 0
+fi
+echo "install-packages: $list: ${pkgs[*]}"
+dnf5 -y install --setopt=install_weak_deps=False "${pkgs[@]}"

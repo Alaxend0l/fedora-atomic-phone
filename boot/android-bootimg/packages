@@ -1,0 +1,8 @@
+# SPDX-License-Identifier: AGPL-3.0-or-later
+# BOOT_METHOD=android-bootimg (bootc image only; this folder isn't a layer
+# of the dev roots). fap-android-boot writes boot images to the inactive
+# slot: mkbootimg (android-tools), slot control (qbootctl), zstd for
+# compressed kernels.
+android-tools
+qbootctl
+zstd

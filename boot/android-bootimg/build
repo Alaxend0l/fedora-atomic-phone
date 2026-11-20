@@ -1,11 +1,11 @@
 #!/usr/bin/env bash
 # SPDX-License-Identifier: AGPL-3.0-or-later
-# Image layer for BOOT_METHOD=android-bootimg. Runs inside the container build.
+# Image layer for BOOT_METHOD=android-bootimg (./packages first). Runs inside
+# the container build.
 set -euxo pipefail
 
 # The on-device tool needs the device's boot image layout at runtime.
 install -Dm644 "/ctx/devices/$FAP_DEVICE/device.env" /usr/lib/fap/device.env
 install -Dm644 /ctx/boot/bootimg-args.sh /usr/lib/fap/bootimg-args.sh
 
-dnf5 -y install android-tools qbootctl zstd
 systemctl enable fap-android-boot.service qbootctl.service
