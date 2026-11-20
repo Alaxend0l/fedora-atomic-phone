@@ -7,6 +7,13 @@ tested by us. Claims carry sources (URL or repo file:line); guesses are
 marked. Codename **waffle** confirmed (LineageOS wiki `waffle.yml:11`,
 `lineage_waffle.mk:17`); the Qualcomm platform name is **pineapple**.
 
+## Verified on the user's unit (2026-11-20)
+- CPH2583 (NA), 512 GB, LineageOS 23.2 on OxygenOS 16 CPH2573IN firmware; unlocked.
+- **`fastboot boot` of the stock boot.img works** (RAM boot into LineageOS).
+- **Use a USB 2.0 cable for bootloader fastboot**: on a USB 3/Thunderbolt link ABL's fastboot crashes into crashdump (05c6:900e).
+- Vol Up+Down+Power with the cable attached enters EDL (9008), not fastboot.
+- Notes and verified full-partition backup: ~/Develop/OnePlus12/.
+
 ## Documents
 | File | Contents |
 |---|---|
