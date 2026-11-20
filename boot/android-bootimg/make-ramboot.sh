@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# SPDX-License-Identifier: AGPL-3.0-or-later
 # Build a RAM-bootable Android boot image from a Fedora (bootc) image, for the
 # no-flash development loop: `fastboot boot <image>` runs it once from RAM and
 # writes nothing to the phone.

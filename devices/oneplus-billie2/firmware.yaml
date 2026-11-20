@@ -1,0 +1,99 @@
+# SPDX-License-Identifier: AGPL-3.0-or-later
+# Firmware manifest for the OnePlus Nord N100 (format: docs/features.md).
+# Collected 2026-11-20 from docs/hardware/*.md and what the RAM-booted and
+# installed systems use. Vendor blobs are never committed: today they are
+# copied/mounted from the phone by hand or by fap-modem-ram; first-boot
+# extraction (droid-juicer style) is on the roadmap.
+schema: 1
+device: oneplus-billie2
+firmware:
+  - name: modem
+    files: ["modem.mdt", "modem.b*", "modem_pr/"]
+    source: {partition: modem_a, path: image/}
+    install: /run/fap-firmware/qcom/sm6115/OnePlus/billie2/   # bind mount of image/, at run time
+    consumer: remoteproc_mpss (firmware-name qcom/sm6115/OnePlus/billie2/modem.mdt)
+    redistributable: false
+    package: ""
+    status: in-use
+    notes: "serve the whole image/ dir: the modem fetches modem_pr/ over TFTP and stalls without it"
+  - name: wlan
+    files: ["wlanmdsp.mbn"]
+    source: {partition: modem_a, path: image/}
+    install: /run/fap-firmware/qcom/sm6115/OnePlus/billie2/
+    consumer: modem (WLAN PD, fetched over tqftpserv)
+    redistributable: false
+    package: ""
+    status: in-use
+    notes: "comes with the modem bind mount"
+  - name: wifi-board-data
+    files: ["ath10k/WCN3990/hw1.0/board-2.bin"]
+    source: {partition: "", path: ""}
+    install: /usr/lib/firmware/
+    consumer: ath10k_snoc (qcom,calibration-variant OnePlus_billie2)
+    redistributable: true
+    package: atheros-firmware
+    status: in-use
+    notes: "generic board_id 0xff entry; the vendor's 35 bdwlan.* in modem_a:image/ are the planned replacement"
+  - name: gpu-zap-shader
+    files: ["a610_zap.mdt", "a610_zap.b00", "a610_zap.b01", "a610_zap.b02"]
+    source: {partition: "super (vendor_a)", path: firmware/}
+    install: /usr/lib/firmware/qcom/sm6115/OnePlus/billie2/
+    consumer: gpu_zap_shader (msm/adreno)
+    redistributable: false
+    package: ""
+    status: in-use
+    notes: "OnePlus-signed; copied into the installed root by hand (AGENTS.md)"
+  - name: touch
+    files: ["ilitek/oneplus-billie2-ili9882n-txd.bin"]
+    source: {partition: "", path: "vendor kernel source: FW_20221_ILI9882N_TXD[] in drivers/input/touchscreen/touch.h"}
+    install: /usr/lib/firmware/ilitek/
+    consumer: ili9882n-ts (kmod/ili9882n-ts)
+    redistributable: false
+    package: ""
+    status: in-use
+    notes: "same firmware as super(vendor_a):firmware/tp/20221/FW_NF_ILI9881H_TXD.bin in Intel HEX; hex->ILI converter TODO"
+  - name: adsp
+    files: ["adsp2.mdt", "adsp2.b*"]
+    source: {partition: modem_a, path: image/}
+    install: /run/fap-firmware/qcom/sm6115/OnePlus/billie2/
+    consumer: remoteproc_adsp (audio, sensors)
+    redistributable: false
+    package: ""
+    status: planned
+    notes: "vendor picks adsp2 via the adsp_variant qfprom cell (docs/hardware/n100-audio.md)"
+  - name: venus
+    files: ["venus.mdt", "venus.b*"]
+    source: {partition: modem_a, path: image/}
+    install: /run/fap-firmware/qcom/sm6115/OnePlus/billie2/
+    consumer: venus video-codec
+    redistributable: false
+    package: ""
+    status: planned
+    notes: "linux-firmware's venus-6.0 is RB2-signed and won't authenticate (guess); needs >= 6.0.55"
+  - name: ipa
+    files: ["ipa_fws.mdt", "ipa_fws.b*"]
+    source: {partition: "super (vendor_a)", path: firmware/}
+    install: /usr/lib/firmware/qcom/sm6115/OnePlus/billie2/
+    consumer: ipa (mobile data)
+    redistributable: false
+    package: ""
+    status: planned
+    notes: "signed; AP loads it"
+  - name: bluetooth
+    files: ["qca/apbtfw11.tlv", "qca/apnv11.bin"]
+    source: {partition: bluetooth_a, path: image/}
+    install: /usr/lib/firmware/
+    consumer: hci_qca (WCN3988)
+    redistributable: true
+    package: linux-firmware (subpackage to check)
+    status: planned
+    notes: "names are a guess; the phone's NVM may carry board RF tuning"
+  - name: speaker-amp-tables
+    files: ["aw87529_*.bin", "aw87359_*.bin"]
+    source: {partition: "super (vendor_a)", path: firmware/}
+    install: ""
+    consumer: "reference only: register tables for the amp drivers"
+    redistributable: false
+    package: ""
+    status: planned
+    notes: "values also in the vendor dmesg (docs/hardware/n100-audio.md section 6)"

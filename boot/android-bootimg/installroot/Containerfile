@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: AGPL-3.0-or-later
 # Development install root: the netroot (kernel modules, our out-of-tree
 # drivers + firmware, SSH, fap-modem-ram) plus Plasma Mobile. Installed as a
 # plain ext4 root (label fap-root) and booted by tiny-init's fap.root=. Not the

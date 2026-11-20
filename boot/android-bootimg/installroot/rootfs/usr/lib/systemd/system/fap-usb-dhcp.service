@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: AGPL-3.0-or-later
 # NetworkManager leaves USB gadget interfaces unmanaged by design, so the host
 # side of the USB network (set up by tiny-init: phone 172.16.42.1) gets its
 # address from this dnsmasq instead. No DNS, no gateway: USB is for SSH.

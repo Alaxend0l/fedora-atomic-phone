@@ -1,3 +1,4 @@
+<!-- SPDX-License-Identifier: AGPL-3.0-or-later -->
 # N100 audio: hardware inventory and mainline bring-up plan
 
 Status: **research only, nothing tested on mainline** (written 2026-11-20).

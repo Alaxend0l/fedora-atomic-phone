@@ -1,3 +1,4 @@
+<!-- SPDX-License-Identifier: AGPL-3.0-or-later -->
 # Boot method: `uboot-android`
 
 Phones can't boot EFI directly: their Android bootloader (ABL) only loads an

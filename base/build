@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# SPDX-License-Identifier: AGPL-3.0-or-later
 # Base layer: everything every phone image gets, regardless of UI or device.
 # Runs inside the container build with this folder as the working directory.
 # Files under ./rootfs are already installed by tools/image/run-layer.

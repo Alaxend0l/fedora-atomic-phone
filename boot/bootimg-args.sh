@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: AGPL-3.0-or-later
 # Source this after a device.env to get the mkbootimg layout arguments.
 # Shared by every boot method that produces an Android boot image
 # (uboot-android wraps U-Boot in one, android-bootimg wraps the Linux kernel).

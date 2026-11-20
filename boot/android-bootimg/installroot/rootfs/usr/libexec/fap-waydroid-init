@@ -1,4 +1,5 @@
 #!/bin/bash
+# SPDX-License-Identifier: AGPL-3.0-or-later
 # Set up Waydroid on the phone: download the LineageOS images (or use ones
 # copied to /etc/waydroid-extra/images), then write our Android properties
 # (UBWC off, density, optional software rendering). Run as root, with
@@ -51,7 +52,7 @@ echo "binderfs: $(ls /dev/binderfs | tr '\n' ' ')"
 # 2. GPU node Waydroid will hand to Android (first /dev/dri/renderD*; override
 #    with drm_device= in the [waydroid] section of /var/lib/waydroid/waydroid.cfg).
 for r in /dev/dri/renderD*; do
-    [ -e "$r" ] && echo "render node: $r ($(basename "$(readlink -f /sys/class/drm/$(basename "$r")/device/driver)"))"
+    [ -e "$r" ] && echo "render node: $r ($(basename "$(readlink -f /sys/class/drm/"$(basename "$r")"/device/driver)"))"
 done
 
 # 3. Images.

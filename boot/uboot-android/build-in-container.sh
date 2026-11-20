@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# SPDX-License-Identifier: AGPL-3.0-or-later
 # Build U-Boot for a device inside a Fedora container, so the host only needs
 # podman (works from macOS via podman machine).
 #

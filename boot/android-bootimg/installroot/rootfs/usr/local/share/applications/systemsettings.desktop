@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: AGPL-3.0-or-later
 # TODO Plasma 7: Change kcm_powerdevilprofilesconfig to kcm_powerdevil
 [Desktop Entry]
 NoDisplay=true

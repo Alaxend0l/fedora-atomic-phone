@@ -1,0 +1,72 @@
+# SPDX-License-Identifier: AGPL-3.0-or-later
+# Feature status for @DEVICE_NAME@: the source of truth for what works
+# (docs/features.md has the schema; docs/devices.md is generated from all
+# devices' files by tools/support-matrix.py).
+#
+# This template is also the feature catalogue: groups, feature ids and their
+# order, and each feature's `title`. Device files repeat groups and ids but
+# leave out `title`. Adding a feature = add it here and to every device.
+#
+# status: works | partial | broken | untested | n-a
+# notes: one line, what's missing or how it's worked around
+# evidence: a repo path, a URL or a commit hash (where it was shown to work/fail)
+schema: 1
+device: "@DEVICE_ID@"
+updated: "@DATE@"
+features:
+  core:
+    ram-boot:          {title: "RAM boot (fastboot boot) dev loop", status: untested, notes: "", evidence: ""}
+    boot-storage:      {title: "Boot from internal storage", status: untested, notes: "", evidence: ""}
+    usb-gadget:        {title: "USB networking / serial (gadget)", status: untested, notes: "", evidence: ""}
+    cpufreq:           {title: "CPU frequency scaling", status: untested, notes: "", evidence: ""}
+    thermal:           {title: "Thermal zones and cooling", status: untested, notes: "", evidence: ""}
+    suspend:           {title: "Suspend (s2idle)", status: untested, notes: "", evidence: ""}
+    reboot-bootloader: {title: "Reboot to bootloader from Linux", status: untested, notes: "", evidence: ""}
+    crash-logs:        {title: "Crash logs (ramoops/pstore)", status: untested, notes: "", evidence: ""}
+  display:
+    display:           {title: "Display panel", status: untested, notes: "", evidence: ""}
+    backlight:         {title: "Backlight", status: untested, notes: "", evidence: ""}
+    gpu:               {title: "GPU acceleration", status: untested, notes: "", evidence: ""}
+    video-codec:       {title: "Hardware video decode/encode", status: untested, notes: "", evidence: ""}
+  input:
+    keys:              {title: "Buttons (power, volume)", status: untested, notes: "", evidence: ""}
+    touchscreen:       {title: "Touchscreen", status: untested, notes: "", evidence: ""}
+  connectivity:
+    wifi:              {title: "Wi-Fi", status: untested, notes: "", evidence: ""}
+    bluetooth:         {title: "Bluetooth", status: untested, notes: "", evidence: ""}
+    usb-host:          {title: "USB host / OTG", status: untested, notes: "", evidence: ""}
+    tethering:         {title: "Hotspot / USB tethering", status: untested, notes: "", evidence: ""}
+    nfc:               {title: "NFC", status: untested, notes: "", evidence: ""}
+  audio:
+    speaker:           {title: "Loudspeaker", status: untested, notes: "", evidence: ""}
+    earpiece:          {title: "Earpiece", status: untested, notes: "", evidence: ""}
+    headphones:        {title: "Headphone jack / USB-C audio", status: untested, notes: "", evidence: ""}
+    microphone:        {title: "Microphones", status: untested, notes: "", evidence: ""}
+  power:
+    battery:           {title: "Battery level", status: untested, notes: "", evidence: ""}
+    charging:          {title: "Charging and charge status", status: untested, notes: "", evidence: ""}
+    fast-charging:     {title: "Fast charging", status: untested, notes: "", evidence: ""}
+  sensors:
+    vibrator:          {title: "Vibrator / haptics", status: untested, notes: "", evidence: ""}
+    accelerometer:     {title: "Accelerometer / gyroscope (rotation)", status: untested, notes: "", evidence: ""}
+    proximity:         {title: "Proximity sensor", status: untested, notes: "", evidence: ""}
+    light-sensor:      {title: "Ambient light sensor", status: untested, notes: "", evidence: ""}
+    compass:           {title: "Magnetometer", status: untested, notes: "", evidence: ""}
+    fingerprint:       {title: "Fingerprint reader", status: untested, notes: "", evidence: ""}
+    microsd:           {title: "microSD card", status: untested, notes: "", evidence: ""}
+    notification-led:  {title: "Notification LED", status: untested, notes: "", evidence: ""}
+  cameras:
+    camera-rear:       {title: "Rear camera", status: untested, notes: "", evidence: ""}
+    camera-front:      {title: "Front camera", status: untested, notes: "", evidence: ""}
+    camera-flash:      {title: "Camera flash / torch", status: untested, notes: "", evidence: ""}
+  telephony:
+    modem:             {title: "Modem firmware boots", status: untested, notes: "", evidence: ""}
+    sim:               {title: "SIM detection", status: untested, notes: "", evidence: ""}
+    sms:               {title: "SMS", status: untested, notes: "", evidence: ""}
+    mobile-data:       {title: "Mobile data", status: untested, notes: "", evidence: ""}
+    calls:             {title: "Voice calls (incl. call audio)", status: untested, notes: "", evidence: ""}
+    gnss:              {title: "GNSS / GPS", status: untested, notes: "", evidence: ""}
+  software:
+    desktop:           {title: "Mobile desktop (Plasma Mobile / Phosh)", status: untested, notes: "", evidence: ""}
+    waydroid:          {title: "Android apps (Waydroid)", status: untested, notes: "", evidence: ""}
+    bootc-updates:     {title: "Image updates (bootc upgrade/rollback)", status: untested, notes: "", evidence: ""}

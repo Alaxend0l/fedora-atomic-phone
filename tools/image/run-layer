@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# SPDX-License-Identifier: AGPL-3.0-or-later
 # Apply one layer folder to the image being built. Runs inside the container
 # build (see Containerfile).
 #

@@ -1,4 +1,5 @@
 #!/bin/bash
+# SPDX-License-Identifier: AGPL-3.0-or-later
 # Record clock/frequency/bus state once per boot, to compare boots started in
 # different ways (normal boot vs fastboot boot): /var/log/fap-boot-state/.
 d=/var/log/fap-boot-state; mkdir -p "$d"

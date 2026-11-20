@@ -1,3 +1,4 @@
+<!-- SPDX-License-Identifier: AGPL-3.0-or-later -->
 # Hardware bring-up plans (OnePlus Nord N100)
 
 Desk research written 2026-11-20 by research agents from the vendor DT dump,

@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# SPDX-License-Identifier: AGPL-3.0-or-later
 # Plasma Mobile: KDE's phone shell. Starts from Kinoite (see Justfile).
 # Untested placeholder; package set to be confirmed against Fedora's repos.
 set -euxo pipefail

@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# SPDX-License-Identifier: AGPL-3.0-or-later
 # Build and flash the Android boot image for the android-bootimg boot method.
 #
 # The phone's bootloader (ABL) boots the Linux kernel straight from boot_a /

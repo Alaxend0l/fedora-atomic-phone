@@ -1,3 +1,4 @@
+<!-- SPDX-License-Identifier: AGPL-3.0-or-later -->
 # Status and handoff
 
 Living document: update the "Where things stand" and "Next steps" sections
@@ -21,7 +22,9 @@ when you stop. Newest log entries at the top.
   UFS (all LUNs, 108 partitions), USB device mode (serial shell on the Mac),
   8 CPUs, 3.6 GB RAM, simpledrm framebuffer. Nothing written to storage.
 - **Framework:** scaffold, layered Containerfile, device format + validator,
-  pluggable boot methods, flash guards. No image has been *built* yet
+  pluggable boot methods, flash guards. Device template + `tools/new-device.sh`,
+  per-device `features.yaml`/`firmware.yaml` with a generated support matrix
+  (docs/devices.md), porting cookbook, CI workflow (ci.yml, not run yet). No image has been *built* yet
   (`just build`), none flashed.
 - **N100 kernel:** Fedora 45's kernel (7.3.4) has every SM6115 driver needed
   to mount root on UFS and ships `sm4250-oneplus-billie2.dtb`. No custom kernel

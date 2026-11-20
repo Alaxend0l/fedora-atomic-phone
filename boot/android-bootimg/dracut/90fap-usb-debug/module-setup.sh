@@ -1,4 +1,5 @@
 #!/bin/bash
+# SPDX-License-Identifier: AGPL-3.0-or-later
 # dracut module: USB serial debug shell in the initramfs.
 #
 # Sets up a USB CDC-ACM gadget as soon as a USB device controller appears and
@@ -22,5 +23,6 @@ installkernel() {
 
 install() {
     inst_multiple mkdir ln ls cat head sleep setsid sh dmesg mount mountpoint modprobe
+    # shellcheck disable=SC2154 # moddir is set by dracut
     inst_hook pre-udev 90 "$moddir/fap-usb-debug.sh"
 }

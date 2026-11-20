@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# SPDX-License-Identifier: AGPL-3.0-or-later
 # Turn a built bootc image into flashable images. Runs on an aarch64 Linux host
 # as root (image-builder needs privileged podman and loop devices).
 #

@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: AGPL-3.0-or-later
 [Unit]
 Description=Start the modem (and Wi-Fi) with EFS served from RAM copies
 Before=NetworkManager.service

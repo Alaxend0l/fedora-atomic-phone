@@ -1,3 +1,4 @@
+<!-- SPDX-License-Identifier: GPL-2.0-only -->
 # adc-ocv-battery
 
 A read-only battery `power_supply` for phones whose fuel gauge has no mainline

@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# SPDX-License-Identifier: AGPL-3.0-or-later
 # Phosh: GNOME-based phone shell. Starts from Silverblue (see Justfile).
 set -euxo pipefail
 

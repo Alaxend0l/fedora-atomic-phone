@@ -1,0 +1,85 @@
+# SPDX-License-Identifier: AGPL-3.0-or-later
+# Checks that need no phone: lint, tests, the generated support matrix,
+# SPDX tags, and that our device trees and kernel modules still build against
+# the newest Fedora 45 kernel. Weekly too, because Fedora's kernel moves
+# without any commit here. Images are built by build.yml (manual).
+name: ci
+
+on:
+  workflow_dispatch:
+  push:
+  schedule:
+    - cron: "17 4 * * 1"          # Mondays 04:17 UTC
+
+permissions:
+  contents: read
+
+jobs:
+  lint:
+    name: lint, tests, generated docs
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install tools
+        run: sudo apt-get update -q && sudo apt-get install -y -q shellcheck python3-yaml
+      - name: SPDX tags
+        run: tools/check-spdx.sh
+      - name: shellcheck (tools/, boot/, layers)
+        run: |
+          files=()
+          while IFS= read -r f; do
+            head -n 1 "$f" | grep -qE '^#!.*\b(ba|da)?sh\b' && files+=("$f")
+          done < <(git ls-files tools boot base desktops devices)
+          printf '%s\n' "${files[@]}"
+          shellcheck -S warning "${files[@]}"
+      - name: Python syntax
+        run: python3 -m py_compile tools/*.py tools/tests/*.py
+      - name: Python tests
+        run: python3 -m unittest discover -v -s tools/tests
+      - name: new-device.sh tests
+        run: tools/tests/test-new-device.sh
+      - name: Device folders
+        run: for d in devices/*/; do case "$d" in devices/_*) continue ;; esac; tools/check-device.sh "$d"; done
+      - name: docs/devices.md is current
+        run: tools/support-matrix.py --check
+
+  dtbs:
+    name: device trees vs. newest Fedora kernel
+    runs-on: ubuntu-24.04-arm
+    container: registry.fedoraproject.org/fedora:45
+    steps:
+      - name: Install tools
+        run: dnf5 -y -q install dtc cpp git-core
+      - uses: actions/checkout@v4
+      - name: Newest Fedora kernel and its Linux tag
+        id: kernel
+        run: |
+          echo "kver=$(tools/ci/fedora-kernel.sh)" >> "$GITHUB_OUTPUT"
+          echo "tag=$(tools/ci/fedora-kernel.sh --tag)" >> "$GITHUB_OUTPUT"
+      - name: Sparse Linux checkout (${{ steps.kernel.outputs.tag }})
+        run: |
+          tools/ci/sparse-linux.sh https://git.kernel.org/pub/scm/linux/kernel/git/stable/linux.git \
+              "${{ steps.kernel.outputs.tag }}" /tmp/linux \
+          || tools/ci/sparse-linux.sh https://github.com/gregkh/linux.git \
+              "${{ steps.kernel.outputs.tag }}" /tmp/linux
+      - name: Build devices/*/dts/*.dts
+        run: tools/ci/dtbs.sh /tmp/linux /tmp/dtbs
+      - uses: actions/upload-artifact@v4
+        with:
+          name: dtbs-${{ steps.kernel.outputs.tag }}
+          path: /tmp/dtbs/*/*.dtb
+
+  kmods:
+    name: kernel modules vs. newest Fedora kernel-devel
+    runs-on: ubuntu-24.04-arm
+    container: registry.fedoraproject.org/fedora:45
+    steps:
+      - uses: actions/checkout@v4
+      - name: Newest Fedora kernel-devel
+        id: kernel
+        run: |
+          kver=$(tools/ci/fedora-kernel.sh)
+          echo "kver=$kver" >> "$GITHUB_OUTPUT"
+          dnf5 -y -q install gcc make "kernel-devel-$kver"
+      - name: Build kmod/* and devices/*/kmod/* (${{ steps.kernel.outputs.kver }})
+        run: tools/ci/kmods.sh "${{ steps.kernel.outputs.kver }}"

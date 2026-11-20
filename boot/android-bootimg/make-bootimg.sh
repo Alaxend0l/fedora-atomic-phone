@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# SPDX-License-Identifier: AGPL-3.0-or-later
 # Build the first boot.img for flashing, from a disk image made by
 # tools/make-disk.sh. Runs on an aarch64 Linux host as root.
 #

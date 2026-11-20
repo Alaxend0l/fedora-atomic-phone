@@ -1,3 +1,4 @@
+<!-- SPDX-License-Identifier: AGPL-3.0-or-later -->
 # OnePlus Nord N100: feature checklist
 
 Status as of 2026-11-20. The phone runs Fedora 45 + Plasma Mobile from its

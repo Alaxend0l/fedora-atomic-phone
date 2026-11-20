@@ -1,0 +1,203 @@
+# SPDX-License-Identifier: AGPL-3.0-or-later
+# OnePlus Nord N100 feature status: the source of truth (schema:
+# docs/features.md; docs/devices.md is generated from this by
+# tools/support-matrix.py). Filled from TODO.md and docs/status.md, 2026-11-20.
+# TODO.md keeps the prioritised work list; keep the two in step.
+schema: 1
+device: oneplus-billie2
+updated: 2026-11-20
+features:
+  core:
+    ram-boot:
+      status: works
+      notes: "fastboot boot of make-ramboot.sh images, with netroot or the installed root (fap.root=); needs a fresh ABL session per attempt"
+      evidence: boot/android-bootimg/README.md
+    boot-storage:
+      status: works
+      notes: "ABL normal-boots boot_a with dtbo_a erased; plain ext4 root on userdata (not bootc yet)"
+      evidence: 2c68e81
+    usb-gadget:
+      status: works
+      notes: "serial + NCM network (172.16.42.1); on normal boot since qcom,select-utmi-as-pipe-clk (image v3)"
+      evidence: 02fa6df
+    cpufreq:
+      status: works
+      notes: "qcom-cpufreq-hw, 0.3-1.8 GHz"
+      evidence: e50bb83
+    thermal:
+      status: partial
+      notes: "16 zones read; CPU zones have no cooling maps, so only the 110 C critical trip acts"
+      evidence: devices/oneplus-billie2/hidden-dependencies.md
+    suspend:
+      status: untested
+      notes: "s2idle not tried; plan needs MPM / system sleep state (docs/hardware/n100-power-and-install.md A2)"
+      evidence: docs/hardware/n100-power-and-install.md
+    reboot-bootloader:
+      status: broken
+      notes: "`reboot bootloader` doesn't reach fastboot; needs the PON reboot-mode for bootloader"
+      evidence: devices/oneplus-billie2/TODO.md
+    crash-logs:
+      status: untested
+      notes: "ramoops in the mainline DT, pstore mounts; no crash captured yet to prove it"
+      evidence: e50bb83
+  display:
+    display:
+      status: works
+      notes: "MSM DRM + our generated ILI9882N panel driver, 720x1600 60 Hz; no LCDB driver (no panel power-off), 90 Hz not exposed"
+      evidence: devices/oneplus-billie2/kmod/panel-ili9882n/README.md
+    backlight:
+      status: works
+      notes: "DCS backlight, 0-2047"
+      evidence: 8505e57
+    gpu:
+      status: partial
+      notes: "Adreno 610 (freedreno) with the phone's zap shader and DDR votes; UBWC off (FD_MESA_DEBUG=noubwc) or tiles corrupt"
+      evidence: 02fa6df
+    video-codec:
+      status: broken
+      notes: "Venus not enabled in the DT; firmware on modem_a"
+      evidence: docs/hardware/n100-gpu-video-display.md
+  input:
+    keys:
+      status: works
+      notes: "power, volume up/down via PMIC nodes in our DT (evtest)"
+      evidence: 343b854
+    touchscreen:
+      status: works
+      notes: "our ili9882n-ts SPI driver as DRM panel follower; firmware from the phone; suspend/resume untested"
+      evidence: kmod/ili9882n-ts/README.md
+  connectivity:
+    wifi:
+      status: partial
+      notes: "ath10k WCN3990 via the modem (RAM-only rmtfs); startup needs retries, random MAC per boot, generic board data"
+      evidence: devices/oneplus-billie2/hidden-dependencies.md
+    bluetooth:
+      status: broken
+      notes: "WCN3988 on UART SE3 (hci_qca) not in the DT yet"
+      evidence: docs/hardware/n100-telephony-bt-gnss.md
+    usb-host:
+      status: broken
+      notes: "PMI632 Type-C + VBUS not in the DT yet (DT-only work)"
+      evidence: docs/hardware/n100-charging-usb.md
+    tethering:
+      status: untested
+      notes: "Wi-Fi works; NetworkManager hotspot not tried"
+      evidence: ""
+    nfc:
+      status: untested
+      notes: "README lists NXP nq-nci, TODO says probably not fitted: verify"
+      evidence: devices/oneplus-billie2/README.md
+  audio:
+    speaker:
+      status: broken
+      notes: "no sound card yet (ADSP + LPASS + WCD937x); AW87529 amp can damage the speaker: follow the plan"
+      evidence: docs/hardware/n100-audio.md
+    earpiece:
+      status: broken
+      notes: "no sound card yet; AW87359 amp"
+      evidence: docs/hardware/n100-audio.md
+    headphones:
+      status: broken
+      notes: "no sound card yet"
+      evidence: docs/hardware/n100-audio.md
+    microphone:
+      status: broken
+      notes: "no sound card yet; a PipeWire null sink keeps apps from crashing"
+      evidence: 74bc5ce
+  power:
+    battery:
+      status: partial
+      notes: "voltage-based estimate from the vendor OCV table (kmod/adc-ocv-battery), read-only"
+      evidence: kmod/adc-ocv-battery/README.md
+    charging:
+      status: partial
+      notes: "status guessed from USB input voltage; Linux doesn't drive the PMI632 charger (never bind qcom_smbx: 4.87 V)"
+      evidence: docs/hardware/n100-charging-usb.md
+    fast-charging:
+      status: broken
+      notes: "no charger control"
+      evidence: docs/hardware/n100-charging-usb.md
+  sensors:
+    vibrator:
+      status: works
+      notes: "PMI632 vibrator (image v3), tested at 31 %; keep strength <= ~73 %; Plasma haptics not checked"
+      evidence: 02fa6df
+    accelerometer:
+      status: broken
+      notes: "sensors sit behind the ADSP (libssc + hexagonrpcd); ADSP not enabled yet"
+      evidence: docs/hardware/n100-sensors-misc.md
+    proximity:
+      status: broken
+      notes: "on the ADSP, see accelerometer"
+      evidence: docs/hardware/n100-sensors-misc.md
+    light-sensor:
+      status: broken
+      notes: "on the ADSP, see accelerometer"
+      evidence: docs/hardware/n100-sensors-misc.md
+    compass:
+      status: broken
+      notes: "on the ADSP, see accelerometer"
+      evidence: docs/hardware/n100-sensors-misc.md
+    fingerprint:
+      status: broken
+      notes: "Egis ET520 on a TrustZone-owned SPI bus: likely not feasible"
+      evidence: docs/hardware/n100-sensors-misc.md
+    microsd:
+      status: untested
+      notes: "SDHCI controller probes; no card tried"
+      evidence: e50bb83
+    notification-led:
+      status: n-a
+      notes: "probably not fitted (verify)"
+      evidence: devices/oneplus-billie2/TODO.md
+  cameras:
+    camera-rear:
+      status: broken
+      notes: "CAMSS/CCI nodes for SM6115 missing; OV13B10 needs a DT match patch"
+      evidence: docs/hardware/n100-cameras.md
+    camera-front:
+      status: broken
+      notes: "CAMSS/CCI nodes missing; OV8856 driver exists"
+      evidence: docs/hardware/n100-cameras.md
+    camera-flash:
+      status: broken
+      notes: "PMI632 flash not in leds-qcom-flash"
+      evidence: docs/hardware/n100-cameras.md
+  telephony:
+    modem:
+      status: partial
+      notes: "MPSS boots from modem_a with RAM-only EFS (fap-modem-ram); early start can stall, retried"
+      evidence: 409bb00
+    sim:
+      status: untested
+      notes: "no SIM yet; ModemManager over QMI not tried"
+      evidence: docs/hardware/n100-telephony-bt-gnss.md
+    sms:
+      status: untested
+      notes: "no SIM yet"
+      evidence: docs/hardware/n100-telephony-bt-gnss.md
+    mobile-data:
+      status: broken
+      notes: "needs the IPA v4.2 node (from agatti) and rmnet"
+      evidence: docs/hardware/n100-telephony-bt-gnss.md
+    calls:
+      status: broken
+      notes: "call audio needs q6voice and a sound card"
+      evidence: docs/hardware/n100-telephony-bt-gnss.md
+    gnss:
+      status: untested
+      notes: "QMI LOC + geoclue not tried"
+      evidence: docs/hardware/n100-telephony-bt-gnss.md
+  software:
+    desktop:
+      status: works
+      notes: "Fedora 45 + Plasma Mobile from userdata (installroot), autologin"
+      evidence: 2c68e81
+    waydroid:
+      status: works
+      notes: "Android 13 on Rust binder, GPU via freedreno with noubwc; no audio; ~1 min first start"
+      evidence: docs/waydroid.md
+    bootc-updates:
+      status: broken
+      notes: "installed root is a plain ext4 tarball; bootc/ostree + fap-android-boot not done"
+      evidence: boot/android-bootimg/README.md

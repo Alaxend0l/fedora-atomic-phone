@@ -1,3 +1,4 @@
+<!-- SPDX-License-Identifier: AGPL-3.0-or-later -->
 # N100: power management and the path to a real install
 
 Research note, 2026-11-20. Nothing here has been run on the phone; it's a

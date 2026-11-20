@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# SPDX-License-Identifier: AGPL-3.0-or-later
 # Build an out-of-tree kernel module directory (Makefile with obj-m) against a
 # Fedora kernel's kernel-devel, in a container. Copies the .ko files to outdir.
 #

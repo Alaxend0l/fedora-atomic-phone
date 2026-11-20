@@ -1,3 +1,4 @@
+<!-- SPDX-License-Identifier: AGPL-3.0-or-later -->
 # N100: things that only work because something else left them on
 
 Audit of 2026-11-20 after Plasma Mobile was GPU-bound and USB failed on

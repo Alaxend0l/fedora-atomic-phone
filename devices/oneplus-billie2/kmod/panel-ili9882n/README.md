@@ -1,3 +1,4 @@
+<!-- SPDX-License-Identifier: GPL-2.0-only -->
 # panel-ili9882n
 
 DRM panel driver for the OnePlus Nord N100's ILI9882N (720x1600, DSI video,

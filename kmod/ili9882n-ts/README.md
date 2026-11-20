@@ -1,3 +1,4 @@
+<!-- SPDX-License-Identifier: GPL-2.0-only -->
 # ili9882n-ts
 
 SPI touchscreen driver for the Ilitek ILI9882N TDDI (touch side), written from

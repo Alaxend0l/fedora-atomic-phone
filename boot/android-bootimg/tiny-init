@@ -1,4 +1,5 @@
 #!/bin/sh
+# SPDX-License-Identifier: AGPL-3.0-or-later
 # /init of the tiny RAM-boot initramfs (boot/android-bootimg/make-ramboot.sh).
 # Static busybox only. Loads the device's drivers, brings up a USB serial
 # (CDC-ACM) gadget with a root shell, and keeps a shell on the screen too.
