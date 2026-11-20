@@ -51,6 +51,16 @@ other SoC platforms off they keep the build quick and the Image small
 enough for uniLoader's memory layout (kernel at 0xa3200000, uniLoader at
 0xa8010000: under 78 MiB including BSS); a packaged kernel would drop them.
 
+## Patches
+[patches/](patches/) holds our own kernel changes, applied in `series` order
+to the pinned waffle-voice checkout by `fap-waffle-build.sh` (the tree is
+reset to the pinned commit first; a patch that doesn't apply fails the
+build). Each patch carries `Upstream-Status:`.
+
+| Patch | What | Upstream-Status |
+|---|---|---|
+| 0001-power-sequencing-qcom-wcn-power-down-at-shutdown | `.shutdown` for pwrseq-qcom-wcn: WLAN_EN/BT_EN low, rail/clock votes dropped, so the WCN7850 restarts from reset after a warm reboot (Wi‑Fi otherwise stuck in SBL) | Pending (not submitted, untested on hardware) |
+
 ## Reproduce
 ```sh
 devices/oneplus-waffle/build-env/fap-waffle-build.sh kernel                 # waffle-voice, slim

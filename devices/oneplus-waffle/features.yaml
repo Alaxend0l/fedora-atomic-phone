@@ -26,14 +26,14 @@ features:
   display:
     display:           {title: "Display panel", status: untested, notes: "first light: simple-framebuffer on the splash buffer 0xd5100000 (1440x3168); panel-boe-aa545 in DaDDevil's tree (module), MDSS off", evidence: ""}
     backlight:         {title: "Backlight", status: untested, notes: "", evidence: ""}
-    gpu:               {title: "GPU acceleration", status: untested, notes: "", evidence: ""}
-    video-codec:       {title: "Hardware video decode/encode", status: untested, notes: "", evidence: ""}
+    gpu:               {title: "GPU acceleration", status: untested, notes: "v7: Adreno 750 (msm/freedreno), gpucc built in, Fedora SQE/GMU + unit zap shader, mesa in the netroot; built, not tested", evidence: ""}
+    video-codec:       {title: "Hardware video decode/encode", status: untested, notes: "v7: Iris (vpu33) with the unit vpu33_4v.mbn; built, not tested", evidence: ""}
   input:
     keys:              {title: "Buttons (power, volume)", status: untested, notes: "power + volume up on PON (resin = vol up), volume down on PM8550 GPIO6 (DaDDevil's DT)", evidence: ""}
     touchscreen:       {title: "Touchscreen", status: untested, notes: "Synaptics S3910 driver in DaDDevil's tree (module); SPI4 off in the first-light DT", evidence: ""}
   connectivity:
     wifi:              {title: "Wi-Fi", status: untested, notes: "WCN7850/ath12k upstream + DaDDevil's 0x1107 board-data fallback; PCIe off in the first-light DT", evidence: ""}
-    bluetooth:         {title: "Bluetooth", status: untested, notes: "", evidence: ""}
+    bluetooth:         {title: "Bluetooth", status: untested, notes: "v7: WCN7850 over UART14 (hci_qca), firmware from the bluetooth_a backup, bluez; built, not tested", evidence: ""}
     usb-host:          {title: "USB host / OTG", status: untested, notes: "", evidence: ""}
     tethering:         {title: "Hotspot / USB tethering", status: untested, notes: "", evidence: ""}
     nfc:               {title: "NFC", status: untested, notes: "", evidence: ""}
@@ -47,7 +47,7 @@ features:
     charging:          {title: "Charging and charge status", status: untested, notes: "", evidence: ""}
     fast-charging:     {title: "Fast charging", status: untested, notes: "", evidence: ""}
   sensors:
-    vibrator:          {title: "Vibrator / haptics", status: untested, notes: "", evidence: ""}
+    vibrator:          {title: "Vibrator / haptics", status: untested, notes: "v7: PM8550B LRA (qcom-spmi-haptics, DaDDevil) at the stock 1.72 V vmax; built, not tested", evidence: ""}
     accelerometer:     {title: "Accelerometer / gyroscope (rotation)", status: untested, notes: "", evidence: ""}
     proximity:         {title: "Proximity sensor", status: untested, notes: "", evidence: ""}
     light-sensor:      {title: "Ambient light sensor", status: untested, notes: "", evidence: ""}

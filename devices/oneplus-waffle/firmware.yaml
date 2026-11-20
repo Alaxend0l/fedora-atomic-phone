@@ -3,19 +3,29 @@
 # Vendor blobs are never committed or redistributed: the image copies them from
 # the phone's own partitions. Paths as DaDDevil's waffle DT expects them;
 # research/firmware.md (branch oneplus12-research) has the full inventory.
-# Nothing here is used yet: first light loads no firmware.
+# The RAM-boot netroot (fap-waffle-build.sh netroot) installs these from the
+# local backups; the tarball stays local.
 schema: 1
 device: "oneplus-waffle"
 firmware:
   - name: gpu-zap
     files: ["gen70900_zap.mbn"]
     source: {partition: vendor (super), path: firmware/}
-    install: /usr/lib/firmware/qcom/sm8650/
+    install: /usr/lib/firmware/qcom/sm8650/oneplus/waffle/
     consumer: gpu_zap_shader
     redistributable: false
     package: ""
     status: planned
-    notes: "linux-firmware's copy is QRD/HDK-signed; the phone needs the OnePlus-signed one (guess, dossier)"
+    notes: "v7: from backup/vendor-files-20261120 (sha256 checked against the phone manifest); linux-firmware's qcom/sm8650 copy is Qualcomm-signed (QRD)"
+  - name: gpu-sqe-gmu
+    files: ["gen70900_sqe.fw", "gmu_gen70900.bin"]
+    source: {partition: "", path: ""}
+    install: /usr/lib/firmware/qcom/
+    consumer: gpu (msm adreno)
+    redistributable: true
+    package: qcom-firmware
+    status: planned
+    notes: "v7: Fedora's copies (.xz); the vendor has the same names as a fallback"
   - name: adsp
     files: ["adsp.mdt", "adsp.b*", "adsp_dtb.mdt", "adsp_dtb.b*"]
     source: {partition: modem_a, path: image/}
@@ -45,13 +55,13 @@ firmware:
     notes: ""
   - name: video
     files: ["vpu33_4v.mbn"]
-    source: {partition: modem_a, path: image/}
+    source: {partition: vendor (super), path: firmware/}
     install: /usr/lib/firmware/qcom/sm8650/oneplus/waffle/
     consumer: iris
     redistributable: false
     package: ""
     status: planned
-    notes: "location on the phone to verify"
+    notes: "v7: /vendor/firmware/vpu33_4v.mbn (squashed, OnePlus-signed), from backup/vendor-files-20261120"
   - name: wifi
     files: ["amss.bin", "m3.bin", "board-2.bin"]
     source: {partition: "", path: ""}
@@ -61,3 +71,12 @@ firmware:
     package: linux-firmware
     status: planned
     notes: "OnePlus subsystem id 0x1107 needs DaDDevil's board-data fallback"
+  - name: bluetooth
+    files: ["hmtbtfw20.tlv", "hmtnv20.bin", "hmtnv20.b*"]
+    source: {partition: bluetooth_a, path: image/}
+    install: /usr/lib/firmware/updates/qca/
+    consumer: uart14 bluetooth (hci_qca, qcom,wcn7850-bt)
+    redistributable: false
+    package: ""
+    status: planned
+    notes: "v7: unit's copies (board-specific NVM) ahead of Fedora atheros-firmware's generic qca/hmt* via the updates/ search path"
