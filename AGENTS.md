@@ -22,12 +22,15 @@ checkout, built images). Pocketblue reference clones:
 |---|---|
 | docs/architecture.md | how images are built and layered |
 | boot/README.md | boot methods (`uboot-android`, `android-bootimg`, `lk2nd`) |
-| docs/porting.md | adding a device |
+| docs/porting.md | adding a device: `tools/new-device.sh` from `devices/_template/` (every device.env key documented) |
+| docs/porting-cookbook.md | symptom → cause → fix recipes from the N100 and Pixel 8 work |
+| docs/features.md, docs/devices.md | per-device `features.yaml`/`firmware.yaml` format; generated support matrix (`tools/support-matrix.py`) |
+| .github/workflows/ci.yml | lint, tests, SPDX, DTBs + kmods vs. newest Fedora kernel (scripts in tools/ci/) |
 | docs/roadmap.md | milestones + porting-tooling plan |
 | docs/re-tooling.md | ranked reverse-engineering tool ideas |
 | docs/decisions/ | why things are the way they are |
 | devices/oneplus-billie2/README.md | N100 hardware, partitions, recovery |
-| devices/oneplus-billie2/TODO.md | N100 feature checklist (what works, what is next) |
+| devices/oneplus-billie2/TODO.md, features.yaml | N100 work list; feature status (source of truth for docs/devices.md) |
 | kernels/qcom-sm6115/README.md | Fedora kernel coverage for the SoC |
 | boot/uboot-android/README.md | U-Boot build + the N100 boot experiments |
 | boot/android-bootimg/README.md | the RAM-boot dev loop (`fastboot boot` + netroot over USB) |
