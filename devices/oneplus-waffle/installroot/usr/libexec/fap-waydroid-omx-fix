@@ -1,0 +1,29 @@
+#!/bin/sh
+# SPDX-License-Identifier: AGPL-3.0-or-later
+# Waydroid's arm64 MAINLINE vendor image declares android.hardware.media.omx
+# in its VINTF manifest but ships no OMX service. mediaserver then waits
+# forever in IOmxStore::getService(), MediaProvider blocks on it, the FUSE
+# session for /storage/emulated times out and Android's shared storage never
+# works (downloads crash, Files hangs). waydroid/waydroid#2453. Put a copy of
+# the manifest without that HAL into Waydroid's vendor overlay before the
+# container starts (overlay lower dirs can't change while mounted).
+set -eu
+cfg=/var/lib/waydroid/waydroid.cfg
+[ -r "$cfg" ] || exit 0
+img=$(sed -n 's/^images_path *= *//p' "$cfg"); img=${img:-/var/lib/waydroid/images}
+[ -r "$img/vendor.img" ] || exit 0
+out=/var/lib/waydroid/overlay/vendor/etc/vintf/manifest.xml
+m=$(mktemp -d)
+trap 'umount "$m" 2>/dev/null; rmdir "$m"' EXIT
+mount -o loop,ro "$img/vendor.img" "$m"
+src=$m/etc/vintf/manifest.xml
+if grep -q 'android\.hardware\.media\.omx' "$src" && ! ls "$m/bin/hw" 2>/dev/null | grep -qi omx; then
+    mkdir -p "${out%/*}"
+    python3 -I -c '
+import re, sys
+s = open(sys.argv[1]).read()
+t = re.sub(r"\s*<hal[^>]*>\s*<name>android\.hardware\.media\.omx</name>.*?</hal>", "", s, flags=re.S)
+open(sys.argv[2], "w").write("<!-- fedora-atomic-phone: OMX HAL removed, waydroid#2453 -->\n" + t)
+' "$src" "$out.tmp"
+    mv "$out.tmp" "$out"
+fi
