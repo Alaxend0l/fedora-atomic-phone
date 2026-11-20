@@ -7,8 +7,9 @@ Android), USB device mode (serial shell), 8 CPUs, 3.6 GB RAM, simpledrm
 720×1600, 16 thermal zones, cpufreq, SD controller, pstore, USB networking
 (172.16.42.1). Our DT additions (`dts/sm4250-oneplus-billie2-fap.dts`) add the PMICs and
 all three keys (verified). PMIC ADC5 reads battery voltage (`vbat_sns`, e.g.
-4.009 V), USB input voltage, `bat_id`, charger/die/XO temperatures; RTC works. Still missing: battery/charger, panel, touch,
-Wi‑Fi, audio. `dt-modules.txt` maps every enabled DT node to its
+4.009 V), USB input voltage, `bat_id`, charger/die/XO temperatures; RTC works. Display: MSM DRM with our ILI9882N panel
+module (`kmod/panel-ili9882n`), DCS backlight. Still missing: LCDB driver
+(panel power-off), GPU, battery percentage, touch, Wi‑Fi, audio. `dt-modules.txt` maps every enabled DT node to its
 module (tools/dt-modules.py). Nothing installed on storage.
 
 Hardware facts below come from a running UBports system (Halium, vendor kernel

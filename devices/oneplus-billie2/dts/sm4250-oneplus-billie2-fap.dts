@@ -58,3 +58,46 @@
 	linux,code = <KEY_VOLUMEUP>;
 	status = "okay";
 };
+
+/*
+ * Display: ILI9882N, 720x1600, DSI video mode, 4 lanes (vendor node
+ * qcom,mdss_dsi_ili9882n_90hz_video). Driver: devices/oneplus-billie2/kmod/
+ * panel-ili9882n (lmdpdg-generated). Reset is TLMM 82 (vendor
+ * qcom,platform-reset-gpio), same as the Fxtec Pro1X.
+ *
+ * Supplies: the panel needs vddio (L9A, 1.8 V) and LCDB lab/ibb (+/-6.0 V on
+ * PMI632). Mainline has no LCDB driver, so the panel driver doesn't manage
+ * any supply: it relies on the bootloader having powered the panel (it has:
+ * its splash is on screen). DSI vdda is L18A; vendor sets 1.232 V, within
+ * mainline's 1.104-1.304 V for L18A, and the DSI driver only requests load.
+ */
+&mdss {
+	status = "okay";
+};
+
+&mdss_dsi0 {
+	vdda-supply = <&vreg_l18a>;
+	status = "okay";
+
+	panel@0 {
+		compatible = "oneplus,billie2-ili9882n";
+		reg = <0>;
+
+		reset-gpios = <&tlmm 82 GPIO_ACTIVE_LOW>;
+
+		port {
+			panel_in: endpoint {
+				remote-endpoint = <&mdss_dsi0_out>;
+			};
+		};
+	};
+};
+
+&mdss_dsi0_out {
+	data-lanes = <0 1 2 3>;
+	remote-endpoint = <&panel_in>;
+};
+
+&mdss_dsi0_phy {
+	status = "okay";
+};

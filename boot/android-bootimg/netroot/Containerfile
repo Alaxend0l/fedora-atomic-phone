@@ -20,12 +20,14 @@ RUN dnf5 -y install --setopt=install_weak_deps=False \
 # Kernel modules matching the booted kernel exactly (not the fedora:45 repos'
 # newest kernel). Skip Fedora's generic initramfs and the kernel image itself.
 COPY --from=kernel /usr/lib/modules /usr/lib/modules
-RUN find /usr/lib/modules -maxdepth 2 \( -name 'initramfs*.img' -o -name vmlinuz \) -delete \
-    && depmod -a "$(ls /usr/lib/modules | sort -V | tail -1)"
+RUN find /usr/lib/modules -maxdepth 2 \( -name 'initramfs*.img' -o -name vmlinuz \) -delete
 
 # The USB network and serial gadget are set up by the initramfs and survive
 # switch_root; keep them as they are (no NetworkManager).
+# rootfs/ may also carry out-of-tree modules in /usr/lib/modules/<kver>/extra
+# (make-netroot.sh NETROOT_EXTRA_MODULES), hence depmod afterwards.
 COPY rootfs/ /
+RUN depmod -a "$(ls /usr/lib/modules | sort -V | tail -1)"
 
 RUN systemctl enable sshd.service serial-getty@ttyGS0.service \
     && systemctl set-default multi-user.target \

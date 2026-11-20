@@ -11,6 +11,36 @@
 - [ ] Publish images to a registry; `bootc upgrade` from a phone
 - [x] Pluggable boot methods: uboot-android, android-bootimg, lk2nd (planned)
 
+## Maintenance and releases
+Phones update like Silverblue: `bootc upgrade` (or its timer) pulls the new
+image per device+desktop from a registry, stages it, switches on reboot;
+`bootc rollback` goes back. `android-bootimg` devices keep the boot partition
+in step via `fap-android-boot` (inactive A/B slot); `uboot-android` needs
+nothing extra.
+
+1. [ ] **Scheduled CI rebuilds**: nightly/weekly plus on every push (today the
+       workflow is manual-only).
+2. [ ] **Registry publishing** (ghcr.io or quay.io), one OCI image per device
+       and desktop.
+3. [ ] **Image signing** with cosign; phones verify signatures before
+       installing (Pocketblue does this).
+4. [ ] **Channels:** publish to `testing`, promote to `stable` after tests.
+5. [ ] **Fedora release upgrades** (~every 6 months, ~13 months support):
+       bump `FAP_FEDORA`, rebuild, test, publish; keep the previous release
+       available as a fallback.
+6. [ ] **Kernel guard:** per-device test before publishing a new kernel, and
+       a way to pin/hold a kernel for one device.
+7. [ ] **Out-of-tree pieces rebuilt per kernel** (panel module, DT additions):
+       automate in CI, e.g. kmod RPMs in COPR. Long term: **upstream them to
+       mainline Linux**, the biggest maintenance win.
+8. [ ] **Boot components:** U-Boot pinned per device, rebuilt deliberately.
+9. [ ] Firmware is extracted on each phone; nothing to update.
+10. [ ] **Testing before release:** RAM-boot loop, `fap-hwtest`, then
+        real-device CI.
+11. [ ] **People/process:** each device names `DEVICE_MAINTAINER` and a
+        status; no active maintainer → status "unmaintained". Keep
+        docs/status.md, decision records and release notes current.
+
 ## Porting tooling
 More ideas, ranked per subsystem: [re-tooling.md](re-tooling.md).
 What slows ports down is per-device bring-up (device tree, panel, touch,

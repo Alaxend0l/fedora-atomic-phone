@@ -22,6 +22,15 @@ cp -R "$here/netroot/." "$ctx/"
 mkdir -p "$ctx/rootfs/root/.ssh"
 install -m 600 "$key" "$ctx/rootfs/root/.ssh/authorized_keys"
 
+# NETROOT_EXTRA_MODULES=<dir> <kver>: out-of-tree .ko files (e.g. a panel
+# driver) to install as /usr/lib/modules/<kver>/extra/.
+if [ -n "${NETROOT_EXTRA_MODULES:-}" ]; then
+    read -r mdir mkver <<< "$NETROOT_EXTRA_MODULES"
+    mkdir -p "$ctx/rootfs/usr/lib/modules/$mkver/extra"
+    cp "$mdir"/*.ko "$ctx/rootfs/usr/lib/modules/$mkver/extra/"
+    echo "extra modules for $mkver: $(cd "$mdir" && ls *.ko | tr '\n' ' ')"
+fi
+
 podman build -t localhost/fap-netroot:latest "$ctx"
 
 # Export the filesystem (not the image layers) as one tarball.
