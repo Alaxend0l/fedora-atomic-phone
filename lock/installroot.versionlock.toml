@@ -4,20 +4,20 @@
 version = "1.0"
 
 [[packages]]
-name = "7zip"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "26.06-1.fc45"
-
-[[packages]]
 name = "LibRaw"
 comment = "installroot"
 [[packages.conditions]]
 key = "evr"
 comparator = "="
 value = "0.22.3-1.fc45"
+
+[[packages]]
+name = "ModemManager"
+comment = "installroot"
+[[packages.conditions]]
+key = "evr"
+comparator = "="
+value = "1.24.2-5.fc45"
 
 [[packages]]
 name = "ModemManager-glib"
@@ -52,12 +52,12 @@ comparator = "="
 value = "1:1.58.1-3.fc45"
 
 [[packages]]
-name = "PackageKit"
+name = "NetworkManager-wwan"
 comment = "installroot"
 [[packages.conditions]]
 key = "evr"
 comparator = "="
-value = "1.4.0-3.fc45"
+value = "1:1.58.1-3.fc45"
 
 [[packages]]
 name = "PackageKit-Qt6"
@@ -66,14 +66,6 @@ comment = "installroot"
 key = "evr"
 comparator = "="
 value = "1.1.4-5.fc45"
-
-[[packages]]
-name = "PackageKit-glib"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "1.4.0-3.fc45"
 
 [[packages]]
 name = "SDL3"
@@ -124,30 +116,6 @@ comparator = "="
 value = "26.27.3-2.fc45"
 
 [[packages]]
-name = "adobe-mappings-cmap"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "20231115-6.fc45"
-
-[[packages]]
-name = "adobe-mappings-cmap-deprecated"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "20231115-6.fc45"
-
-[[packages]]
-name = "adobe-mappings-pdf"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "20190401-13.fc45"
-
-[[packages]]
 name = "adwaita-cursor-theme"
 comment = "installroot"
 [[packages.conditions]]
@@ -172,36 +140,12 @@ comparator = "="
 value = "46.2-12.fc45"
 
 [[packages]]
-name = "adwaita-mono-fonts"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "51.0-1.fc45"
-
-[[packages]]
-name = "adwaita-sans-fonts"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "51.0-1.fc45"
-
-[[packages]]
 name = "alsa-lib"
 comment = "installroot"
 [[packages.conditions]]
 key = "evr"
 comparator = "="
 value = "1.2.16.1-2.fc45"
-
-[[packages]]
-name = "angelfish"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "26.08.3-1.fc45"
 
 [[packages]]
 name = "appstream"
@@ -212,28 +156,12 @@ comparator = "="
 value = "1.1.3-4.fc45"
 
 [[packages]]
-name = "appstream-data"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "45-3.fc45"
-
-[[packages]]
 name = "appstream-qt"
 comment = "installroot"
 [[packages.conditions]]
 key = "evr"
 comparator = "="
 value = "1.1.3-4.fc45"
-
-[[packages]]
-name = "arianna"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "26.08.3-1.fc45"
 
 [[packages]]
 name = "aribb24"
@@ -284,38 +212,6 @@ comparator = "="
 value = "2.62.1-1.fc45"
 
 [[packages]]
-name = "audiocd-kio"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "26.08.3-1.fc45"
-
-[[packages]]
-name = "audiocd-kio-doc"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "26.08.3-1.fc45"
-
-[[packages]]
-name = "audit"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "4.2.1-2.fc45"
-
-[[packages]]
-name = "audit-rules"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "4.2.1-2.fc45"
-
-[[packages]]
 name = "aurorae"
 comment = "installroot"
 [[packages.conditions]]
@@ -346,22 +242,6 @@ comment = "installroot"
 key = "evr"
 comparator = "="
 value = "0.9~rc2-9.fc45"
-
-[[packages]]
-name = "bash"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "5.3.15-2.fc45"
-
-[[packages]]
-name = "bat"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "0.26.1-4.fc45"
 
 [[packages]]
 name = "bluedevil"
@@ -428,38 +308,6 @@ comparator = "="
 value = "1.90.0-13.fc45"
 
 [[packages]]
-name = "boost-filesystem"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "1.90.0-13.fc45"
-
-[[packages]]
-name = "boost-log"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "1.90.0-13.fc45"
-
-[[packages]]
-name = "boost-regex"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "1.90.0-13.fc45"
-
-[[packages]]
-name = "boost-serialization"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "1.90.0-13.fc45"
-
-[[packages]]
 name = "boost-thread"
 comment = "installroot"
 [[packages.conditions]]
@@ -476,22 +324,6 @@ comparator = "="
 value = "6.8.3-1.fc45"
 
 [[packages]]
-name = "breeze-gtk-common"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "6.8.3-1.fc45"
-
-[[packages]]
-name = "breeze-gtk-gtk3"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "6.8.3-1.fc45"
-
-[[packages]]
 name = "breeze-icon-theme"
 comment = "installroot"
 [[packages.conditions]]
@@ -500,36 +332,12 @@ comparator = "="
 value = "6.32.0-1.fc45"
 
 [[packages]]
-name = "brlapi"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "0.8.8-9.fc45"
-
-[[packages]]
-name = "btrfs-progs"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "7.1-1.fc45"
-
-[[packages]]
 name = "bubblewrap"
 comment = "installroot"
 [[packages.conditions]]
 key = "evr"
 comparator = "="
 value = "0.13.1-1.fc45"
-
-[[packages]]
-name = "c-ares"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "1.34.9-1.fc45"
 
 [[packages]]
 name = "cairo"
@@ -548,28 +356,12 @@ comparator = "="
 value = "1.18.6-1.fc45"
 
 [[packages]]
-name = "capstone"
+name = "callaudiod"
 comment = "installroot"
 [[packages.conditions]]
 key = "evr"
 comparator = "="
-value = "5.0.6-6.fc45"
-
-[[packages]]
-name = "catdoc"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "0.95-31.fc45"
-
-[[packages]]
-name = "catdoc-wordview"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "0.95-31.fc45"
+value = "0.1.99-4.fc45"
 
 [[packages]]
 name = "cdparanoia-libs"
@@ -578,14 +370,6 @@ comment = "installroot"
 key = "evr"
 comparator = "="
 value = "10.2-51.fc45"
-
-[[packages]]
-name = "checkpolicy"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "3.11-2.fc45"
 
 [[packages]]
 name = "chrony"
@@ -612,14 +396,6 @@ comparator = "="
 value = "4.3.0-7.fc45"
 
 [[packages]]
-name = "cmark-lib"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "0.31.1-4.fc45"
-
-[[packages]]
 name = "codec2"
 comment = "installroot"
 [[packages.conditions]]
@@ -636,14 +412,6 @@ comparator = "="
 value = "1.4.8-5.fc45"
 
 [[packages]]
-name = "compat-lua-libs"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "5.1.5-32.fc45"
-
-[[packages]]
 name = "composefs-libs"
 comment = "installroot"
 [[packages.conditions]]
@@ -652,52 +420,12 @@ comparator = "="
 value = "1.0.8-7.fc45"
 
 [[packages]]
-name = "container-selinux"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "4:2.251.0-1.fc45"
-
-[[packages]]
-name = "coreutils"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "9.11-6.fc45"
-
-[[packages]]
-name = "cpio"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "2.15-10.fc45"
-
-[[packages]]
-name = "cpp"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "16.2.1-3.fc45"
-
-[[packages]]
 name = "cryptsetup-libs"
 comment = "installroot"
 [[packages.conditions]]
 key = "evr"
 comparator = "="
 value = "2.8.8-1.fc45"
-
-[[packages]]
-name = "cups-client"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "1:2.4.19-4.fc45"
 
 [[packages]]
 name = "cups-filesystem"
@@ -716,28 +444,12 @@ comparator = "="
 value = "1:2.4.19-4.fc45"
 
 [[packages]]
-name = "curl"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "8.21.0-9.fc45"
-
-[[packages]]
 name = "cxx-rust-cssparser"
 comment = "installroot"
 [[packages.conditions]]
 key = "evr"
 comparator = "="
 value = "1.1.0-1.fc45"
-
-[[packages]]
-name = "cyrus-sasl-gssapi"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "2.1.28-37.fc45"
 
 [[packages]]
 name = "dbus"
@@ -762,14 +474,6 @@ comment = "installroot"
 key = "evr"
 comparator = "="
 value = "1:1.16.4-2.fc45"
-
-[[packages]]
-name = "dbus-glib"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "0.112-14.fc45"
 
 [[packages]]
 name = "dbus-libs"
@@ -810,38 +514,6 @@ comment = "installroot"
 key = "evr"
 comparator = "="
 value = "4.3-3.fc45"
-
-[[packages]]
-name = "dejavu-fonts-all"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "2.37-30.fc45"
-
-[[packages]]
-name = "dejavu-sans-fonts"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "2.37-30.fc45"
-
-[[packages]]
-name = "dejavu-sans-mono-fonts"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "2.37-30.fc45"
-
-[[packages]]
-name = "dejavu-serif-fonts"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "2.37-30.fc45"
 
 [[packages]]
 name = "desktop-backgrounds-compat"
@@ -892,54 +564,6 @@ comparator = "="
 value = "10.5.2-2.fc45"
 
 [[packages]]
-name = "diffutils"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "3.12-6.fc45"
-
-[[packages]]
-name = "distribution-gpg-keys"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "1.123-1.fc45"
-
-[[packages]]
-name = "djvulibre-libs"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "3.5.30-2.fc45"
-
-[[packages]]
-name = "dmidecode"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "1:3.7-2.fc45"
-
-[[packages]]
-name = "dnf5"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "5.4.8.0-2.fc45"
-
-[[packages]]
-name = "dnf5-plugins"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "5.4.8.0-2.fc45"
-
-[[packages]]
 name = "dns-root-data"
 comment = "installroot"
 [[packages.conditions]]
@@ -972,44 +596,12 @@ comparator = "="
 value = "1.79.2-29.fc45"
 
 [[packages]]
-name = "dosfstools"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "4.2-19.fc45"
-
-[[packages]]
-name = "dotconf"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "1.4.1-8.fc45"
-
-[[packages]]
 name = "double-conversion"
 comment = "installroot"
 [[packages.conditions]]
 key = "evr"
 comparator = "="
 value = "3.4.0-4.fc45"
-
-[[packages]]
-name = "dracut"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "111-5.fc45"
-
-[[packages]]
-name = "dracut-config-rescue"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "111-5.fc45"
 
 [[packages]]
 name = "dtc"
@@ -1044,36 +636,12 @@ comparator = "="
 value = "1.47.4-2.fc45"
 
 [[packages]]
-name = "ebook-tools-libs"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "0.2.2-33.fc45"
-
-[[packages]]
 name = "editorconfig-libs"
 comment = "installroot"
 [[packages.conditions]]
 key = "evr"
 comparator = "="
 value = "0.12.11-2.fc45"
-
-[[packages]]
-name = "elfutils-debuginfod-client"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "0.197-1.fc45"
-
-[[packages]]
-name = "elisa-player"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "26.08.3-2.fc45"
 
 [[packages]]
 name = "emacs-filesystem"
@@ -1084,52 +652,12 @@ comparator = "="
 value = "1:30.2-3.fc45"
 
 [[packages]]
-name = "espeak-ng"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "1.52.0-4.fc45"
-
-[[packages]]
-name = "ethtool"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "2:7.2-1.fc45"
-
-[[packages]]
 name = "evtest"
 comment = "installroot"
 [[packages.conditions]]
 key = "evr"
 comparator = "="
 value = "1.36-3.fc45"
-
-[[packages]]
-name = "exempi"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "2.6.4-10.fc45"
-
-[[packages]]
-name = "exfatprogs"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "1.4.4-1.fc45"
-
-[[packages]]
-name = "exiv2"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "0.28.9-1.fc45"
 
 [[packages]]
 name = "exiv2-libs"
@@ -1148,14 +676,6 @@ comparator = "="
 value = "2.9.0-1.fc45"
 
 [[packages]]
-name = "f2fs-tools"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "1.16.0-11.fc45"
-
-[[packages]]
 name = "f45-backgrounds-base"
 comment = "installroot"
 [[packages.conditions]]
@@ -1172,36 +692,12 @@ comparator = "="
 value = "45.0.4-1.fc45"
 
 [[packages]]
-name = "faad2-libs"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "1:2.11.4-1.fc45"
-
-[[packages]]
 name = "fdk-aac-free"
 comment = "installroot"
 [[packages.conditions]]
 key = "evr"
 comparator = "="
 value = "2.0.3-3.fc45"
-
-[[packages]]
-name = "fedora-appstream-metadata"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "20261002-2.fc45"
-
-[[packages]]
-name = "fedora-bookmarks"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "28-37.fc45"
 
 [[packages]]
 name = "fedora-flathub-remote"
@@ -1228,28 +724,12 @@ comparator = "="
 value = "0.11-1.fc45"
 
 [[packages]]
-name = "fedora-workstation-repositories"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "45-3.fc45"
-
-[[packages]]
 name = "feedbackd"
 comment = "installroot"
 [[packages.conditions]]
 key = "evr"
 comparator = "="
 value = "0.8.11-1.fc45"
-
-[[packages]]
-name = "ffmpeg-free"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "9.0.2-4.fc45"
 
 [[packages]]
 name = "fftw-libs-double"
@@ -1266,46 +746,6 @@ comment = "installroot"
 key = "evr"
 comparator = "="
 value = "3.3.10-18.fc45"
-
-[[packages]]
-name = "filesystem"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "3.18-59.fc45"
-
-[[packages]]
-name = "firefox"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "160.0-1.fc45"
-
-[[packages]]
-name = "firefox-langpacks"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "160.0-1.fc45"
-
-[[packages]]
-name = "firewalld"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "2.5.2-1.fc45"
-
-[[packages]]
-name = "firewalld-filesystem"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "2.5.2-1.fc45"
 
 [[packages]]
 name = "flac-libs"
@@ -1333,14 +773,6 @@ value = "6.8.3-1.fc45"
 
 [[packages]]
 name = "flatpak-libs"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "1.19.0^really1.18.4-1.fc45"
-
-[[packages]]
-name = "flatpak-selinux"
 comment = "installroot"
 [[packages.conditions]]
 key = "evr"
@@ -1378,14 +810,6 @@ comment = "installroot"
 key = "evr"
 comparator = "="
 value = "1:5.0.0-4.fc45"
-
-[[packages]]
-name = "freeglut"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "3.8.0-3.fc45"
 
 [[packages]]
 name = "freetype"
@@ -1428,39 +852,7 @@ comparator = "="
 value = "3.18.3-1.fc45"
 
 [[packages]]
-name = "futuresql-qt6"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "0.1.1-8.fc45"
-
-[[packages]]
 name = "fwupd"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "2.1.10-1.fc45"
-
-[[packages]]
-name = "fwupd-efi"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "1.9-4.fc45"
-
-[[packages]]
-name = "fwupd-plugin-modem-manager"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "2.1.10-1.fc45"
-
-[[packages]]
-name = "fwupd-plugin-uefi-capsule-data"
 comment = "installroot"
 [[packages.conditions]]
 key = "evr"
@@ -1500,30 +892,6 @@ comparator = "="
 value = "2.8.2-2.fc45"
 
 [[packages]]
-name = "ghostscript"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "10.07.1-3.fc45"
-
-[[packages]]
-name = "ghostscript-tools-fontutils"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "10.07.1-3.fc45"
-
-[[packages]]
-name = "ghostscript-tools-printing"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "10.07.1-3.fc45"
-
-[[packages]]
 name = "giflib"
 comment = "installroot"
 [[packages.conditions]]
@@ -1548,23 +916,15 @@ comparator = "="
 value = "2.90.1-1.fc45"
 
 [[packages]]
-name = "glibc"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "2.44-2.fc45"
-
-[[packages]]
-name = "glibc-all-langpacks"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "2.44-2.fc45"
-
-[[packages]]
 name = "glibc-gconv-extra"
+comment = "installroot"
+[[packages.conditions]]
+key = "evr"
+comparator = "="
+value = "2.44-2.fc45"
+
+[[packages]]
+name = "glibc-langpack-en"
 comment = "installroot"
 [[packages.conditions]]
 key = "evr"
@@ -1620,23 +980,7 @@ comparator = "="
 value = "1.86.0-11.fc45"
 
 [[packages]]
-name = "google-droid-sans-fonts"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "20200215-25.fc45"
-
-[[packages]]
 name = "google-noto-color-emoji-fonts"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "20260921-1.fc45"
-
-[[packages]]
-name = "google-noto-emoji-fonts"
 comment = "installroot"
 [[packages.conditions]]
 key = "evr"
@@ -1668,31 +1012,7 @@ comparator = "="
 value = "20260601-3.fc45"
 
 [[packages]]
-name = "google-noto-sans-mono-vf-fonts"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "20260601-3.fc45"
-
-[[packages]]
 name = "google-noto-sans-vf-fonts"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "20260601-3.fc45"
-
-[[packages]]
-name = "google-noto-serif-fonts"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "20260601-3.fc45"
-
-[[packages]]
-name = "google-noto-serif-vf-fonts"
 comment = "installroot"
 [[packages.conditions]]
 key = "evr"
@@ -1804,22 +1124,6 @@ comparator = "="
 value = "1.28.9-1.fc45"
 
 [[packages]]
-name = "gstreamer1-plugins-good"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "1.28.9-1.fc45"
-
-[[packages]]
-name = "gstreamer1-plugins-good-qt6"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "1.28.9-1.fc45"
-
-[[packages]]
 name = "gtk-update-icon-cache"
 comment = "installroot"
 [[packages.conditions]]
@@ -1860,22 +1164,6 @@ comparator = "="
 value = "15.0.0-2.fc45"
 
 [[packages]]
-name = "haruna"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "1.9.0-1.fc45"
-
-[[packages]]
-name = "hdparm"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "9.65-11.fc45"
-
-[[packages]]
 name = "hicolor-icon-theme"
 comment = "installroot"
 [[packages.conditions]]
@@ -1900,52 +1188,12 @@ comparator = "="
 value = "1.2.0-10.fc45"
 
 [[packages]]
-name = "hostname"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "3.25-5.fc45"
-
-[[packages]]
 name = "hunspell"
 comment = "installroot"
 [[packages.conditions]]
 key = "evr"
 comparator = "="
 value = "1.7.6-1.fc45"
-
-[[packages]]
-name = "hunspell-en"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "0.20260225-3.fc45"
-
-[[packages]]
-name = "hunspell-en-AU"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "0.20260225-3.fc45"
-
-[[packages]]
-name = "hunspell-en-CA"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "0.20260225-3.fc45"
-
-[[packages]]
-name = "hunspell-en-GB"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "0.20260225-3.fc45"
 
 [[packages]]
 name = "hunspell-en-US"
@@ -1980,52 +1228,12 @@ comparator = "="
 value = "4.4-7.fc45"
 
 [[packages]]
-name = "ibus"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "1.5.35-2.fc45"
-
-[[packages]]
-name = "ibus-gtk3"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "1.5.35-2.fc45"
-
-[[packages]]
 name = "ibus-libs"
 comment = "installroot"
 [[packages.conditions]]
 key = "evr"
 comparator = "="
 value = "1.5.35-2.fc45"
-
-[[packages]]
-name = "ibus-panel"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "1.5.35-2.fc45"
-
-[[packages]]
-name = "ibus-setup"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "1.5.35-2.fc45"
-
-[[packages]]
-name = "icu-tzdata"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "2026f-1.fc45"
 
 [[packages]]
 name = "iio-sensor-proxy"
@@ -2068,14 +1276,6 @@ comparator = "="
 value = "62-3.fc45"
 
 [[packages]]
-name = "initscripts-service"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "10.27-3.fc45"
-
-[[packages]]
 name = "iproute"
 comment = "installroot"
 [[packages.conditions]]
@@ -2084,31 +1284,7 @@ comparator = "="
 value = "7.0.0-2.fc45"
 
 [[packages]]
-name = "ipset"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "7.24-4.fc45"
-
-[[packages]]
-name = "ipset-libs"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "7.24-4.fc45"
-
-[[packages]]
 name = "iptables-libs"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "1.8.13-3.fc45"
-
-[[packages]]
-name = "iptables-nft"
 comment = "installroot"
 [[packages.conditions]]
 key = "evr"
@@ -2148,28 +1324,12 @@ comparator = "="
 value = "2.14-5.fc45"
 
 [[packages]]
-name = "jbig2dec-libs"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "0.20-9.fc45"
-
-[[packages]]
 name = "jbigkit-libs"
 comment = "installroot"
 [[packages.conditions]]
 key = "evr"
 comparator = "="
 value = "2.1-34.fc45"
-
-[[packages]]
-name = "jq"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "1.8.2-5.fc45"
 
 [[packages]]
 name = "json-glib"
@@ -2196,14 +1356,6 @@ comparator = "="
 value = "26.08.3-1.fc45"
 
 [[packages]]
-name = "kaccounts-providers"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "26.08.3-1.fc45"
-
-[[packages]]
 name = "kactivitymanagerd"
 comment = "installroot"
 [[packages.conditions]]
@@ -2212,68 +1364,12 @@ comparator = "="
 value = "6.8.3-1.fc45"
 
 [[packages]]
-name = "kalk"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "26.08.3-1.fc45"
-
-[[packages]]
-name = "kasts"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "26.08.3-1.fc45"
-
-[[packages]]
-name = "kbd"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "2.10.0-3.fc45"
-
-[[packages]]
-name = "kbd-legacy"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "2.10.0-3.fc45"
-
-[[packages]]
-name = "kbd-misc"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "2.10.0-3.fc45"
-
-[[packages]]
-name = "kclock"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "26.08.3-1.fc45"
-
-[[packages]]
 name = "kcm-plasma-keyboard"
 comment = "installroot"
 [[packages.conditions]]
 key = "evr"
 comparator = "="
 value = "1:6.8.3-1.fc45"
-
-[[packages]]
-name = "kcm-plasmalogin"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "6.8.3-1.fc45"
 
 [[packages]]
 name = "kde-cli-tools"
@@ -2292,14 +1388,6 @@ comparator = "="
 value = "5-8.fc45"
 
 [[packages]]
-name = "kde-inotify-survey"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "26.08.3-1.fc45"
-
-[[packages]]
 name = "kde-settings"
 comment = "installroot"
 [[packages.conditions]]
@@ -2309,14 +1397,6 @@ value = "44.0-1.fc45"
 
 [[packages]]
 name = "kde-settings-plasma"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "44.0-1.fc45"
-
-[[packages]]
-name = "kde-settings-plasmalogin"
 comment = "installroot"
 [[packages.conditions]]
 key = "evr"
@@ -2348,14 +1428,6 @@ comparator = "="
 value = "1:6.8.3-1.fc45"
 
 [[packages]]
-name = "kdsingleapplication-qt6"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "1.2.1-2.fc45"
-
-[[packages]]
 name = "kdsoap-ws-discovery-client"
 comment = "installroot"
 [[packages.conditions]]
@@ -2370,30 +1442,6 @@ comment = "installroot"
 key = "evr"
 comparator = "="
 value = "2.2.0-10.fc45"
-
-[[packages]]
-name = "kernel-tools"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "7.3.4-300.fc45"
-
-[[packages]]
-name = "kernel-tools-libs"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "7.3.4-300.fc45"
-
-[[packages]]
-name = "keysmith"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "26.08.3-1.fc45"
 
 [[packages]]
 name = "kf6-attica"
@@ -2653,14 +1701,6 @@ value = "6.32.0-1.fc45"
 
 [[packages]]
 name = "kf6-kidletime"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "6.32.0-1.fc45"
-
-[[packages]]
-name = "kf6-kidletime-x11"
 comment = "installroot"
 [[packages.conditions]]
 key = "evr"
@@ -2996,14 +2036,6 @@ comparator = "="
 value = "6.32.0-1.fc45"
 
 [[packages]]
-name = "kf6-sonnet-hunspell"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "6.32.0-1.fc45"
-
-[[packages]]
 name = "kf6-syndication"
 comment = "installroot"
 [[packages.conditions]]
@@ -3013,14 +2045,6 @@ value = "6.32.0-1.fc45"
 
 [[packages]]
 name = "kf6-syntax-highlighting"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "6.32.0-1.fc45"
-
-[[packages]]
-name = "kf6-threadweaver"
 comment = "installroot"
 [[packages.conditions]]
 key = "evr"
@@ -3052,28 +2076,12 @@ comparator = "="
 value = "5.1.1-4.fc45"
 
 [[packages]]
-name = "kirigami-app-components"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "1.0.2-1.fc45"
-
-[[packages]]
 name = "kmenuedit"
 comment = "installroot"
 [[packages.conditions]]
 key = "evr"
 comparator = "="
 value = "6.8.3-1.fc45"
-
-[[packages]]
-name = "kmime"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "26.04.3-3.fc45"
 
 [[packages]]
 name = "kmod"
@@ -3092,22 +2100,6 @@ comparator = "="
 value = "34.2-6.fc45"
 
 [[packages]]
-name = "kmscon"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "10.1.1-3.fc45"
-
-[[packages]]
-name = "kmscon-freetype"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "10.1.1-3.fc45"
-
-[[packages]]
 name = "knighttime"
 comment = "installroot"
 [[packages.conditions]]
@@ -3116,44 +2108,12 @@ comparator = "="
 value = "6.8.3-1.fc45"
 
 [[packages]]
-name = "koko"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "26.08.3-1.fc45"
-
-[[packages]]
-name = "kpartx"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "0.14.3-2.fc45"
-
-[[packages]]
 name = "kpipewire"
 comment = "installroot"
 [[packages.conditions]]
 key = "evr"
 comparator = "="
 value = "6.8.3-1.fc45"
-
-[[packages]]
-name = "kquickimageeditor-qt6"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "0.7.0-2.fc45"
-
-[[packages]]
-name = "krecorder"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "26.08.3-1.fc45"
 
 [[packages]]
 name = "kscreen"
@@ -3180,44 +2140,12 @@ comparator = "="
 value = "6.8.3-1.fc45"
 
 [[packages]]
-name = "kunifiedpush"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "26.08.3-1.fc45"
-
-[[packages]]
 name = "kwayland"
 comment = "installroot"
 [[packages.conditions]]
 key = "evr"
 comparator = "="
 value = "6.8.3-1.fc45"
-
-[[packages]]
-name = "kweather"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "26.08.3-1.fc45"
-
-[[packages]]
-name = "kweather-plasma-applet"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "26.08.3-1.fc45"
-
-[[packages]]
-name = "kweathercore"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "26.08.3-1.fc45"
 
 [[packages]]
 name = "kwin"
@@ -3250,14 +2178,6 @@ comment = "installroot"
 key = "evr"
 comparator = "="
 value = "6.8.3-1.fc45"
-
-[[packages]]
-name = "lame"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "4.0-1.fc45"
 
 [[packages]]
 name = "lame-libs"
@@ -3293,14 +2213,6 @@ value = "1.87.0-5.fc45"
 
 [[packages]]
 name = "less"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "710-2.fc45"
-
-[[packages]]
-name = "less-color"
 comment = "installroot"
 [[packages.conditions]]
 key = "evr"
@@ -3346,14 +2258,6 @@ comment = "installroot"
 key = "evr"
 comparator = "="
 value = "1.8.13-3.fc45"
-
-[[packages]]
-name = "libXScrnSaver"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "1.2.5-2.fc45"
 
 [[packages]]
 name = "libXau"
@@ -3468,14 +2372,6 @@ comparator = "="
 value = "3.5.19-4.fc45"
 
 [[packages]]
-name = "libXpresent"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "1.0.0-29.fc45"
-
-[[packages]]
 name = "libXrandr"
 comment = "installroot"
 [[packages.conditions]]
@@ -3490,14 +2386,6 @@ comment = "installroot"
 key = "evr"
 comparator = "="
 value = "0.9.12-5.fc45"
-
-[[packages]]
-name = "libXres"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "1.2.2-8.fc45"
 
 [[packages]]
 name = "libXt"
@@ -3548,14 +2436,6 @@ comparator = "="
 value = "1.17-5.fc45"
 
 [[packages]]
-name = "libao"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "1.2.0-32.fc45"
-
-[[packages]]
 name = "libaom"
 comment = "installroot"
 [[packages.conditions]]
@@ -3588,31 +2468,7 @@ comparator = "="
 value = "0.8-35.fc45"
 
 [[packages]]
-name = "libatasmart"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "0.19-33.fc45"
-
-[[packages]]
-name = "libavc1394"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "0.5.4-28.fc45"
-
-[[packages]]
 name = "libavcodec-free"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "9.0.2-4.fc45"
-
-[[packages]]
-name = "libavdevice-free"
 comment = "installroot"
 [[packages.conditions]]
 key = "evr"
@@ -3660,94 +2516,6 @@ comparator = "="
 value = "0.98.1-16.fc45"
 
 [[packages]]
-name = "libbabeltrace2"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "2.1.2-10.fc45"
-
-[[packages]]
-name = "libblockdev"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "3.6.0-1.fc45"
-
-[[packages]]
-name = "libblockdev-crypto"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "3.6.0-1.fc45"
-
-[[packages]]
-name = "libblockdev-fs"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "3.6.0-1.fc45"
-
-[[packages]]
-name = "libblockdev-loop"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "3.6.0-1.fc45"
-
-[[packages]]
-name = "libblockdev-mdraid"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "3.6.0-1.fc45"
-
-[[packages]]
-name = "libblockdev-nvme"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "3.6.0-1.fc45"
-
-[[packages]]
-name = "libblockdev-part"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "3.6.0-1.fc45"
-
-[[packages]]
-name = "libblockdev-smart"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "3.6.0-1.fc45"
-
-[[packages]]
-name = "libblockdev-swap"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "3.6.0-1.fc45"
-
-[[packages]]
-name = "libblockdev-utils"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "3.6.0-1.fc45"
-
-[[packages]]
 name = "libbluray"
 comment = "installroot"
 [[packages.conditions]]
@@ -3772,100 +2540,12 @@ comparator = "="
 value = "3.1.0-38.fc45"
 
 [[packages]]
-name = "libbytesize"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "2.12-5.fc45"
-
-[[packages]]
-name = "libcaca"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "0.99-0.86.beta20.fc45"
-
-[[packages]]
-name = "libcamera"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "0.7.2-6.fc45"
-
-[[packages]]
-name = "libcamera-ipa"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "0.7.2-6.fc45"
-
-[[packages]]
 name = "libcanberra"
 comment = "installroot"
 [[packages.conditions]]
 key = "evr"
 comparator = "="
 value = "0.30-52.fc45"
-
-[[packages]]
-name = "libcanberra-backend-alsa"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "0.30-52.fc45"
-
-[[packages]]
-name = "libcanberra-backend-gstreamer"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "0.30-52.fc45"
-
-[[packages]]
-name = "libcanberra-backend-pulse"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "0.30-52.fc45"
-
-[[packages]]
-name = "libcanberra-gtk3"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "0.30-52.fc45"
-
-[[packages]]
-name = "libcap-ng-python3"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "0.9.6-1.fc45"
-
-[[packages]]
-name = "libcdio"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "2.3.0-2.fc45"
-
-[[packages]]
-name = "libcdio-paranoia"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "10.2+2.0.2-8.fc45"
 
 [[packages]]
 name = "libchromaprint"
@@ -3882,14 +2562,6 @@ comment = "installroot"
 key = "evr"
 comparator = "="
 value = "0.4.1-1.fc45"
-
-[[packages]]
-name = "libcue"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "2.4.2-2.fc45"
 
 [[packages]]
 name = "libdaemon"
@@ -3916,30 +2588,6 @@ comparator = "="
 value = "1.5.4-1.fc45"
 
 [[packages]]
-name = "libdbusmenu"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "16.04.0-32.fc45"
-
-[[packages]]
-name = "libdbusmenu-gtk3"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "16.04.0-32.fc45"
-
-[[packages]]
-name = "libdc1394"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "2.2.7-10.fc45"
-
-[[packages]]
 name = "libddcutil"
 comment = "installroot"
 [[packages.conditions]]
@@ -3964,14 +2612,6 @@ comparator = "="
 value = "1.26-1.fc45"
 
 [[packages]]
-name = "libdhash"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "0.5.0-63.fc45"
-
-[[packages]]
 name = "libdisplay-info"
 comment = "installroot"
 [[packages.conditions]]
@@ -3986,14 +2626,6 @@ comment = "installroot"
 key = "evr"
 comparator = "="
 value = "0.7.8-4.fc45"
-
-[[packages]]
-name = "libdnf5-plugin-appstream"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "5.4.8.0-2.fc45"
 
 [[packages]]
 name = "libdovi"
@@ -4124,22 +2756,6 @@ comparator = "="
 value = "1.1.47-2.fc45"
 
 [[packages]]
-name = "libgexiv2"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "0.16.2-1.fc45"
-
-[[packages]]
-name = "libgit2_1.9"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "1.9.7-3.fc45"
-
-[[packages]]
 name = "libglibutil"
 comment = "installroot"
 [[packages.conditions]]
@@ -4164,14 +2780,6 @@ comparator = "="
 value = "1:1.7.0-10.fc45"
 
 [[packages]]
-name = "libglvnd-gles"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "1:1.7.0-10.fc45"
-
-[[packages]]
 name = "libglvnd-glx"
 comment = "installroot"
 [[packages.conditions]]
@@ -4186,22 +2794,6 @@ comment = "installroot"
 key = "evr"
 comparator = "="
 value = "1:1.7.0-10.fc45"
-
-[[packages]]
-name = "libgs"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "10.07.1-3.fc45"
-
-[[packages]]
-name = "libgsf"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "1.14.60-1.fc45"
 
 [[packages]]
 name = "libgudev"
@@ -4220,23 +2812,7 @@ comparator = "="
 value = "0.4.9-6.fc45"
 
 [[packages]]
-name = "libgxps"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "0.3.2-13.fc45"
-
-[[packages]]
 name = "libheif"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "1.23.7-1.fc45"
-
-[[packages]]
-name = "libheif-ffmpeg"
 comment = "installroot"
 [[packages.conditions]]
 key = "evr"
@@ -4276,22 +2852,6 @@ comparator = "="
 value = "78.3-9.fc45"
 
 [[packages]]
-name = "libiec61883"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "1.2.0-53.fc45"
-
-[[packages]]
-name = "libijs"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "0.35-27.fc45"
-
-[[packages]]
 name = "libimobiledevice"
 comment = "installroot"
 [[packages.conditions]]
@@ -4306,14 +2866,6 @@ comment = "installroot"
 key = "evr"
 comparator = "="
 value = "1.3.2-2.fc45"
-
-[[packages]]
-name = "libini_config"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "2.0.0-63.fc45"
 
 [[packages]]
 name = "libinput"
@@ -4340,60 +2892,12 @@ comparator = "="
 value = "1:0.11.2-2.fc45"
 
 [[packages]]
-name = "libkcapi"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "1.5.1-2.fc45"
-
-[[packages]]
-name = "libkcapi-hasher"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "1.5.1-2.fc45"
-
-[[packages]]
-name = "libkcapi-hmaccalc"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "1.5.1-2.fc45"
-
-[[packages]]
-name = "libkcddb"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "26.08.3-1.fc45"
-
-[[packages]]
-name = "libkcddb-doc"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "26.08.3-1.fc45"
-
-[[packages]]
 name = "libkexiv2-qt6"
 comment = "installroot"
 [[packages.conditions]]
 key = "evr"
 comparator = "="
 value = "26.08.3-1.fc45"
-
-[[packages]]
-name = "libklvanc"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "1.6.0-5.fc45"
 
 [[packages]]
 name = "libkscreen"
@@ -4468,30 +2972,6 @@ comparator = "="
 value = "4.3.0-1.fc45"
 
 [[packages]]
-name = "liblouis"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "3.33.0-9.fc45"
-
-[[packages]]
-name = "liblouis-tables"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "3.33.0-9.fc45"
-
-[[packages]]
-name = "libmarkdown"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "2.2.7-15.fc45"
-
-[[packages]]
 name = "libmbim"
 comment = "installroot"
 [[packages.conditions]]
@@ -4500,12 +2980,12 @@ comparator = "="
 value = "1.32.0-4.fc45"
 
 [[packages]]
-name = "libmediainfo"
+name = "libmbim-utils"
 comment = "installroot"
 [[packages.conditions]]
 key = "evr"
 comparator = "="
-value = "26.05-2.fc45"
+value = "1.32.0-4.fc45"
 
 [[packages]]
 name = "libmnl"
@@ -4524,28 +3004,12 @@ comparator = "="
 value = "1:0.8.9.0-30.fc45"
 
 [[packages]]
-name = "libmpc"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "1.4.1-2.fc45"
-
-[[packages]]
 name = "libmtp"
 comment = "installroot"
 [[packages.conditions]]
 key = "evr"
 comparator = "="
 value = "1.1.22-4.fc45"
-
-[[packages]]
-name = "libmusicbrainz5"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "5.1.0-32.fc45"
 
 [[packages]]
 name = "libmysofa"
@@ -4612,22 +3076,6 @@ comparator = "="
 value = "0.8.9-1.fc45"
 
 [[packages]]
-name = "libntlm"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "1.8-5.fc45"
-
-[[packages]]
-name = "libnvme"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "1.16.2-1.fc45"
-
-[[packages]]
 name = "liboeffis"
 comment = "installroot"
 [[packages.conditions]]
@@ -4642,14 +3090,6 @@ comment = "installroot"
 key = "evr"
 comparator = "="
 value = "2:1.3.6-4.fc45"
-
-[[packages]]
-name = "libolm"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "3.2.16-14.fc45"
 
 [[packages]]
 name = "libopenjph"
@@ -4668,30 +3108,6 @@ comparator = "="
 value = "0.8.10-1.fc45"
 
 [[packages]]
-name = "libopusenc"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "0.3-3.fc45"
-
-[[packages]]
-name = "libosinfo"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "1.12.0-12.fc45"
-
-[[packages]]
-name = "libpaper"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "1:2.1.1-11.fc45"
-
-[[packages]]
 name = "libpcap"
 comment = "installroot"
 [[packages.conditions]]
@@ -4708,36 +3124,12 @@ comparator = "="
 value = "0.16-18.fc45"
 
 [[packages]]
-name = "libpfm"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "4.14.1-2.fc45"
-
-[[packages]]
 name = "libphonenumber"
 comment = "installroot"
 [[packages.conditions]]
 key = "evr"
 comparator = "="
 value = "8.13.55-13.fc45"
-
-[[packages]]
-name = "libpipeline"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "1.5.8-5.fc45"
-
-[[packages]]
-name = "libpisp"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "1.8.0-1.fc45"
 
 [[packages]]
 name = "libpkgconf"
@@ -4788,14 +3180,6 @@ comparator = "="
 value = "0.5.12-3.fc45"
 
 [[packages]]
-name = "libproxy-bin"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "0.5.12-3.fc45"
-
-[[packages]]
 name = "libqalculate"
 comment = "installroot"
 [[packages.conditions]]
@@ -4812,6 +3196,14 @@ comparator = "="
 value = "1.36.0-4.fc45"
 
 [[packages]]
+name = "libqmi-utils"
+comment = "installroot"
+[[packages.conditions]]
+key = "evr"
+comparator = "="
+value = "1.36.0-4.fc45"
+
+[[packages]]
 name = "libqrtr-glib"
 comment = "installroot"
 [[packages.conditions]]
@@ -4820,36 +3212,12 @@ comparator = "="
 value = "1.2.2-10.fc45"
 
 [[packages]]
-name = "libquotient-qt6"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "0.9.6.1-2.fc45"
-
-[[packages]]
 name = "librabbitmq"
 comment = "installroot"
 [[packages.conditions]]
 key = "evr"
 comparator = "="
 value = "0.18.1-1.fc45"
-
-[[packages]]
-name = "libraw1394"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "2.1.2-39.fc45"
-
-[[packages]]
-name = "libreport-filesystem"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "2.17.15-14.fc45"
 
 [[packages]]
 name = "librist"
@@ -4900,28 +3268,12 @@ comparator = "="
 value = "0.21.8.2-2.fc45"
 
 [[packages]]
-name = "libselinux-utils"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "3.11-5.fc45"
-
-[[packages]]
 name = "libshaderc"
 comment = "installroot"
 [[packages.conditions]]
 key = "evr"
 comparator = "="
 value = "2026.2-3.fc45"
-
-[[packages]]
-name = "libshout"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "2.4.6-12.fc45"
 
 [[packages]]
 name = "libsmbclient"
@@ -4956,60 +3308,12 @@ comparator = "="
 value = "3.8.1-1.fc45"
 
 [[packages]]
-name = "libspectre"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "0.2.12-12.fc45"
-
-[[packages]]
 name = "libss"
 comment = "installroot"
 [[packages.conditions]]
 key = "evr"
 comparator = "="
 value = "1.47.4-2.fc45"
-
-[[packages]]
-name = "libssh2"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "1.11.1-10.fc45"
-
-[[packages]]
-name = "libsss_certmap"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "2.13.2-2.fc45"
-
-[[packages]]
-name = "libsss_idmap"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "2.13.2-2.fc45"
-
-[[packages]]
-name = "libsss_nss_idmap"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "2.13.2-2.fc45"
-
-[[packages]]
-name = "libsss_sudo"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "2.13.2-2.fc45"
 
 [[packages]]
 name = "libstemmer"
@@ -5092,52 +3396,12 @@ comparator = "="
 value = "3.12.0-2.fc45"
 
 [[packages]]
-name = "libtomcrypt"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "1.18.2-24.fc45"
-
-[[packages]]
-name = "libtommath"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "1.3.1~rc1-8.fc45"
-
-[[packages]]
-name = "libtraceevent"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "1.8.4-6.fc45"
-
-[[packages]]
-name = "libtsm"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "4.8.0-1.fc45"
-
-[[packages]]
 name = "libudfread"
 comment = "installroot"
 [[packages.conditions]]
 key = "evr"
 comparator = "="
 value = "1.2.0-4.fc45"
-
-[[packages]]
-name = "libudisks2"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "2.11.2-1.fc45"
 
 [[packages]]
 name = "libunibreak"
@@ -5178,14 +3442,6 @@ comment = "installroot"
 key = "evr"
 comparator = "="
 value = "1.2.1-21.fc45"
-
-[[packages]]
-name = "libv4l"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "1.32.0-4.fc45"
 
 [[packages]]
 name = "libva"
@@ -5292,14 +3548,6 @@ comparator = "="
 value = "1.6.0-4.fc45"
 
 [[packages]]
-name = "libwnck3"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "43.3-8.fc45"
-
-[[packages]]
 name = "libxcb"
 comment = "installroot"
 [[packages.conditions]]
@@ -5372,22 +3620,6 @@ comparator = "="
 value = "0-0.63.20260213git6067afd.fc45"
 
 [[packages]]
-name = "libzen"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "0.4.41-11.fc45"
-
-[[packages]]
-name = "libzip"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "1.12.1-1.fc45"
-
-[[packages]]
 name = "lilv-libs"
 comment = "installroot"
 [[packages.conditions]]
@@ -5402,14 +3634,6 @@ comment = "installroot"
 key = "evr"
 comparator = "="
 value = "20261019-1.fc45"
-
-[[packages]]
-name = "llhttp"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "9.4.4-1.fc45"
 
 [[packages]]
 name = "llvm-filesystem"
@@ -5452,44 +3676,12 @@ comparator = "="
 value = "0.9.34-3.fc45"
 
 [[packages]]
-name = "localsearch"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "3.12.0-2.fc45"
-
-[[packages]]
-name = "logrotate"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "3.22.0-6.fc45"
-
-[[packages]]
 name = "lpcnetfreedv"
 comment = "installroot"
 [[packages.conditions]]
 key = "evr"
 comparator = "="
 value = "0.5-11.fc45"
-
-[[packages]]
-name = "lsb_release"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "3.3-9.fc45"
-
-[[packages]]
-name = "lttng-ust"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "2.15.1-4.fc45"
 
 [[packages]]
 name = "lxc"
@@ -5540,54 +3732,6 @@ comparator = "="
 value = "0.14.0-8.fc45"
 
 [[packages]]
-name = "man-db"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "2.13.1-4.fc45"
-
-[[packages]]
-name = "marknote"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "1.6.0-2.fc45"
-
-[[packages]]
-name = "md4c"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "0.5.3-2.fc45"
-
-[[packages]]
-name = "mdadm"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "4.6-2.fc45"
-
-[[packages]]
-name = "media-player-info"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "23-21.fc45"
-
-[[packages]]
-name = "memstrack"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "0.2.5-9.fc45"
-
-[[packages]]
 name = "mesa-dri-drivers"
 comment = "installroot"
 [[packages.conditions]]
@@ -5620,23 +3764,7 @@ comparator = "="
 value = "26.2.7-1.fc45"
 
 [[packages]]
-name = "mesa-libGLU"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "9.0.3-9.fc45"
-
-[[packages]]
 name = "mesa-libgbm"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "26.2.7-1.fc45"
-
-[[packages]]
-name = "mesa-vulkan-drivers"
 comment = "installroot"
 [[packages.conditions]]
 key = "evr"
@@ -5650,22 +3778,6 @@ comment = "installroot"
 key = "evr"
 comparator = "="
 value = "4.1.0-5.fc45"
-
-[[packages]]
-name = "mozilla-filesystem"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "1.9-39.fc45"
-
-[[packages]]
-name = "mozilla-openh264"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "2.6.0-3.fc45"
 
 [[packages]]
 name = "mpdecimal"
@@ -5684,22 +3796,6 @@ comparator = "="
 value = "1.33.6-3.fc45"
 
 [[packages]]
-name = "mpv-libs"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "0.41.0-10.fc45"
-
-[[packages]]
-name = "mpvqt"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "1.1.1-3.fc45"
-
-[[packages]]
 name = "mtdev"
 comment = "installroot"
 [[packages.conditions]]
@@ -5708,36 +3804,12 @@ comparator = "="
 value = "1.1.6-13.fc45"
 
 [[packages]]
-name = "mujs"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "1.3.7-3.fc45"
-
-[[packages]]
 name = "ncurses"
 comment = "installroot"
 [[packages.conditions]]
 key = "evr"
 comparator = "="
 value = "6.6-3.fc45"
-
-[[packages]]
-name = "neochat"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "26.08.3-1.fc45"
-
-[[packages]]
-name = "neon"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "0.37.1-4.fc45"
 
 [[packages]]
 name = "nettle3.10"
@@ -5770,14 +3842,6 @@ comment = "installroot"
 key = "evr"
 comparator = "="
 value = "1.22.1-3.fc45"
-
-[[packages]]
-name = "nilfs-utils"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "2.2.11-9.fc45"
 
 [[packages]]
 name = "nspr"
@@ -5836,92 +3900,12 @@ comparator = "="
 value = "3.133.0-1.fc45"
 
 [[packages]]
-name = "ntfs-3g"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "2:2026.2.25-3.fc45"
-
-[[packages]]
-name = "ntfs-3g-libs"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "2:2026.2.25-3.fc45"
-
-[[packages]]
-name = "ntfs-3g-system-compression"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "1.1-3.fc45"
-
-[[packages]]
-name = "ntfsprogs"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "2:2026.2.25-3.fc45"
-
-[[packages]]
-name = "numactl-libs"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "2.0.19-5.fc45"
-
-[[packages]]
 name = "ocean-sound-theme"
 comment = "installroot"
 [[packages.conditions]]
 key = "evr"
 comparator = "="
 value = "6.8.3-1.fc45"
-
-[[packages]]
-name = "okular-libs"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "26.08.3-1.fc45"
-
-[[packages]]
-name = "okular-mobile"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "26.08.3-1.fc45"
-
-[[packages]]
-name = "okular-part"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "26.08.3-1.fc45"
-
-[[packages]]
-name = "oniguruma"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "6.9.10-5.fc45"
-
-[[packages]]
-name = "openal-soft"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "1.24.2-10.fc45"
 
 [[packages]]
 name = "openapv-libs"
@@ -5938,14 +3922,6 @@ comment = "installroot"
 key = "evr"
 comparator = "="
 value = "0.1.6-11.fc45"
-
-[[packages]]
-name = "opencsd"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "1.8.2-1.fc45"
 
 [[packages]]
 name = "openexr-libs"
@@ -6028,52 +4004,12 @@ comparator = "="
 value = "1.6-3.fc45"
 
 [[packages]]
-name = "opus-tools"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "0.2-21.fc45"
-
-[[packages]]
-name = "opusfile"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "0.12-20.fc45"
-
-[[packages]]
 name = "orc"
 comment = "installroot"
 [[packages.conditions]]
 key = "evr"
 comparator = "="
 value = "0.4.41-4.fc45"
-
-[[packages]]
-name = "orca"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "51.1-1.fc45"
-
-[[packages]]
-name = "osinfo-db"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "20251212-2.fc45"
-
-[[packages]]
-name = "osinfo-db-tools"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "1.12.0-10.fc45"
 
 [[packages]]
 name = "ostree-libs"
@@ -6084,14 +4020,6 @@ comparator = "="
 value = "2026.4-1.fc45"
 
 [[packages]]
-name = "p11-kit-server"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "0.26.6-1.fc45"
-
-[[packages]]
 name = "pango"
 comment = "installroot"
 [[packages.conditions]]
@@ -6100,36 +4028,12 @@ comparator = "="
 value = "1.58.2-1.fc45"
 
 [[packages]]
-name = "parted"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "3.7.13-1.fc45"
-
-[[packages]]
-name = "passim"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "0.1.13-1.fc45"
-
-[[packages]]
 name = "passim-libs"
 comment = "installroot"
 [[packages.conditions]]
 key = "evr"
 comparator = "="
 value = "0.1.13-1.fc45"
-
-[[packages]]
-name = "pcaudiolib"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "1.1-20.fc45"
 
 [[packages]]
 name = "pciutils"
@@ -6362,14 +4266,6 @@ comment = "installroot"
 key = "evr"
 comparator = "="
 value = "3.16-527.fc45"
-
-[[packages]]
-name = "perl-NDBM_File"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "1.18-527.fc45"
 
 [[packages]]
 name = "perl-Net-SSLeay"
@@ -6636,38 +4532,6 @@ comparator = "="
 value = "1.05-527.fc45"
 
 [[packages]]
-name = "phonon-backend-vlc-common"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "0.12.0-9.fc45"
-
-[[packages]]
-name = "phonon-common"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "4.12.0-12.fc45"
-
-[[packages]]
-name = "phonon-qt6"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "4.12.0-12.fc45"
-
-[[packages]]
-name = "phonon-qt6-backend-vlc"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "0.12.0-9.fc45"
-
-[[packages]]
 name = "pinentry"
 comment = "installroot"
 [[packages.conditions]]
@@ -6692,39 +4556,7 @@ comparator = "="
 value = "1.6.11-1.fc45"
 
 [[packages]]
-name = "pipewire-alsa"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "1.6.11-1.fc45"
-
-[[packages]]
-name = "pipewire-jack-audio-connection-kit"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "1.6.11-1.fc45"
-
-[[packages]]
-name = "pipewire-jack-audio-connection-kit-libs"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "1.6.11-1.fc45"
-
-[[packages]]
 name = "pipewire-libs"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "1.6.11-1.fc45"
-
-[[packages]]
-name = "pipewire-plugin-libcamera"
 comment = "installroot"
 [[packages.conditions]]
 key = "evr"
@@ -6820,7 +4652,7 @@ comparator = "="
 value = "6.8.3-1.fc45"
 
 [[packages]]
-name = "plasma-browser-integration"
+name = "plasma-desktop"
 comment = "installroot"
 [[packages.conditions]]
 key = "evr"
@@ -6828,12 +4660,12 @@ comparator = "="
 value = "6.8.3-1.fc45"
 
 [[packages]]
-name = "plasma-desktop"
+name = "plasma-dialer"
 comment = "installroot"
 [[packages.conditions]]
 key = "evr"
 comparator = "="
-value = "6.8.3-1.fc45"
+value = "1:6.8.3-1.fc45"
 
 [[packages]]
 name = "plasma-discover"
@@ -6852,39 +4684,7 @@ comparator = "="
 value = "6.8.3-1.fc45"
 
 [[packages]]
-name = "plasma-discover-kns"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "6.8.3-1.fc45"
-
-[[packages]]
 name = "plasma-discover-libs"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "6.8.3-1.fc45"
-
-[[packages]]
-name = "plasma-discover-notifier"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "6.8.3-1.fc45"
-
-[[packages]]
-name = "plasma-discover-offline-updates"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "6.8.3-1.fc45"
-
-[[packages]]
-name = "plasma-discover-packagekit"
 comment = "installroot"
 [[packages.conditions]]
 key = "evr"
@@ -6906,14 +4706,6 @@ comment = "installroot"
 key = "evr"
 comparator = "="
 value = "1:6.8.3-1.fc45"
-
-[[packages]]
-name = "plasma-login-manager"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "6.8.3-1.fc45"
 
 [[packages]]
 name = "plasma-lookandfeel-fedora"
@@ -6988,14 +4780,6 @@ comparator = "="
 value = "26.08.3-1.fc45"
 
 [[packages]]
-name = "plasma-setup"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "6.8.3-1.fc45"
-
-[[packages]]
 name = "plasma-systemsettings"
 comment = "installroot"
 [[packages.conditions]]
@@ -7005,14 +4789,6 @@ value = "6.8.3-1.fc45"
 
 [[packages]]
 name = "plasma-union"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "6.8.3-1.fc45"
-
-[[packages]]
-name = "plasma-welcome"
 comment = "installroot"
 [[packages.conditions]]
 key = "evr"
@@ -7052,46 +4828,6 @@ comparator = "="
 value = "6.8.3-1.fc45"
 
 [[packages]]
-name = "plymouth"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "26.134.222-6.fc45"
-
-[[packages]]
-name = "plymouth-core-libs"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "26.134.222-6.fc45"
-
-[[packages]]
-name = "plymouth-scripts"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "26.134.222-6.fc45"
-
-[[packages]]
-name = "policycoreutils"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "3.11-2.fc45"
-
-[[packages]]
-name = "policycoreutils-python-utils"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "3.11-2.fc45"
-
-[[packages]]
 name = "polkit"
 comment = "installroot"
 [[packages.conditions]]
@@ -7114,14 +4850,6 @@ comment = "installroot"
 key = "evr"
 comparator = "="
 value = "127-5.fc45"
-
-[[packages]]
-name = "polkit-pkla-compat"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "0.1-33.fc45"
 
 [[packages]]
 name = "polkit-qt6-1"
@@ -7156,23 +4884,7 @@ comparator = "="
 value = "0.4.11-12.fc45"
 
 [[packages]]
-name = "poppler-glib"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "26.08.0-2.fc45"
-
-[[packages]]
 name = "poppler-qt6"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "26.08.0-2.fc45"
-
-[[packages]]
-name = "poppler-utils"
 comment = "installroot"
 [[packages.conditions]]
 key = "evr"
@@ -7186,14 +4898,6 @@ comment = "installroot"
 key = "evr"
 comparator = "="
 value = "6.8.3-1.fc45"
-
-[[packages]]
-name = "prefixdevname"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "0.2.0-9.fc45"
 
 [[packages]]
 name = "procps-ng"
@@ -7260,28 +4964,12 @@ comparator = "="
 value = "1.8.1-2.fc45"
 
 [[packages]]
-name = "pulseaudio-utils"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "17.0-11.fc45"
-
-[[packages]]
 name = "python-pip-wheel"
 comment = "installroot"
 [[packages.conditions]]
 key = "evr"
 comparator = "="
 value = "26.1.2-5.fc45"
-
-[[packages]]
-name = "python-unversioned-command"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "3.15.2-1.fc45"
 
 [[packages]]
 name = "python3"
@@ -7292,52 +4980,12 @@ comparator = "="
 value = "3.15.2-1.fc45"
 
 [[packages]]
-name = "python3-audit"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "4.2.1-2.fc45"
-
-[[packages]]
-name = "python3-brlapi"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "0.8.8-9.fc45"
-
-[[packages]]
-name = "python3-brotli"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "1.2.1-1.fc45"
-
-[[packages]]
 name = "python3-cairo"
 comment = "installroot"
 [[packages.conditions]]
 key = "evr"
 comparator = "="
 value = "1.28.0-8.fc45"
-
-[[packages]]
-name = "python3-certifi"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "2026.01.04-3.fc45"
-
-[[packages]]
-name = "python3-charset-normalizer"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "3.4.9-2.fc45"
 
 [[packages]]
 name = "python3-click"
@@ -7348,36 +4996,12 @@ comparator = "="
 value = "1:8.4.2-1.fc45"
 
 [[packages]]
-name = "python3-dasbus"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "1.7-16.fc45"
-
-[[packages]]
 name = "python3-dbus"
 comment = "installroot"
 [[packages.conditions]]
 key = "evr"
 comparator = "="
 value = "1.5.1-1.fc45"
-
-[[packages]]
-name = "python3-distro"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "1.9.0-13.fc45"
-
-[[packages]]
-name = "python3-firewall"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "2.5.2-1.fc45"
 
 [[packages]]
 name = "python3-gbinder"
@@ -7404,30 +5028,6 @@ comparator = "="
 value = "3.58.1-6.fc45"
 
 [[packages]]
-name = "python3-html2text"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "2025.4.15-8.fc45"
-
-[[packages]]
-name = "python3-ibus"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "1.5.35-2.fc45"
-
-[[packages]]
-name = "python3-idna"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "3.18-2.fc45"
-
-[[packages]]
 name = "python3-libdnf5"
 comment = "installroot"
 [[packages.conditions]]
@@ -7442,174 +5042,6 @@ comment = "installroot"
 key = "evr"
 comparator = "="
 value = "3.15.2-1.fc45"
-
-[[packages]]
-name = "python3-libselinux"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "3.11-5.fc45"
-
-[[packages]]
-name = "python3-libsemanage"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "3.11-4.fc45"
-
-[[packages]]
-name = "python3-linux-procfs"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "0.7.4-5.fc45"
-
-[[packages]]
-name = "python3-louis"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "3.33.0-9.fc45"
-
-[[packages]]
-name = "python3-mutagen"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "1.48.1-2.fc45"
-
-[[packages]]
-name = "python3-nftables"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "1:1.1.6-4.fc45"
-
-[[packages]]
-name = "python3-perf"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "7.3.4-300.fc45"
-
-[[packages]]
-name = "python3-policycoreutils"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "3.11-2.fc45"
-
-[[packages]]
-name = "python3-psutil"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "7.2.2-10.fc45"
-
-[[packages]]
-name = "python3-pyatspi"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "2.58.2-6.fc45"
-
-[[packages]]
-name = "python3-pycryptodomex"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "3.23.0-8.fc45"
-
-[[packages]]
-name = "python3-pyinotify"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "0.9.6-6.fc45"
-
-[[packages]]
-name = "python3-pysocks"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "1.7.1-35.fc45"
-
-[[packages]]
-name = "python3-pyudev"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "0.24.4-5.fc45"
-
-[[packages]]
-name = "python3-requests"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "2.34.2-2.fc45"
-
-[[packages]]
-name = "python3-setools"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "4.7.1-1.fc45"
-
-[[packages]]
-name = "python3-speechd"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "0.12.1-9.fc45"
-
-[[packages]]
-name = "python3-tkinter"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "3.15.2-1.fc45"
-
-[[packages]]
-name = "python3-urllib3"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "2.8.0-3.fc45"
-
-[[packages]]
-name = "python3-urllib3+socks"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "2.8.0-3.fc45"
-
-[[packages]]
-name = "python3-websockets"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "15.0.1-14.fc45"
 
 [[packages]]
 name = "qaccessibilityclient-qt6"
@@ -7652,28 +5084,12 @@ comparator = "="
 value = "0.12.0-7.fc45"
 
 [[packages]]
-name = "qmlkonsole"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "26.08.3-1.fc45"
-
-[[packages]]
 name = "qqc2-breeze-style"
 comment = "installroot"
 [[packages.conditions]]
 key = "evr"
 comparator = "="
 value = "6.8.3-1.fc45"
-
-[[packages]]
-name = "qrca"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "26.08.3-1.fc45"
 
 [[packages]]
 name = "qrencode-libs"
@@ -7740,28 +5156,12 @@ comparator = "="
 value = "6.11.2-3.fc45"
 
 [[packages]]
-name = "qt6-qtcharts"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "6.11.2-1.fc45"
-
-[[packages]]
 name = "qt6-qtdeclarative"
 comment = "installroot"
 [[packages.conditions]]
 key = "evr"
 comparator = "="
 value = "6.11.2-3.fc45"
-
-[[packages]]
-name = "qt6-qthttpserver"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "6.11.2-1.fc45"
 
 [[packages]]
 name = "qt6-qtlocation"
@@ -7836,22 +5236,6 @@ comparator = "="
 value = "6.11.2-1.fc45"
 
 [[packages]]
-name = "qt6-qtspeech-flite"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "6.11.2-1.fc45"
-
-[[packages]]
-name = "qt6-qtspeech-speechd"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "6.11.2-1.fc45"
-
-[[packages]]
 name = "qt6-qtsvg"
 comment = "installroot"
 [[packages.conditions]]
@@ -7874,14 +5258,6 @@ comment = "installroot"
 key = "evr"
 comparator = "="
 value = "6.11.2-2.fc45"
-
-[[packages]]
-name = "qt6-qttranslations"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "6.11.2-1.fc45"
 
 [[packages]]
 name = "qt6-qtvirtualkeyboard"
@@ -7980,30 +5356,6 @@ comparator = "="
 value = "1.3-1.fc45"
 
 [[packages]]
-name = "rootfiles"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "9.0-8.fc45"
-
-[[packages]]
-name = "rpm"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "6.1.0-1.fc45"
-
-[[packages]]
-name = "rpm-plugin-selinux"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "6.1.0-1.fc45"
-
-[[packages]]
 name = "rsync"
 comment = "installroot"
 [[packages.conditions]]
@@ -8084,36 +5436,12 @@ comparator = "="
 value = "2.32.74-1.fc45"
 
 [[packages]]
-name = "selinux-policy"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "45.24-1.fc45"
-
-[[packages]]
-name = "selinux-policy-targeted"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "45.24-1.fc45"
-
-[[packages]]
 name = "serd"
 comment = "installroot"
 [[packages.conditions]]
 key = "evr"
 comparator = "="
 value = "0.32.10-2.fc45"
-
-[[packages]]
-name = "setup"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "2.15.1-2.fc45"
 
 [[packages]]
 name = "setxkbmap"
@@ -8132,14 +5460,6 @@ comparator = "="
 value = "0.6.3-70.fc45"
 
 [[packages]]
-name = "shadow-utils"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "2:4.20.0-2.fc45"
-
-[[packages]]
 name = "shared-mime-info"
 comment = "installroot"
 [[packages.conditions]]
@@ -8156,14 +5476,6 @@ comparator = "="
 value = "8.60^20240205.c8ad982-6.fc45"
 
 [[packages]]
-name = "signon-kwallet-extension"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "26.08.3-1.fc45"
-
-[[packages]]
 name = "signon-plugin-oauth2"
 comment = "installroot"
 [[packages.conditions]]
@@ -8178,22 +5490,6 @@ comment = "installroot"
 key = "evr"
 comparator = "="
 value = "8.60^20240205.c8ad982-6.fc45"
-
-[[packages]]
-name = "signon-ui"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "0.15^20240205.eef943f-7.fc45"
-
-[[packages]]
-name = "slang"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "2.3.3-10.fc45"
 
 [[packages]]
 name = "snappy"
@@ -8244,52 +5540,12 @@ comparator = "="
 value = "0.1.3-22.fc45"
 
 [[packages]]
-name = "spacebar"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "1:6.8.3-1.fc45"
-
-[[packages]]
 name = "spandsp"
 comment = "installroot"
 [[packages.conditions]]
 key = "evr"
 comparator = "="
 value = "0.0.6-23.fc45"
-
-[[packages]]
-name = "speech-dispatcher"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "0.12.1-9.fc45"
-
-[[packages]]
-name = "speech-dispatcher-espeak-ng"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "0.12.1-9.fc45"
-
-[[packages]]
-name = "speech-dispatcher-libs"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "0.12.1-9.fc45"
-
-[[packages]]
-name = "speech-dispatcher-utils"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "0.12.1-9.fc45"
 
 [[packages]]
 name = "speex"
@@ -8324,46 +5580,6 @@ comparator = "="
 value = "1.5.7-1.fc45"
 
 [[packages]]
-name = "sssd-client"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "2.13.2-2.fc45"
-
-[[packages]]
-name = "sssd-common"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "2.13.2-2.fc45"
-
-[[packages]]
-name = "sssd-kcm"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "2.13.2-2.fc45"
-
-[[packages]]
-name = "sssd-krb5-common"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "2.13.2-2.fc45"
-
-[[packages]]
-name = "startup-notification"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "0.12-45.fc45"
-
-[[packages]]
 name = "sudo"
 comment = "installroot"
 [[packages.conditions]]
@@ -8380,14 +5596,6 @@ comparator = "="
 value = "3.1.2-3.fc45"
 
 [[packages]]
-name = "switcheroo-control"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "3.0-9.fc45"
-
-[[packages]]
 name = "systemd"
 comment = "installroot"
 [[packages.conditions]]
@@ -8396,23 +5604,7 @@ comparator = "="
 value = "262.1-1.fc45"
 
 [[packages]]
-name = "systemd-networkd"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "262.1-1.fc45"
-
-[[packages]]
 name = "systemd-pam"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "262.1-1.fc45"
-
-[[packages]]
-name = "systemd-resolved"
 comment = "installroot"
 [[packages.conditions]]
 key = "evr"
@@ -8442,30 +5634,6 @@ comment = "installroot"
 key = "evr"
 comparator = "="
 value = "2.3.2-3.fc45"
-
-[[packages]]
-name = "tcl"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "1:9.0.4-1.fc45"
-
-[[packages]]
-name = "telepathy-glib"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "0.24.2-16.fc45"
-
-[[packages]]
-name = "telepathy-mission-control"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "1:5.16.5-16.fc45"
 
 [[packages]]
 name = "tesseract-common"
@@ -8500,62 +5668,6 @@ comparator = "="
 value = "4.1.0-13.fc45"
 
 [[packages]]
-name = "tinysparql"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "3.12.0-2.fc45"
-
-[[packages]]
-name = "tinyxml2"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "11.0.0-6.fc45"
-
-[[packages]]
-name = "tk"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "1:9.0.4-1.fc45"
-
-[[packages]]
-name = "tokodon"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "26.08.3-1.fc45"
-
-[[packages]]
-name = "totem-pl-parser"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "3.26.7-4.fc45"
-
-[[packages]]
-name = "tpm2-tools"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "5.8-1.fc45"
-
-[[packages]]
-name = "tpm2-tss-fapi"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "4.2.2-1.fc45"
-
-[[packages]]
 name = "tqftpserv"
 comment = "installroot"
 [[packages.conditions]]
@@ -8572,76 +5684,12 @@ comparator = "="
 value = "1.24-3.fc45"
 
 [[packages]]
-name = "tuned"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "2.28.0-1.fc45"
-
-[[packages]]
-name = "tuned-ppd"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "2.28.0-1.fc45"
-
-[[packages]]
 name = "twolame-libs"
 comment = "installroot"
 [[packages.conditions]]
 key = "evr"
 comparator = "="
 value = "0.4.0-10.fc45"
-
-[[packages]]
-name = "uchardet"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "0.0.8-11.fc45"
-
-[[packages]]
-name = "udev-hid-bpf"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "2.2.0.20251121-5.fc45"
-
-[[packages]]
-name = "udev-hid-bpf-stable"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "2.2.0.20251121-5.fc45"
-
-[[packages]]
-name = "udftools"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "2.3-14.fc45"
-
-[[packages]]
-name = "udisks2"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "2.11.2-1.fc45"
-
-[[packages]]
-name = "unbound-anchor"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "1.26.2-2.fc45"
 
 [[packages]]
 name = "unbound-libs"
@@ -8668,14 +5716,6 @@ comparator = "="
 value = "0.0.0+17.04.20170403-25.fc45"
 
 [[packages]]
-name = "unzip"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "6.0-71.fc45"
-
-[[packages]]
 name = "upower"
 comment = "installroot"
 [[packages.conditions]]
@@ -8692,124 +5732,12 @@ comparator = "="
 value = "1.91.5-1.fc45"
 
 [[packages]]
-name = "urw-base35-bookman-fonts"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "20200910-29.fc45"
-
-[[packages]]
-name = "urw-base35-c059-fonts"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "20200910-29.fc45"
-
-[[packages]]
-name = "urw-base35-d050000l-fonts"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "20200910-29.fc45"
-
-[[packages]]
-name = "urw-base35-fonts"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "20200910-29.fc45"
-
-[[packages]]
-name = "urw-base35-fonts-common"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "20200910-29.fc45"
-
-[[packages]]
-name = "urw-base35-gothic-fonts"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "20200910-29.fc45"
-
-[[packages]]
-name = "urw-base35-nimbus-mono-ps-fonts"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "20200910-29.fc45"
-
-[[packages]]
-name = "urw-base35-nimbus-roman-fonts"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "20200910-29.fc45"
-
-[[packages]]
-name = "urw-base35-nimbus-sans-fonts"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "20200910-29.fc45"
-
-[[packages]]
-name = "urw-base35-p052-fonts"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "20200910-29.fc45"
-
-[[packages]]
-name = "urw-base35-standard-symbols-ps-fonts"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "20200910-29.fc45"
-
-[[packages]]
-name = "urw-base35-z003-fonts"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "20200910-29.fc45"
-
-[[packages]]
-name = "usbmuxd"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "1.1.1^20251205git3ded00c-2.fc45"
-
-[[packages]]
 name = "usbutils"
 comment = "installroot"
 [[packages.conditions]]
 key = "evr"
 comparator = "="
 value = "019-3.fc45"
-
-[[packages]]
-name = "userspace-rcu"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "0.15.6-2.fc45"
 
 [[packages]]
 name = "util-linux"
@@ -8820,84 +5748,12 @@ comparator = "="
 value = "2.42.4-1.fc45"
 
 [[packages]]
-name = "vapoursynth-libs"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "79-3.fc45"
-
-[[packages]]
 name = "vid.stab"
 comment = "installroot"
 [[packages.conditions]]
 key = "evr"
 comparator = "="
 value = "1.1.1-9.fc45"
-
-[[packages]]
-name = "vim-minimal"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "2:9.2.1302-2.fc45"
-
-[[packages]]
-name = "virt-what"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "1.27-6.fc45"
-
-[[packages]]
-name = "vlc-libs"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "1:3.0.24-3.fc45"
-
-[[packages]]
-name = "vlc-plugin-ffmpeg"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "1:3.0.24-3.fc45"
-
-[[packages]]
-name = "vlc-plugin-pipewire"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "3-8.fc45"
-
-[[packages]]
-name = "vlc-plugin-pulseaudio"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "1:3.0.24-3.fc45"
-
-[[packages]]
-name = "vlc-plugins-base"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "1:3.0.24-3.fc45"
-
-[[packages]]
-name = "vlc-plugins-video-out"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "1:3.0.24-3.fc45"
 
 [[packages]]
 name = "vo-amrwbenc"
@@ -8908,14 +5764,6 @@ comparator = "="
 value = "0.1.3-25.fc45"
 
 [[packages]]
-name = "volume_key-libs"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "0.3.12-33.fc45"
-
-[[packages]]
 name = "vulkan-loader"
 comment = "installroot"
 [[packages.conditions]]
@@ -8924,23 +5772,7 @@ comparator = "="
 value = "1.4.350.0-2.fc45"
 
 [[packages]]
-name = "wavpack"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "5.9.0-3.fc45"
-
-[[packages]]
 name = "waydroid"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "1.6.3-2.fc45"
-
-[[packages]]
-name = "waydroid-selinux"
 comment = "installroot"
 [[packages.conditions]]
 key = "evr"
@@ -9116,14 +5948,6 @@ comparator = "="
 value = "1.2.1-6.fc45"
 
 [[packages]]
-name = "xdriinfo"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "1.0.8-1.fc45"
-
-[[packages]]
 name = "xevd-libs"
 comment = "installroot"
 [[packages.conditions]]
@@ -9138,14 +5962,6 @@ comment = "installroot"
 key = "evr"
 comparator = "="
 value = "0.7.0-2.fc45"
-
-[[packages]]
-name = "xfsprogs"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "7.1.1-1.fc45.1"
 
 [[packages]]
 name = "xhost"
@@ -9228,14 +6044,6 @@ comparator = "="
 value = "1.2.8-6.fc45"
 
 [[packages]]
-name = "xrandr"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "1.5.4-3.fc45"
-
-[[packages]]
 name = "xrdb"
 comment = "installroot"
 [[packages.conditions]]
@@ -9252,36 +6060,12 @@ comparator = "="
 value = "1.3.7-20.fc45"
 
 [[packages]]
-name = "xwaylandvideobridge"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "0.5.2-1.fc45"
-
-[[packages]]
 name = "xxhash-libs"
 comment = "installroot"
 [[packages.conditions]]
 key = "evr"
 comparator = "="
 value = "0.8.4-2.fc45"
-
-[[packages]]
-name = "yt-dlp"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "2026.10.21-2.fc45"
-
-[[packages]]
-name = "yt-dlp+default"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "2026.10.21-2.fc45"
 
 [[packages]]
 name = "zeromq"
@@ -9306,22 +6090,6 @@ comment = "installroot"
 key = "evr"
 comparator = "="
 value = "0.8.0-3.fc45"
-
-[[packages]]
-name = "zram-generator"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "1.2.1-6.fc45"
-
-[[packages]]
-name = "zram-generator-defaults"
-comment = "installroot"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "1.2.1-6.fc45"
 
 [[packages]]
 name = "zvbi"
