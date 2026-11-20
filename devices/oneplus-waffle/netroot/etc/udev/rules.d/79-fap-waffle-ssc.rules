@@ -1,0 +1,5 @@
+# SPDX-License-Identifier: AGPL-3.0-or-later
+# v8 sensors: the OnePlus 12's sensors sit on the ADSP's sensor core (SSC).
+# iio-sensor-proxy's own rule only claims light + compass for fastrpc-adsp;
+# add accelerometer and proximity (read before its 80-* rule).
+SUBSYSTEM=="misc", KERNEL=="fastrpc-adsp*", ENV{IIO_SENSOR_PROXY_TYPE}+="ssc-accel ssc-proximity"

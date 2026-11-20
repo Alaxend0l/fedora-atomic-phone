@@ -145,7 +145,7 @@ those ourselves.
   `SM8650-QRD-tplg.bin` links to), installed as
   `qcom/sm8650/OnePlus 12-tplg.bin.xz`. No ACDB/calibration needed for it.
 - UCM: [ucm/](ucm/) (based on alsa-ucm-conf's SM8650-QRD; HP PA at -9 dB).
-- **Speakers / earpiece: blocked.** Two NXP TFA9874 on `i2c_hub_7` (0x34
+- **Speakers / earpiece: blocked in v6/v7 (v8: see below).** Two NXP TFA9874 on `i2c_hub_7` (0x34
   bottom, 0x35 top; the top one is most likely the earpiece/second
   speaker). No TFA9874 driver exists in the kernel (tfa989x: 9890/95/97) and
   they need OnePlus's tuning container (`tfa98xx.cnt`-style, vendor/odm in
@@ -153,7 +153,7 @@ those ourselves.
   SECONDARY_MI2S link to a `max98357a` placeholder is deleted and
   `i2c_hub_7` stays off, so the amps are never touched. The generic
   topology also has no SECONDARY_MI2S back end.
-- **USB-C analog headset: not yet.** Needs `i2c3` (wcd939x-usbss switch),
+- **USB-C analog headset: not yet in v6/v7 (v8: see below).** Needs `i2c3` (wcd939x-usbss switch),
   pmic-glink altmode and a codec ↔ usbss graph link the board DT lacks; and
   the USB port is the RAM boot's only link.
 - Physical mic mapping (which AMIC is bottom/top/back) unknown.
@@ -177,6 +177,47 @@ those ourselves.
   use OnePlus's own vmax (1720 mV, dtbo entry 15) instead of the board DT's
   2.4 V. Custom FF effects can carry their own vmax (driver clamps at 10 V):
   test with `fftest`'s built-in effects only.
+
+## Speakers, USB-C headset, sensors, cameras (v8, branch oneplus12-hw, built 2026-11-20, untested)
+Test procedure, stop conditions and sha256s: `~/Develop/fap-build/waffle/hw/HW.md`.
+Two netroot DTs: `-netroot` (everything below) and `-netroot-safe` (the v7
+hardware set with the v8 kernel), as a fallback.
+- **Speakers / earpiece:** two NXP TFA9874 on `i2c_hub_7` (0x34 bottom,
+  reset GPIO 173; 0x35 top/earpiece, GPIO 178; L15B), fed by LPASS
+  SECONDARY_MI2S (I2S1, gpio121-124), as OnePlus's audio DT
+  (`waffle-22825-audio-pineapple-overlay.dtsi`) describes them. Driver: our
+  `tfa9874` (kernel patch 0002): no boost converter ever (output bounded
+  by VBAT), analog gain fixed to the vendor's tuning (TDMSPKG 5, AMPGAIN
+  190, from the unit's `tfa98xx.cnt`), documented user registers only (no
+  key/MTP/FAIM/hidden trim writes), and the amplifier stays powered down
+  unless a stream plays **and** its `Amp Enable` switch (default off) is
+  on. The container's "patch" is a dummy (TFA9874 has no DSP); its
+  SpeakerBoost messages are for a host-DSP module we don't have, so there
+  is **no speaker protection**: low levels and short tones only. Topology:
+  Fedora's generic AudioReach file with its PRIMARY_MI2S_RX graph moved to
+  SECONDARY_MI2S_RX (`build-env/tplg-sec-mi2s.py`, in-place binary patch,
+  203 bytes; MultiMedia1/2/5 can feed it). No UCM device on purpose (no
+  automatic routing to the speakers). Test: `fap-hw-speaker-test`.
+- **USB-C analog headset:** the WCD9395 codec linked to the WCD USB-C
+  audio switch (`typec-mux@e` on i2c3) as on SM8650-QRD (`mode-switch`,
+  `orientation-switch`, port@1 graph); UCSI/pmic-glink report
+  audio-accessory mode, the switch routes HPH/mic/ground, the codec's MBHC
+  reports the jack. When the switch driver probes it briefly re-programs
+  the USB D+/D- switches (USB link may blip); during the test the USB
+  cable is replaced by the headset adapter, so the test runs unattended
+  (`fap-hw-headset-watch`) or over Wi-Fi.
+- **Sensors:** SSC on the ADSP via FastRPC: `hexagonrpcd` (sensors PD),
+  `libssc`, `iio-sensor-proxy` with SSC support, built from source at
+  pinned commits in the netroot; served files: `/vendor/etc/sensors`
+  config + `sns_reg_config` (vendor copy), the persist sensor registry
+  (calibration) and `/vendor/dsp` (dsp_a), under
+  `/usr/share/qcom/sm8650/OnePlus/waffle`. Not started automatically:
+  `fap-hw-sensors`.
+- **Cameras:** CAMSS, CCI0/1, i2c9 and DaDDevil's sensor drivers (imx581
+  main, lyt808 tele, ov64b, imx615 front; ak7377/ak7316/sem1217s lenses)
+  as modules; front-camera EEPROM read-only in the DT; Fedora libcamera
+  (simple pipeline + software ISP). CAMERA_ICP firmware isn't needed for
+  raw capture through CAMSS. Test: `fap-hw-camera`.
 
 ## Known issues (v5/v6 live tests, 2026-11-20)
 - **Wi‑Fi after a warm reboot from our Linux** (v7 carries a fix, untested:

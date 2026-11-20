@@ -38,9 +38,9 @@ features:
     tethering:         {title: "Hotspot / USB tethering", status: untested, notes: "", evidence: ""}
     nfc:               {title: "NFC", status: untested, notes: "", evidence: ""}
   audio:
-    speaker:           {title: "Loudspeaker", status: broken, notes: "2x TFA9874 (i2c_hub_7): no driver, needs OnePlus tuning container from vendor; kept off", evidence: "devices/oneplus-waffle/README.md"}
-    earpiece:          {title: "Earpiece", status: broken, notes: "most likely the top TFA9874 (stereo); blocked with the speakers", evidence: "devices/oneplus-waffle/README.md"}
-    headphones:        {title: "Headphone jack / USB-C audio", status: untested, notes: "v6: WCD9395 HPH path on; USB-C analog switch (wcd939x-usbss, i2c3) still off", evidence: ""}
+    speaker:           {title: "Loudspeaker", status: untested, notes: "v8 (oneplus12-hw): tfa9874 driver (no boost, vendor gain, off until Amp Enable) + SECONDARY_MI2S topology; built, not tested; no speaker protection", evidence: "devices/oneplus-waffle/README.md"}
+    earpiece:          {title: "Earpiece", status: untested, notes: "v8: top TFA9874 (0x35, I2S right slot) with the same driver; built, not tested", evidence: "devices/oneplus-waffle/README.md"}
+    headphones:        {title: "Headphone jack / USB-C audio", status: untested, notes: "v8: WCD9395 HPH + USB-C audio switch (wcd939x-usbss on i2c3) linked as on QRD; built, not tested", evidence: ""}
     microphone:        {title: "Microphones", status: untested, notes: "v6: WCD9395 AMIC1/3/4/5 via SoundWire TX, UCM Mic1/3/4/5", evidence: ""}
   power:
     battery:           {title: "Battery level", status: untested, notes: "", evidence: ""}
@@ -48,16 +48,16 @@ features:
     fast-charging:     {title: "Fast charging", status: untested, notes: "", evidence: ""}
   sensors:
     vibrator:          {title: "Vibrator / haptics", status: untested, notes: "v7: PM8550B LRA (qcom-spmi-haptics, DaDDevil) at the stock 1.72 V vmax; built, not tested", evidence: ""}
-    accelerometer:     {title: "Accelerometer / gyroscope (rotation)", status: untested, notes: "", evidence: ""}
-    proximity:         {title: "Proximity sensor", status: untested, notes: "", evidence: ""}
-    light-sensor:      {title: "Ambient light sensor", status: untested, notes: "", evidence: ""}
+    accelerometer:     {title: "Accelerometer / gyroscope (rotation)", status: untested, notes: "v8: SSC via hexagonrpcd + libssc + iio-sensor-proxy (unit config/registry); built, not tested", evidence: ""}
+    proximity:         {title: "Proximity sensor", status: untested, notes: "v8: SSC (see accelerometer); built, not tested", evidence: ""}
+    light-sensor:      {title: "Ambient light sensor", status: untested, notes: "v8: SSC (see accelerometer); built, not tested", evidence: ""}
     compass:           {title: "Magnetometer", status: untested, notes: "", evidence: ""}
     fingerprint:       {title: "Fingerprint reader", status: untested, notes: "", evidence: ""}
     microsd:           {title: "microSD card", status: untested, notes: "", evidence: ""}
     notification-led:  {title: "Notification LED", status: untested, notes: "", evidence: ""}
   cameras:
-    camera-rear:       {title: "Rear camera", status: untested, notes: "", evidence: ""}
-    camera-front:      {title: "Front camera", status: untested, notes: "", evidence: ""}
+    camera-rear:       {title: "Rear camera", status: untested, notes: "v8: CAMSS + imx581/lyt808/ov64b drivers, libcamera simple pipeline + softISP; built, not tested", evidence: ""}
+    camera-front:      {title: "Front camera", status: untested, notes: "v8: CAMSS + imx615 (i2c9), libcamera; built, not tested", evidence: ""}
     camera-flash:      {title: "Camera flash / torch", status: untested, notes: "", evidence: ""}
   telephony:
     modem:             {title: "Modem firmware boots", status: untested, notes: "mpss off in the first-light DT; ARB fuse 1: never flash firmware", evidence: ""}

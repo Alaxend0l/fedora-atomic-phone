@@ -1,0 +1,19 @@
+#!/bin/bash
+# SPDX-License-Identifier: AGPL-3.0-or-later
+# v8: bring up the ADSP sensor core (SSC) and read accelerometer, light and
+# proximity through iio-sensor-proxy for 30 s. Read-only for the phone.
+set -uo pipefail
+echo "== ADSP + FastRPC"
+grep -H . /sys/class/remoteproc/*/name /sys/class/remoteproc/*/state 2>/dev/null | paste - - | grep -i adsp
+ls -l /dev/fastrpc-* || { echo "no /dev/fastrpc-*: fastrpc module/DT?"; lsmod | grep -i fastrpc; exit 1; }
+echo "== hexagonrpcd (sensors PD)"
+systemctl start fap-hexagonrpcd-sensorspd.service; sleep 5
+systemctl --no-pager -l status fap-hexagonrpcd-sensorspd.service | tail -15
+echo "== QRTR: SSC is QMI service 400"
+qrtr-lookup | awk 'NR==1 || $1 == 400'
+echo "== iio-sensor-proxy"
+systemctl restart iio-sensor-proxy.service; sleep 3
+systemctl --no-pager -l status iio-sensor-proxy.service | tail -15
+echo "== monitor-sensor (30 s: rotate the phone, cover the top, change the light)"
+timeout 30 monitor-sensor --accel --light --proximity 2>&1 || timeout 30 monitor-sensor 2>&1
+journalctl -b --no-pager -u iio-sensor-proxy -u fap-hexagonrpcd-sensorspd | tail -30

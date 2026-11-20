@@ -33,7 +33,7 @@
 # Runs on the host (macOS or Linux, podman) and re-executes itself inside
 # localhost/fap-waffle-build (built from ./Containerfile when missing, or with
 # REBUILD_IMAGE=1). State lives in the case-sensitive podman volume
-# "waffle-build" (/work; macOS's file system is case-insensitive, Linux trees
+# "waffle-build" (FAP_WAFFLE_VOLUME overrides; /work; macOS's file system is case-insensitive, Linux trees
 # aren't): sources in /work/src, kernel trees /work/linux-waffle and
 # /work/linux (Fedora), build dirs /work/out-<tree>, intermediate files
 # /work/stage. Outputs go to OUT (default ~/Develop/fap-build/waffle).
@@ -67,7 +67,9 @@
 set -euo pipefail
 
 IMAGE=localhost/fap-waffle-build
-VOLUME=waffle-build
+# FAP_WAFFLE_VOLUME: another podman volume (e.g. a copy of waffle-build) so two
+# builds can run side by side without sharing trees and stage files.
+VOLUME=${FAP_WAFFLE_VOLUME:-waffle-build}
 
 # Pinned sources
 WAFFLE_URL=https://github.com/DaDDevil/linux
@@ -88,7 +90,7 @@ UL_TEXT_BASE=0xa8010000
 UL_PAYLOAD_ENTRY=0xa3200000
 UL_RAMDISK_ENTRY=0xb6f95000
 UL_BANK_END=0xd4e23000
-VARIANTS="plain netroot"
+VARIANTS="plain netroot netroot-safe"
 
 if [[ -z ${FAP_WAFFLE_INNER:-} ]]; then
   HERE=$(cd "$(dirname "$0")/.." && pwd)        # devices/oneplus-waffle
@@ -200,6 +202,9 @@ fetch_tree() {
 PATCHES=/repo/kernels/qcom-sm8650/patches
 apply_patches() {
   git -C "$K" reset -q --hard "$WAFFLE_COMMIT"
+  # Files our patches add are untracked after the reset; the build is out
+  # of tree (O=), so nothing else in the source tree is untracked.
+  git -C "$K" clean -fdq
   local p
   while read -r p; do
     [[ -z $p || $p == \#* ]] && continue
@@ -292,7 +297,7 @@ image_size_check() {   # the kernel's image_size (incl. BSS) must end below uniL
   (( isz + (2 << 20) <= room )) || die "kernel image_size too big for uniLoader's layout (needs PAYLOAD_ENTRY moved)"
 }
 
-DTS_NAMES="sm8650-oneplus-waffle-fap sm8650-oneplus-waffle-fap-netroot"
+DTS_NAMES="sm8650-oneplus-waffle-fap sm8650-oneplus-waffle-fap-netroot sm8650-oneplus-waffle-fap-netroot-safe"
 cmd_dtb() {
   [[ $KERNEL_TREE == waffle ]] || die "dtb needs KERNEL_TREE=waffle (the board DT lives there)"
   fetch_tree
@@ -442,7 +447,7 @@ uniloader_build() {
 
 cmd_images() {
   local f v I=$S/images
-  for f in Image-waffle initramfs.cpio.gz sm8650-oneplus-waffle-fap.dtb sm8650-oneplus-waffle-fap-netroot.dtb; do
+  for f in Image-waffle initramfs.cpio.gz sm8650-oneplus-waffle-fap.dtb sm8650-oneplus-waffle-fap-netroot.dtb sm8650-oneplus-waffle-fap-netroot-safe.dtb; do
     [[ -f $S/$f ]] || die "missing $S/$f: run kernel, dtb and initramfs first"
   done
   image_size_check "$S/Image-waffle"
@@ -653,6 +658,122 @@ cmd_gpu_firmware() {
   (cd /out/gpu-firmware && sha256sum waffle-gpu-firmware.tar.gz > SHA256SUMS && cat SHA256SUMS && tar -tzvf waffle-gpu-firmware.tar.gz)
 }
 
+# ---------------------------------------------------------------- v8
+# Branch oneplus12-hw: speakers (TFA9874), USB-C analog headset, sensors
+# (SSC on the ADSP), cameras (CAMSS + libcamera). All of it lands only in
+# the (local, SENSITIVE) netroot tarball.
+NETROOT_PKGS_V8="libcamera-tools libcamera-ipa iio-sensor-proxy libqmi libqrtr-glib protobuf-c libgudev polkit-libs"
+
+# Speakers: Fedora's generic AudioReach topology (installed by
+# netroot_audio_dhcp) with its PRIMARY_MI2S_RX playback graph moved to
+# SECONDARY_MI2S_RX (LPASS I2S1, the TFA9874 link). Patched in place
+# (build-env/tplg-sec-mi2s.py); every other graph stays byte-identical and
+# the decoded diff is printed. The unpatched file stays in /usr/lib/fap-hw
+# for a quick fallback (HW.md).
+netroot_v8_topology() {   # netroot_v8_topology <root>
+  local R=$1 T=/work/stage/tplg
+  command -v alsatplg >/dev/null || dnf -y -q install /usr/bin/alsatplg >/dev/null
+  rm -rf "$T" && mkdir -p "$T"
+  xz -dc "$R/usr/lib/firmware/$TPLG_NAME" > "$T/generic.bin"
+  python3 -I "$DEV/build-env/tplg-sec-mi2s.py" "$T/generic.bin" "$T/sec.bin"
+  alsatplg -d "$T/generic.bin" -o "$T/generic.conf" 2>/dev/null
+  alsatplg -d "$T/sec.bin" -o "$T/sec.conf" 2>/dev/null
+  echo "topology diff (decoded): $(diff "$T/generic.conf" "$T/sec.conf" | grep -c '^[<>]') changed lines"
+  diff "$T/generic.conf" "$T/sec.conf" | grep '^>' | grep -vE "device18|SECONDARY_MI2S_RX|Secondary MI2S Playback|token1 18|token250 1|index 18" &&
+    die "unexpected topology change" || true
+  install -D -m 644 "$R/usr/lib/firmware/$TPLG_NAME" "$R/usr/lib/fap-hw/OnePlus 12-tplg.generic.bin.xz"
+  xz -c --check=crc32 "$T/sec.bin" > "$R/usr/lib/firmware/$TPLG_NAME"
+  rm -rf "$T"
+}
+
+# Short 1 kHz test tones for the speaker test: 48 kHz, S16, stereo, with
+# 20 ms fades, signal in one channel only (the other silent), at -40 and
+# -30 dBFS. Generated here, not downloaded.
+netroot_v8_tones() {   # netroot_v8_tones <root>
+  local D=$1/usr/share/fap-hw
+  mkdir -p "$D"
+  python3 -I - "$D" <<'PY'
+import math, struct, sys, wave
+d = sys.argv[1]
+rate, secs, f = 48000, 2.0, 1000.0
+for db in (-40, -30):
+    amp = 32767 * 10 ** (db / 20)
+    n = int(rate * secs); fade = int(rate * 0.02)
+    for side in ("left", "right"):
+        frames = bytearray()
+        for i in range(n):
+            g = min(1.0, i / fade, (n - 1 - i) / fade)
+            v = int(round(amp * g * math.sin(2 * math.pi * f * i / rate)))
+            frames += struct.pack('<hh', v if side == "left" else 0, v if side == "right" else 0)
+        with wave.open(f"{d}/tone-1k-{-db}dBFS-{side}.wav", "wb") as w:
+            w.setnchannels(2); w.setsampwidth(2); w.setframerate(rate); w.writeframes(bytes(frames))
+PY
+  echo "tones: $(ls "$D" | tr '\n' ' ')"
+}
+
+# Sensors: hexagonrpcd (serves the ADSP sensors PD its registry/config over
+# FastRPC), libssc (QMI client for the sensor core) and iio-sensor-proxy
+# with SSC support, built from source at pinned commits (none of them is
+# packaged with SSC support in Fedora). Built in the build container
+# (Fedora 45, same as the netroot), installed with DESTDIR.
+SSC_SOURCES="hexagonrpc|https://github.com/linux-msm/hexagonrpc|da7a3742ab8d5273a281b70ee11f16fb2cb6a690
+libssc|https://codeberg.org/DylanVanAssche/libssc|033e2a32095c024d6dbdfb1d4ae1db4a94be32f1
+iio-sensor-proxy|https://gitlab.freedesktop.org/hadess/iio-sensor-proxy|0085ddf8ecb173a1c5fcf2344aa40e561125354f"
+SSC_ROOT=/usr/share/qcom/sm8650/OnePlus/waffle
+netroot_v8_sensors_build() {   # netroot_v8_sensors_build <root>
+  local R=$1 D=/work/stage/ssc-dest line n url commit
+  dnf -y -q install meson ninja-build gcc pkgconf-pkg-config glib2-devel libqmi-devel \
+    libqrtr-glib-devel protobuf-c-devel libgudev-devel polkit-devel systemd-devel \
+    systemd-rpm-macros json-c-devel python3-devel protobuf-compiler 'pkgconfig(udev)' >/dev/null
+  rm -rf "$D" && mkdir -p "$D"
+  while IFS='|' read -r n url commit; do
+    [[ -d /work/src/$n/.git ]] || git clone -q "$url" "/work/src/$n"
+    git -C "/work/src/$n" cat-file -e "$commit^{commit}" 2>/dev/null || git -C "/work/src/$n" fetch -q origin
+    git -C "/work/src/$n" checkout -q -f --detach "$commit"
+    [[ $(git -C "/work/src/$n" rev-parse HEAD) == "$commit" ]] || die "$n: not at $commit"
+    echo "$n $commit (tree $(git -C "/work/src/$n" rev-parse HEAD^{tree}))"
+  done <<< "$SSC_SOURCES"
+  local B=/work/stage/ssc-build; rm -rf "$B" && mkdir -p "$B"
+  ssc_meson() {   # ssc_meson <src> <build> [meson options]: build, install to $D
+    local src=$1 b=$2; shift 2
+    meson setup "$b" "$src" --prefix=/usr --buildtype=release "$@" > "$b.log" 2>&1 &&
+      ninja -C "$b" >> "$b.log" 2>&1 &&
+      DESTDIR=$D meson install -C "$b" >> "$b.log" 2>&1 ||
+      { tail -40 "$b.log"; die "build failed: $src"; }
+  }
+  ssc_meson /work/src/hexagonrpc "$B/hexagonrpc"
+  ssc_meson /work/src/libssc "$B/libssc"
+  meson install -C "$B/libssc" >> "$B/libssc.log" 2>&1   # also into the build container, for iio-sensor-proxy
+  ssc_meson /work/src/iio-sensor-proxy "$B/iiosp" -Dssc-support=enabled
+  [[ -x $D/usr/bin/hexagonrpcd && -x $D/usr/libexec/iio-sensor-proxy ]] || die "sensor userspace incomplete"
+  ldd "$D/usr/libexec/iio-sensor-proxy" | grep -q libssc || die "iio-sensor-proxy built without libssc"
+  cp -a "$D/." "$R/"
+  rm -rf "$B" "$D"
+  echo "sensors: hexagonrpcd, libssc, iio-sensor-proxy (SSC) installed"
+}
+
+# The files hexagonrpcd serves to the ADSP sensors PD (hexagonrpcd(1)):
+# sensors/config + sns_reg.conf from this unit's /vendor/etc/sensors
+# (checked against the phone-side manifest), sensors/registry from the
+# unit's persist partition (calibration: SENSITIVE), dsp/ from dsp_a.
+# Read-only from the backup images with debugfs (no mount).
+netroot_v8_sensors_data() {   # netroot_v8_sensors_data <root>
+  local R=$1 S=$1$SSC_ROOT f
+  command -v debugfs >/dev/null || dnf -y -q install e2fsprogs >/dev/null
+  mkdir -p "$S/sensors/config" "$S/sensors/registry" "$S/dsp"
+  while read -r f; do
+    vendor_file "$f" "$S/sensors/config/$(basename "$f")"
+  done < <(awk '$2 ~ /^vendor\/etc\/sensors\/config\// {print $2}' /vendor-files/phone-manifest.sha256)
+  vendor_file vendor/etc/sensors/sns_reg_config "$S/sensors/sns_reg.conf"
+  [[ -f /backup/persist.img && -f /backup/dsp_a.img ]] || die "PHONE_BACKUP needs persist.img and dsp_a.img"
+  debugfs -R "rdump /sensors/registry/registry $S/sensors/registry" /backup/persist.img 2>/dev/null
+  mv "$S/sensors/registry/registry/"* "$S/sensors/registry/" && rmdir "$S/sensors/registry/registry"
+  debugfs -R "rdump /adsp $S/dsp" /backup/dsp_a.img 2>/dev/null
+  debugfs -R "rdump /cdsp $S/dsp" /backup/dsp_a.img 2>/dev/null
+  [[ -s $S/sensors/sns_reg.conf && -n $(ls "$S/sensors/registry") && -d $S/dsp/adsp ]] || die "sensor data incomplete"
+  echo "sensor data: config $(ls "$S/sensors/config" | wc -l) files, registry $(ls "$S/sensors/registry" | wc -l) entries, dsp $(du -sh "$S/dsp" | cut -f1)"
+}
+
 cmd_netroot() {
   [[ -f /netroot-generic.tar.gz ]] || die "set NETROOT_GENERIC=<generic netroot.tar.gz>"
   local kver R=/work/netroot-root; kver=$(cat "$S/kernel-release-waffle")
@@ -676,6 +797,19 @@ cmd_netroot() {
     echo "Iris firmware: $WAFFLE_FW/vpu33_4v.mbn (unit)"
   else
     echo "no VENDOR_FILES: netroot without GPU zap shader and Iris firmware"
+  fi
+  # v8 (oneplus12-hw)
+  say "netroot v8: $NETROOT_PKGS_V8, speaker topology, test tones, sensors"
+  dnf5 -y -q --installroot="$R" --use-host-config --releasever=45 \
+    --setopt=install_weak_deps=False install $NETROOT_PKGS_V8
+  dnf5 -y -q --installroot="$R" --use-host-config --releasever=45 clean all >/dev/null
+  netroot_v8_topology "$R"
+  netroot_v8_tones "$R"
+  netroot_v8_sensors_build "$R"
+  if [[ -d /backup && -d /vendor-files ]]; then
+    netroot_v8_sensors_data "$R"
+  else
+    echo "no PHONE_BACKUP/VENDOR_FILES: netroot without sensor registry/config"
   fi
   mkdir -p /out/netroot
   (cd "$R" && tar -czf /out/netroot/netroot.tar.gz .)

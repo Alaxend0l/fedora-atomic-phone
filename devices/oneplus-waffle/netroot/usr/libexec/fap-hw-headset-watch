@@ -1,0 +1,48 @@
+#!/bin/bash
+# SPDX-License-Identifier: AGPL-3.0-or-later
+# v8: watch the USB-C port and the WCD9395 jack while the host cable is
+# unplugged and a USB-C -> 3.5 mm headset adapter is plugged in. Start it in
+# the background (it survives the USB link going away), swap the cables,
+# wait, swap back, read the log:
+#
+#   systemd-run --unit fap-headset fap-hw-headset-watch [seconds] [--play]
+#   ... later: cat /var/log/fap-hw-headset.log
+#
+# --play: once the headphone jack reports "on", play the -40 dBFS tone on
+# the headphones (UCM Headphones, HPH at -9 dB) and record 5 s from the
+# headset mic (AMIC2) to /var/log/fap-hw-headset-mic.wav.
+set -uo pipefail
+secs=${1:-180}; play=0; [[ ${2:-} == --play || ${1:-} == --play ]] && play=1
+[[ $secs == --play ]] && secs=180
+L=/var/log/fap-hw-headset.log
+exec >>"$L" 2>&1
+echo "=== $(date -Is) watching for ${secs}s (play=$play)"
+C=$(sed -n 's/^ *\([0-9]*\) \[.*\]: .* - OnePlus 12$/\1/p' /proc/asound/cards | head -1)
+dmesg -w --since now 2>/dev/null | grep --line-buffered -iE 'typec|ucsi|altmode|wcd939x|usbss|mbhc|jack|dwc3' &
+DM=$!
+played=0 last=
+for ((i = 0; i < secs; i++)); do
+  st="$(for p in /sys/class/typec/port*; do
+          printf '%s data_role=%s power_role=%s orient=%s ' "${p##*/}" \
+            "$(cat "$p/data_role" 2>/dev/null)" "$(cat "$p/power_role" 2>/dev/null)" \
+            "$(cat "$p/orientation" 2>/dev/null)"
+          for q in "$p"/port*-partner; do [[ -d $q ]] && printf 'partner accessory=%s ' "$(cat "$q/accessory_mode" 2>/dev/null)"; done
+        done)"
+  [[ -n $C ]] && st+="$(amixer -c "$C" cget iface=CARD,name='Headphone Jack' 2>/dev/null | sed -n 's/.*: values=/ hp=/p')"
+  [[ -n $C ]] && st+="$(amixer -c "$C" cget iface=CARD,name='Mic Jack' 2>/dev/null | sed -n 's/.*: values=/ mic=/p')"
+  [[ $st != "$last" ]] && echo "$(date +%T) $st" && last=$st
+  if (( play && !played )) && [[ $st == *"hp=on"* ]]; then
+    played=1
+    echo "$(date +%T) headphones detected: tone + mic recording"
+    alsaucm -c "hw:$C" set _verb HiFi set _enadev Headphones || true
+    timeout 5 aplay -D "plughw:$C,0" /usr/share/fap-hw/tone-1k-40dBFS-left.wav || true
+    timeout 5 aplay -D "plughw:$C,0" /usr/share/fap-hw/tone-1k-40dBFS-right.wav || true
+    alsaucm -c "hw:$C" set _verb HiFi set _disdev Headphones || true
+    alsaucm -c "hw:$C" set _verb HiFi set _enadev Headset 2>/dev/null ||
+      { amixer -c "$C" cset name='MultiMedia3 Mixer TX_CODEC_DMA_TX_3' 1; }
+    timeout 8 arecord -D "plughw:$C,2" -f S16_LE -r 48000 -c 1 -d 5 /var/log/fap-hw-headset-mic.wav || true
+  fi
+  sleep 1
+done
+kill $DM 2>/dev/null
+echo "=== $(date -Is) done"

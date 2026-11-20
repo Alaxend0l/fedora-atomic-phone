@@ -1,0 +1,13 @@
+# SPDX-License-Identifier: AGPL-3.0-or-later
+# v8 sensors: serve the ADSP sensors PD its config/registry over FastRPC
+# (hexagonrpc's hexagonrpcd-adsp-sensorspd.service, with this unit's files
+# under /usr/share/qcom/sm8650/OnePlus/waffle; run as root in the dev netroot).
+# Not enabled: /usr/libexec/fap-hw-sensors starts it.
+[Unit]
+Description=hexagonrpcd for the ADSP sensors PD (OnePlus 12)
+ConditionPathExists=/dev/fastrpc-adsp
+
+[Service]
+ExecStart=/usr/bin/hexagonrpcd -f /dev/fastrpc-adsp -d adsp -s -R /usr/share/qcom/sm8650/OnePlus/waffle
+Restart=on-failure
+RestartSec=3

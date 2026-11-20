@@ -27,7 +27,9 @@ Legend: [x] done · [~] partly / workaround · [ ] not started
 - [~] P2 Bluetooth (hci_qca on UART14, bluetooth_a firmware): v7 built, untested
 - [~] P2 Video codec (Iris, vpu33_4v.mbn): v7 built, untested
 - [~] P2 Audio: v6 enables the WCD9395 path (sound card, SoundWire, LPASS macros, Fedora AudioReach topology, ucm/); mics testable, HPH not routed to USB-C yet
-- [ ] P2 Speakers/earpiece: TFA9874 x2 need a driver + OnePlus tuning container (vendor, not backed up); SECONDARY_MI2S topology
-- [ ] P2 USB-C analog headset: i2c3 wcd939x-usbss + codec graph link + altmode
+- [~] P2 Speakers/earpiece: v8 (oneplus12-hw): conservative tfa9874 driver (no boost, vendor gain, off by default) + SECONDARY_MI2S topology; untested, test only at -40 dBFS after the user's OK (fap-build/waffle/hw/HW.md). Later: speaker protection (no host-DSP SpeakerBoost), datasheet for gain scales
+- [~] P2 USB-C analog headset: v8: i2c3 wcd939x-usbss + codec graph link (QRD style); untested (fap-hw-headset-watch)
 - [~] P2 Haptics (v7: stock 1.72 V vmax, untested), [ ] alert slider
-- [ ] P3 Modem, cameras, sensors (SSC)
+- [ ] P3 Modem
+- [~] P3 Sensors (SSC): v8: hexagonrpcd + libssc + iio-sensor-proxy (SSC) with the unit's config/registry; untested (fap-hw-sensors)
+- [~] P3 Cameras: v8: CAMSS + 4 sensor drivers + libcamera simple/softISP; untested (fap-hw-camera)

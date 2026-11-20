@@ -1,0 +1,19 @@
+#!/bin/bash
+# SPDX-License-Identifier: AGPL-3.0-or-later
+# v8: CAMSS + sensor drivers + libcamera (simple pipeline, software ISP).
+#   fap-hw-camera            list and capture one frame from every camera
+set -uo pipefail
+echo "== drivers"
+dmesg | grep -iE 'camss|cci|imx581|imx615|lyt808|ov64b|ak73|sem1217|camcc' | tail -40
+ls /dev/media* /dev/video* /dev/v4l-subdev* 2>/dev/null | tr '\n' ' '; echo
+for m in /dev/media*; do media-ctl -d "$m" -p 2>/dev/null | grep -E '^Media|driver|entity|- entity' | head -40; done
+echo "== libcamera"
+cam -l
+n=$(cam -l 2>/dev/null | grep -c '^[0-9]*:')
+mkdir -p /var/log/fap-hw-cam
+for ((i = 1; i <= n; i++)); do
+  echo "== camera $i"
+  timeout 60 cam -c "$i" --capture=3 --file="/var/log/fap-hw-cam/cam$i-#.ppm" --stream pixelformat=BGR888 ||
+    timeout 60 cam -c "$i" --capture=3 --file="/var/log/fap-hw-cam/cam$i-#.bin"
+done
+ls -l /var/log/fap-hw-cam

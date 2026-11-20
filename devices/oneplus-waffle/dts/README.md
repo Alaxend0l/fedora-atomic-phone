@@ -5,7 +5,9 @@
 |---|---|
 | `sm8650-oneplus-waffle-fap.dtsi` | first-light trim: simple-framebuffer on the splash buffer until msm (MDSS + DSI0 + panel) takes over, USB peripheral (high speed); v5/v6: DSPs, pmic-glink, PCIe Wi-Fi, touch, WCD9395 audio on; DP/GPU/speaker amps/cameras/other peripheral buses off |
 | `sm8650-oneplus-waffle-fap.dts` | plain variant: full memory map, debug shell |
-| `sm8650-oneplus-waffle-fap-netroot.dts` | netroot variant: full 16 GB map, `fap.netroot=` in bootargs |
+| `sm8650-oneplus-waffle-fap-netroot.dts` | netroot variant: full 16 GB map, `fap.netroot=` in bootargs; v8: + `-fap-hw.dtsi` |
+| `sm8650-oneplus-waffle-fap-hw.dtsi` | v8 (branch oneplus12-hw): TFA9874 speaker link on SECONDARY_MI2S + i2c_hub_7, WCD9395 ↔ USB-C audio switch link + i2c3, CAMSS/CCI/i2c9 (EEPROM read-only) |
+| `sm8650-oneplus-waffle-fap-netroot-safe.dts` | v8 fallback: netroot without `-fap-hw.dtsi` (= v7 hardware set) |
 
 They `#include "sm8650-oneplus-waffle.dts"`, the board DT from
 DaDDevil/linux `waffle-voice` (pinned in `../build-env/fap-waffle-build.sh`),

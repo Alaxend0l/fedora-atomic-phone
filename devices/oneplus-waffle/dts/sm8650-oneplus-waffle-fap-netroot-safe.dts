@@ -1,0 +1,15 @@
+// SPDX-License-Identifier: (GPL-2.0+ OR BSD-3-Clause)
+/*
+ * OnePlus 12 netroot, v8 "safe" variant: the v7 hardware set (no speaker
+ * link, no USB-C audio switch, no cameras) with the v8 kernel and the same
+ * netroot. Fallback when the full -netroot DT doesn't come up.
+ */
+/dts-v1/;
+
+#include "sm8650-oneplus-waffle-fap.dtsi"
+
+/ {
+	chosen {
+		bootargs = "console=tty0 loglevel=7 ignore_loglevel printk.devkmsg=on clk_ignore_unused pd_ignore_unused regulator_ignore_unused nokaslr fbcon=font:TER16x32 fap.netroot=http://172.16.42.2:8000/netroot.tar.gz";
+	};
+};

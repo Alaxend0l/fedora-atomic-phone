@@ -60,6 +60,7 @@ build). Each patch carries `Upstream-Status:`.
 | Patch | What | Upstream-Status |
 |---|---|---|
 | 0001-power-sequencing-qcom-wcn-power-down-at-shutdown | `.shutdown` for pwrseq-qcom-wcn: WLAN_EN/BT_EN low, rail/clock votes dropped, so the WCN7850 restarts from reset after a warm reboot (Wi‑Fi otherwise stuck in SBL) | Pending (not submitted, untested on hardware) |
+| 0002-ASoC-codecs-add-TFA9874-amplifier-driver | conservative TFA9874 (TFA2) ASoC driver for the OnePlus 12 speaker amps: no boost, vendor gain, documented user registers only (no key/MTP/hidden), off until "Amp Enable" is set | Pending (needs binding + datasheet review; untested on hardware) |
 
 ## Reproduce
 ```sh

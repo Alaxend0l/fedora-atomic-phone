@@ -1,0 +1,114 @@
+// SPDX-License-Identifier: (GPL-2.0+ OR BSD-3-Clause)
+/*
+ * OnePlus 12 (waffle), v8 hardware additions on top of
+ * sm8650-oneplus-waffle-fap.dtsi (branch oneplus12-hw). Our own file; it
+ * references labels of DaDDevil's board DT, which is only read from the
+ * pinned kernel tree at build time (dts/README.md).
+ *
+ * Included by the -netroot DT only. The -netroot-safe DT leaves it out
+ * (= the v7 hardware set with the v8 kernel), as a fallback if anything
+ * here keeps the sound card or the USB link from coming up.
+ *
+ * 1. Speakers: the two NXP TFA9874 on i2c_hub_7 behind LPASS
+ *    SECONDARY_MI2S (I2S1, gpio121-124). Driver: our tfa9874
+ *    (kernels/qcom-sm8650/patches/0002-*): probe resets and reads the
+ *    chip and leaves it powered down; no boost converter ever; the
+ *    amplifier only runs while a stream plays AND its "Amp Enable"
+ *    switch (default off) is set. Topology: netroot's patched AudioReach
+ *    file routes MultiMedia1/2/5 to SECONDARY_MI2S_RX.
+ * 2. USB-C analog headset: link the WCD9395 codec to the WCD USB-C audio
+ *    switch (typec-mux@e on i2c3) as on SM8650-QRD, so audio-accessory
+ *    mode (UCSI/pmic-glink) reaches the codec's MBHC and the switch
+ *    routes HPH L/R, mic and ground to the port.
+ * 3. Cameras: CAMSS, CCI0/1 and i2c9 (front camera + its EEPROM, which
+ *    is made read-only here) as the board DT has them.
+ * Sensors (SSC on the ADSP) need no DT change: FastRPC is in sm8650.dtsi.
+ */
+
+/* 1. Speakers */
+&{/sound} {
+	pinctrl-0 = <&sec_mi2s_active>;
+	pinctrl-names = "default";
+
+	speaker-dai-link {
+		link-name = "Speaker Playback";
+
+		cpu {
+			sound-dai = <&q6apmbedai SECONDARY_MI2S_RX>;
+		};
+
+		codec {
+			sound-dai = <&speaker_amp_bot>, <&speaker_amp_top>;
+		};
+
+		platform {
+			sound-dai = <&q6apm>;
+		};
+	};
+};
+
+&i2c_hub_7 {
+	status = "okay";
+};
+
+/* vdd-supply (L15B 1.8 V) and reset-gpios (173/178, high = reset) as the board DT has them. */
+&speaker_amp_bot {
+	compatible = "nxp,tfa9874";
+	#sound-dai-cells = <0>;
+	sound-name-prefix = "SpkrBot";
+};
+
+&speaker_amp_top {
+	compatible = "nxp,tfa9874";
+	#sound-dai-cells = <0>;
+	sound-name-prefix = "SpkrTop";
+};
+
+/* 2. USB-C analog headset (as sm8650-qrd.dts) */
+&wcd939x {
+	mode-switch;
+	orientation-switch;
+
+	port {
+		wcd_codec_headset_in: endpoint {
+			remote-endpoint = <&wcd_usbss_headset_out>;
+		};
+	};
+};
+
+&i2c3 {
+	status = "okay";
+
+	typec-mux@e {
+		ports {
+			port@1 {
+				reg = <1>;
+
+				wcd_usbss_headset_out: endpoint {
+					remote-endpoint = <&wcd_codec_headset_in>;
+				};
+			};
+		};
+	};
+};
+
+/* 3. Cameras */
+&camss {
+	status = "okay";
+};
+
+&cci0 {
+	status = "okay";
+};
+
+&cci1 {
+	status = "okay";
+};
+
+&i2c9 {
+	status = "okay";
+
+	eeprom@54 {
+		read-only;
+	};
+};

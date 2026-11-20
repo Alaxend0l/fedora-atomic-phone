@@ -9,6 +9,8 @@
 /dts-v1/;
 
 #include "sm8650-oneplus-waffle-fap.dtsi"
+/* v8: speakers, USB-C headset, cameras (the -netroot-safe DT leaves this out) */
+#include "sm8650-oneplus-waffle-fap-hw.dtsi"
 
 / {
 	chosen {
