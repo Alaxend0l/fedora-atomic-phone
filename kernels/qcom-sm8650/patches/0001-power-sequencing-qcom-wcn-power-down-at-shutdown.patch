@@ -1,0 +1,171 @@
+SPDX-License-Identifier: GPL-2.0-only
+From: fedora-atomic-phone <noreply@fedora-atomic-phone.invalid>
+Subject: [PATCH] power: sequencing: qcom-wcn: power the chip down at shutdown
+
+On the OnePlus 12 (SM8650 + WCN7850 on PCIe0), Wi-Fi works after a cold
+boot or after a reboot from Android, but not after a warm reboot from a
+Linux kernel with ath12k: MHI reports "Current EE: SECONDARY BOOTLOADER",
+qcom_mhi_qrtr fails with -107 and no wlan interface appears.
+
+ath12k's .shutdown powers the firmware down over MHI, but nothing turns
+the chip off: the pwrseq core keeps WLAN_EN/BT_EN high and the rails on
+for as long as a consumer (pci-pwrctrl-pwrseq for ath12k, hci_qca for
+Bluetooth) holds them, and neither consumer has a .shutdown that powers
+off. Give the provider a .shutdown that drives WLAN_EN and BT_EN low and
+drops its regulator and clock votes, so the next kernel starts the chip
+from reset. The enable state of the regulators/clock is tracked so the
+shutdown path never unbalances them.
+
+Upstream-Status: Pending [not submitted; written against DaDDevil/linux
+  waffle-voice 9359fc74 (v7.4-rc3 based, which adds wlan_reset_pulse);
+  the hunks apply to mainline pwrseq-qcom-wcn.c with offsets]
+Tested: not yet (built only; OnePlus 12 test = warm reboot to bootloader,
+  fastboot boot, ath12k reaches mission mode)
+
+---
+ drivers/power/sequencing/pwrseq-qcom-wcn.c | 71 +++++++++++++++++++++++++++++-
+ 1 file changed, 68 insertions(+), 3 deletions(-)
+
+--- a/drivers/power/sequencing/pwrseq-qcom-wcn.c
++++ b/drivers/power/sequencing/pwrseq-qcom-wcn.c
+@@ -41,6 +41,9 @@
+ 	struct clk *clk;
+ 	struct qmp *qmp;
+ 	unsigned long last_gpio_enable_jf;
++	bool vddio_on;
++	bool vregs_on;
++	bool clk_on;
+ };
+ 
+ static void pwrseq_qcom_wcn_qmp_put(void *data)
+@@ -111,14 +114,21 @@
+ static int pwrseq_qcom_wcn_vddio_enable(struct pwrseq_device *pwrseq)
+ {
+ 	struct pwrseq_qcom_wcn_ctx *ctx = pwrseq_device_get_drvdata(pwrseq);
++	int ret;
+ 
+-	return regulator_enable(ctx->vddio);
++	ret = regulator_enable(ctx->vddio);
++	if (!ret)
++		ctx->vddio_on = true;
++
++	return ret;
+ }
+ 
+ static int pwrseq_qcom_wcn_vddio_disable(struct pwrseq_device *pwrseq)
+ {
+ 	struct pwrseq_qcom_wcn_ctx *ctx = pwrseq_device_get_drvdata(pwrseq);
+ 
++	ctx->vddio_on = false;
++
+ 	return regulator_disable(ctx->vddio);
+ }
+ 
+@@ -131,14 +141,21 @@
+ static int pwrseq_qcom_wcn_vregs_enable(struct pwrseq_device *pwrseq)
+ {
+ 	struct pwrseq_qcom_wcn_ctx *ctx = pwrseq_device_get_drvdata(pwrseq);
++	int ret;
+ 
+-	return regulator_bulk_enable(ctx->pdata->num_vregs, ctx->regs);
++	ret = regulator_bulk_enable(ctx->pdata->num_vregs, ctx->regs);
++	if (!ret)
++		ctx->vregs_on = true;
++
++	return ret;
+ }
+ 
+ static int pwrseq_qcom_wcn_vregs_disable(struct pwrseq_device *pwrseq)
+ {
+ 	struct pwrseq_qcom_wcn_ctx *ctx = pwrseq_device_get_drvdata(pwrseq);
+ 
++	ctx->vregs_on = false;
++
+ 	return regulator_bulk_disable(ctx->pdata->num_vregs, ctx->regs);
+ }
+ 
+@@ -151,14 +168,20 @@
+ static int pwrseq_qcom_wcn_clk_enable(struct pwrseq_device *pwrseq)
+ {
+ 	struct pwrseq_qcom_wcn_ctx *ctx = pwrseq_device_get_drvdata(pwrseq);
++	int ret;
+ 
+-	return clk_prepare_enable(ctx->clk);
++	ret = clk_prepare_enable(ctx->clk);
++	if (!ret)
++		ctx->clk_on = true;
++
++	return ret;
+ }
+ 
+ static int pwrseq_qcom_wcn_clk_disable(struct pwrseq_device *pwrseq)
+ {
+ 	struct pwrseq_qcom_wcn_ctx *ctx = pwrseq_device_get_drvdata(pwrseq);
+ 
++	ctx->clk_on = false;
+ 	clk_disable_unprepare(ctx->clk);
+ 
+ 	return 0;
+@@ -562,6 +585,7 @@
+ 		return -ENOMEM;
+ 
+ 	ctx->of_node = dev->of_node;
++	platform_set_drvdata(pdev, ctx);
+ 
+ 	ctx->pdata = device_get_match_data(dev);
+ 	if (!ctx->pdata)
+@@ -628,6 +652,46 @@
+ 	return 0;
+ }
+ 
++/*
++ * Take the chip all the way down when the system goes down. The pwrseq core
++ * keeps the units on for as long as a consumer (ath12k through pci-pwrctrl,
++ * hci_qca) holds them, and neither consumer powers off on shutdown, so a
++ * warm reboot leaves WLAN_EN/BT_EN high and the rails on. The WCN7850 then
++ * keeps running across the reset, and the next kernel finds its firmware
++ * stuck in the secondary bootloader ("Current EE: SECONDARY BOOTLOADER")
++ * instead of booting it from reset. The consumers are shut down before us
++ * (they were probed later), so nothing talks to the chip any more.
++ */
++static void pwrseq_qcom_wcn_shutdown(struct platform_device *pdev)
++{
++	struct pwrseq_qcom_wcn_ctx *ctx = platform_get_drvdata(pdev);
++
++	if (!ctx)
++		return;
++
++	/* NULL descriptors (optional GPIOs) are no-ops. */
++	gpiod_set_value_cansleep(ctx->wlan_gpio, 0);
++	gpiod_set_value_cansleep(ctx->bt_gpio, 0);
++
++	if (ctx->clk_on) {
++		clk_disable_unprepare(ctx->clk);
++		ctx->clk_on = false;
++	}
++
++	if (ctx->vregs_on) {
++		regulator_bulk_disable(ctx->pdata->num_vregs, ctx->regs);
++		ctx->vregs_on = false;
++	}
++
++	if (ctx->vddio_on) {
++		regulator_disable(ctx->vddio);
++		ctx->vddio_on = false;
++	}
++
++	/* Let the PMU and the rails settle before the reset or power-off. */
++	msleep(100);
++}
++
+ static const struct of_device_id pwrseq_qcom_wcn_of_match[] = {
+ 	{
+ 		.compatible = "qcom,wcn3950-pmu",
+@@ -675,6 +739,7 @@
+ 		.of_match_table = pwrseq_qcom_wcn_of_match,
+ 	},
+ 	.probe = pwrseq_qcom_wcn_probe,
++	.shutdown = pwrseq_qcom_wcn_shutdown,
+ };
+ module_platform_driver(pwrseq_qcom_wcn_driver);
+ 

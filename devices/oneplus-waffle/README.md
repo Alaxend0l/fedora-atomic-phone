@@ -32,7 +32,8 @@ unlocked (orange), 16 GB RAM (ddr_info; verify). **Anti-rollback fuse is
 | Audio | WCD9395 (headphone path, AMIC1-5) + 2× TFA9874 speaker amps | WCD9395/LPASS/AudioReach upstream; TFA9874 no driver | v6: WCD path built, untested; speakers blocked |
 | Charging | ADSP (pmic-glink, OnePlus battmgr messages) | out-of-tree changes | untested |
 | Modem | SM8650 MPSS | upstream PAS | untested |
-| Other | haptics (PM8550B), alert slider, IR, NFC SN220, fingerprint | mostly not | untested |
+| GPU | Adreno 750 | upstream msm (zap is OnePlus-signed) | v7: built, untested |
+| Other | haptics (PM8550B), alert slider, IR, NFC SN220, fingerprint | mostly not | haptics v7: built, untested |
 
 ## Boot chain (stock, measured from the backup)
 XBL → UEFI → ABL. Header **v4** everywhere:
@@ -108,9 +109,17 @@ Images (from `build-env/fap-waffle-build.sh images`, in
 devices/oneplus-waffle/build-env/fap-waffle-build.sh all
 # optional: header v2 fallback from the stock backup (read-only mount)
 STOCK_BACKUP=~/Develop/OnePlus12/backup/partitions-20261120 devices/oneplus-waffle/build-env/fap-waffle-build.sh images
-# optional: generic netroot + this kernel's modules
-NETROOT_GENERIC=~/Develop/fap-build/netroot-shiba/netroot.tar.gz devices/oneplus-waffle/build-env/fap-waffle-build.sh netroot
+# optional: generic netroot + this kernel's modules (+ the unit's firmware: local only)
+NETROOT_GENERIC=~/Develop/fap-build/netroot-shiba/netroot.tar.gz \
+  PHONE_BACKUP=~/Develop/OnePlus12/backup/partitions-20261120 \
+  VENDOR_FILES=~/Develop/OnePlus12/backup/vendor-files-20261120 \
+  devices/oneplus-waffle/build-env/fap-waffle-build.sh netroot
+# GPU firmware only, for another root (e.g. Plasma): unpack at / of that root
+VENDOR_FILES=~/Develop/OnePlus12/backup/vendor-files-20261120 devices/oneplus-waffle/build-env/fap-waffle-build.sh gpu-firmware
 ```
+The kernel tree gets our patches from
+[kernels/qcom-sm8650/patches/](../../kernels/qcom-sm8650/patches/) (`series`,
+each with an `Upstream-Status:` line) on every `kernel`/`dtb` run.
 podman image `localhost/fap-waffle-build` ([build-env/Containerfile](build-env/Containerfile)),
 case-sensitive volume `waffle-build`, outputs in `~/Develop/fap-build/waffle/`.
 (`build-env/`, not `build/`: `build` is this device's image-layer script.)
@@ -169,8 +178,30 @@ The GPU stays off in the DT, so `build` sets LIBGL/GBM_ALWAYS_SOFTWARE
 (llvmpipe at 1440×3168: expect it to be slow). SDDM logs `phone` in
 (password 147147, dev only); SSH as root over USB as before.
 
+## GPU, Bluetooth, video, haptics (v7, built 2026-11-20, untested)
+- **GPU:** Adreno 750 (`qcom,adreno-43051401`, msm "gen70900") on, with
+  gpucc built in (the GPU is a component of the msm DRM device, so a
+  modular gpucc would hold back the display). Firmware at first open of the
+  DRM device: `qcom/gen70900_sqe.fw.xz`, `qcom/gmu_gen70900.bin.xz` (Fedora
+  qcom-firmware) and `qcom/sm8650/oneplus/waffle/gen70900_zap.mbn` (unit
+  /vendor; linux-firmware's `qcom/sm8650/gen70900_zap.mbn` is QRD-signed).
+  Userspace: Fedora mesa (freedreno, turnip). Any root can take the firmware
+  from `fap-waffle-build.sh gpu-firmware`; with it, drop
+  `LIBGL_ALWAYS_SOFTWARE`.
+- **Bluetooth:** WCN7850 on UART14 (`qcom,wcn7850-bt`, hci_qca, 3.2 Mbaud),
+  powered by the same PMU as Wi‑Fi. Firmware from the unit's `bluetooth_a`
+  (`hmtbtfw20.tlv`, board-specific `hmtnv20.*`) in
+  `/usr/lib/firmware/updates/qca` (searched before Fedora's generic copies).
+- **Video:** Iris (vpu33) with the unit's `vpu33_4v.mbn`.
+- **Haptics:** PM8550B LRA via DaDDevil's `qcom-spmi-haptics` (input FF). We
+  use OnePlus's own vmax (1720 mV, dtbo entry 15) instead of the board DT's
+  2.4 V. Custom FF effects can carry their own vmax (driver clamps at 10 V):
+  test with `fftest`'s built-in effects only.
+
 ## Known issues (v5/v6 live tests, 2026-11-20)
-- **Wi‑Fi after a warm reboot from our Linux:** ath12k works (joined a
+- **Wi‑Fi after a warm reboot from our Linux** (v7 carries a fix, untested:
+  `kernels/qcom-sm8650/patches/0001-*` gives pwrseq-qcom-wcn a `.shutdown`
+  that drives WLAN_EN/BT_EN low and drops its rail votes). Before: ath12k works (joined a
   network, HTTPS OK) only when the previous boot was LineageOS. After
   `systemctl reboot --reboot-argument=bootloader` + `fastboot boot` the
   WCN7850 firmware sits in its secondary bootloader ("Current EE: SECONDARY

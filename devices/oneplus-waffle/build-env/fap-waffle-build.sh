@@ -17,6 +17,9 @@
 #   initramfs     static busybox + boot/android-bootimg/tiny-init + modules
 #   images        uniLoader per variant, wrapped in boot images (ramboot/)
 #   netroot       generic netroot tarball + this kernel's modules (optional)
+#   gpu-firmware  only the Adreno 750 firmware set (Fedora SQE/GMU + the
+#                 unit's zap shader) as OUT/gpu-firmware/waffle-gpu-firmware.tar.gz,
+#                 to unpack into any root (e.g. the Plasma root); local only
 #   all           kernel dtb initramfs images
 #   bisect        crash-bisect variants in OUT/bisect (needs 'all' and
 #                 '--daddevil kernel' first): v1 = DaDDevil's own recipe
@@ -59,6 +62,12 @@
 #                  and modemst1/modemst2/fsg/fsc (EFS copies for rmtfs -r)
 #                  go into the netroot tarball, which therefore must stay
 #                  local (it carries the unit's IMEI data and OEM firmware).
+#                  v7: also bluetooth_a.img (BT patch + NVM files).
+#   VENDOR_FILES   host dir of this unit's /vendor + /odm copy
+#                  (OnePlus12/backup/vendor-files-20261120: tree/ +
+#                  phone-manifest.sha256), read-only (netroot, gpu-firmware):
+#                  GPU zap shader and Iris firmware, checked against the
+#                  phone-side manifest. OEM firmware: outputs stay local.
 set -euo pipefail
 
 IMAGE=localhost/fap-waffle-build
@@ -102,6 +111,11 @@ if [[ -z ${FAP_WAFFLE_INNER:-} ]]; then
   if [[ -n ${PHONE_BACKUP:-} ]]; then
     [[ -f $PHONE_BACKUP/modem_a.img ]] || { echo "no $PHONE_BACKUP/modem_a.img" >&2; exit 1; }
     extra+=(-v "$(cd "$PHONE_BACKUP" && pwd):/backup:ro")
+  fi
+  if [[ -n ${VENDOR_FILES:-} ]]; then
+    [[ -f $VENDOR_FILES/phone-manifest.sha256 && -d $VENDOR_FILES/tree/vendor/firmware ]] ||
+      { echo "VENDOR_FILES needs tree/ and phone-manifest.sha256" >&2; exit 1; }
+    extra+=(-v "$(cd "$VENDOR_FILES" && pwd):/vendor-files:ro")
   fi
   [[ -n ${NETROOT_GENERIC:-} ]] && extra+=(-v "$(cd "$(dirname "$NETROOT_GENERIC")" && pwd)/$(basename "$NETROOT_GENERIC"):/netroot-generic.tar.gz:ro")
   tty=(); [[ -t 0 && -t 1 ]] && tty=(-it)
@@ -167,7 +181,8 @@ fetch_tree() {
       git -C "$K" checkout -q -f --detach FETCH_HEAD
     fi
     [[ $(git -C "$K" rev-parse HEAD) == "$WAFFLE_COMMIT" ]] || die "waffle-voice moved: not at $WAFFLE_COMMIT"
-    echo "waffle-voice $WAFFLE_COMMIT" > "$S/kernel-source"
+    apply_patches
+    echo "waffle-voice $WAFFLE_COMMIT + kernels/qcom-sm8650/patches ($(grep -cv '^#' "$PATCHES/series") patches)" > "$S/kernel-source"
   else
     if [[ ! -d $K/.fap-prepared ]]; then
       rm -rf "$K" && mkdir -p "$K"
@@ -179,6 +194,23 @@ fetch_tree() {
     fi
     echo "Fedora kernel-7.3.4-300.fc45.src.rpm (linux-7.3.4 + patch-7.3-redhat.patch)" > "$S/kernel-source"
   fi
+}
+
+# Our kernel patches (kernels/qcom-sm8650/patches/series, each with an
+# Upstream-Status line), applied to the pinned waffle-voice checkout. The
+# tracked files are reset to the pinned commit first (only files that
+# differ are rewritten, so make rebuilds just those), then every patch must
+# apply cleanly.
+PATCHES=/repo/kernels/qcom-sm8650/patches
+apply_patches() {
+  git -C "$K" reset -q --hard "$WAFFLE_COMMIT"
+  local p
+  while read -r p; do
+    [[ -z $p || $p == \#* ]] && continue
+    grep -q '^Upstream-Status: ' "$PATCHES/$p" || die "$p has no Upstream-Status line"
+    git -C "$K" apply --whitespace=nowarn "$PATCHES/$p" || die "patch does not apply: $p"
+    echo "applied: $p"
+  done < "$PATCHES/series"
 }
 
 kconfig() {
@@ -519,6 +551,8 @@ netroot_phone_files() {   # netroot_phone_files <root>
 # chrony: v5's netroot had none, so the clock stayed wrong after boot (no
 # RTC time the kernel trusts); it syncs once Wi-Fi is up.
 NETROOT_PKGS="alsa-utils alsa-ucm alsa-ucm-utils dnsmasq chrony"
+# v7: GPU userspace + test tools, Bluetooth, haptics (fftest) and V4L2 tools.
+NETROOT_PKGS_V7="mesa-dri-drivers mesa-vulkan-drivers egl-utils kmscube glmark2 vulkan-tools bluez linuxconsoletools v4l-utils"
 # The card is driver "sm8650", name "OnePlus 12" (board DT model), so q6apm
 # asks for qcom/sm8650/OnePlus 12-tplg.bin. Its back ends are SM8650-QRD's
 # (RX_CODEC_DMA_RX_0, TX_CODEC_DMA_TX_3); qcom-firmware's SM8650-QRD/MTP/HDK
@@ -529,12 +563,9 @@ netroot_audio_dhcp() {   # netroot_audio_dhcp <root>
   local R=$1 P=/work/stage/netroot-rpms
   say "netroot: $NETROOT_PKGS (Fedora 45) + AudioReach topology + UCM"
   dnf5 -y -q --installroot="$R" --use-host-config --releasever=45 \
-    --setopt=install_weak_deps=False install $NETROOT_PKGS
+    --setopt=install_weak_deps=False install $NETROOT_PKGS $NETROOT_PKGS_V7
   dnf5 -y -q --installroot="$R" --use-host-config --releasever=45 clean all >/dev/null
-  rm -rf "$P" && mkdir -p "$P"
-  (cd "$P" && dnf5 -q --releasever=45 download qcom-firmware >/dev/null)
-  rpmkeys -K "$P"/qcom-firmware-*.rpm | grep -q 'digests signatures OK' || die "qcom-firmware rpm signature"
-  (cd "$P" && rpm2cpio qcom-firmware-*.rpm | cpio -idm --quiet "./$TPLG_SRC")
+  qcom_firmware_rpm "$P" "./$TPLG_SRC"
   [[ -s $P/$TPLG_SRC ]] || die "qcom-firmware has no $TPLG_SRC"
   install -D -m 644 "$P/$TPLG_SRC" "$R/usr/lib/firmware/$TPLG_NAME"
   echo "topology: $(basename "$P"/qcom-firmware-*.rpm) $TPLG_SRC -> /usr/lib/firmware/$TPLG_NAME ($(sha256sum < "$P/$TPLG_SRC" | cut -c1-16)…)"
@@ -547,6 +578,83 @@ netroot_audio_dhcp() {   # netroot_audio_dhcp <root>
   mkdir -p "$R/etc/systemd/system/multi-user.target.wants"
   ln -sf /usr/lib/systemd/system/chronyd.service "$R/etc/systemd/system/multi-user.target.wants/chronyd.service"
   rm -rf "$P"
+}
+
+# Fedora's qcom-firmware rpm (signature-checked), unpacking only the given
+# paths into <dir>: qcom_firmware_rpm <dir> <./path>...
+qcom_firmware_rpm() {
+  local P=$1; shift
+  rm -rf "$P" && mkdir -p "$P"
+  (cd "$P" && dnf5 -q --releasever=45 download qcom-firmware >/dev/null)
+  rpmkeys -K "$P"/qcom-firmware-*.rpm | grep -q 'digests signatures OK' || die "qcom-firmware rpm signature"
+  (cd "$P" && rpm2cpio qcom-firmware-*.rpm | cpio -idm --quiet "$@")
+  echo "qcom-firmware: $(basename "$P"/qcom-firmware-*.rpm)"
+}
+
+# v7 GPU firmware (Adreno 750, msm "gen70900"), reusable for any root:
+# gpu_firmware <root>. SQE + GMU from Fedora (paths the driver asks for:
+# qcom/gen70900_sqe.fw, qcom/gmu_gen70900.bin; .xz is fine, FW_LOADER_COMPRESS
+# is on); zap shader from the unit's /vendor/firmware (OnePlus-signed), at
+# the DT's firmware-name. Mesa (freedreno/turnip) comes from the root's own
+# packages (mesa-dri-drivers, mesa-vulkan-drivers); no LIBGL_ALWAYS_SOFTWARE.
+GPU_FW_FEDORA="usr/lib/firmware/qcom/gen70900_sqe.fw.xz usr/lib/firmware/qcom/gmu_gen70900.bin.xz"
+GPU_ZAP=vendor/firmware/gen70900_zap.mbn
+WAFFLE_FW=usr/lib/firmware/qcom/sm8650/oneplus/waffle
+gpu_firmware() {   # gpu_firmware <root>
+  local R=$1 P=/work/stage/gpu-rpm f
+  [[ -d /vendor-files ]] || die "set VENDOR_FILES (for $GPU_ZAP)"
+  qcom_firmware_rpm "$P" $(for f in $GPU_FW_FEDORA; do echo "./$f"; done)
+  for f in $GPU_FW_FEDORA; do
+    [[ -s $P/$f ]] || die "qcom-firmware has no $f"
+    install -D -m 644 "$P/$f" "$R/$f"
+  done
+  vendor_file "$GPU_ZAP" "$R/$WAFFLE_FW/gen70900_zap.mbn"
+  rm -rf "$P"
+  echo "GPU firmware: $GPU_FW_FEDORA (Fedora) + $WAFFLE_FW/gen70900_zap.mbn (unit)"
+}
+
+# vendor_file <vendor/... path> <dest>: one file from the unit's vendor copy,
+# checked against the phone-side manifest (sha256 taken on the phone).
+vendor_file() {
+  local want got
+  want=$(awk -v f="$1" '$2 == f {print $1}' /vendor-files/phone-manifest.sha256)
+  [[ -n $want ]] || die "$1 not in phone-manifest.sha256"
+  got=$(sha256sum < "/vendor-files/tree/$1" | cut -d' ' -f1)
+  [[ $got == "$want" ]] || die "$1: sha256 $got, manifest says $want"
+  install -D -m 644 "/vendor-files/tree/$1" "$2"
+}
+
+# v7 Bluetooth firmware from the unit's bluetooth_a partition (vfat, read
+# with mtools from the read-only image): image/hmtbtfw*.tlv, hmtnv*. Into
+# /usr/lib/firmware/updates/qca, which the firmware loader searches before
+# /usr/lib/firmware, so they win over Fedora's generic atheros-firmware
+# copies without replacing them.
+netroot_bt_firmware() {   # netroot_bt_firmware <root>
+  local R=$1 M=/work/stage/fw-bt D=$1/usr/lib/firmware/updates/qca
+  [[ -f /backup/bluetooth_a.img ]] || die "no bluetooth_a.img in PHONE_BACKUP"
+  command -v mcopy >/dev/null || dnf -y -q install mtools >/dev/null
+  rm -rf "$M" && mkdir -p "$M" "$D"
+  MTOOLS_SKIP_CHECK=1 mcopy -s -n -i /backup/bluetooth_a.img ::/image "$M/"
+  cp -a "$M"/image/hmtbtfw* "$M"/image/hmtnv* "$D/"
+  [[ -f $D/hmtbtfw20.tlv && -f $D/hmtnv20.bin ]] || die "bluetooth_a has no hmtbtfw20.tlv/hmtnv20.bin"
+  echo "BT firmware: $(ls "$D" | wc -l) files in /usr/lib/firmware/updates/qca (bluetooth_a)"
+  rm -rf "$M"
+  # bluez's preset usually enables it already; make sure (no systemctl here).
+  mkdir -p "$R/etc/systemd/system/bluetooth.target.wants"
+  ln -sf /usr/lib/systemd/system/bluetooth.service "$R/etc/systemd/system/bluetooth.target.wants/bluetooth.service"
+  ln -sf /usr/lib/systemd/system/bluetooth.service "$R/etc/systemd/system/dbus-org.bluez.service"
+}
+
+cmd_gpu_firmware() {
+  local R=/work/gpu-fw-root
+  rm -rf "$R" && mkdir -p "$R"
+  gpu_firmware "$R"
+  mkdir -p /out/gpu-firmware
+  (cd "$R" && tar -czf /out/gpu-firmware/waffle-gpu-firmware.tar.gz usr)
+  printf '%s\n' "SENSITIVE: contains OnePlus firmware from this unit's /vendor (gen70900_zap.mbn). Local only; never commit or upload." \
+    > /out/gpu-firmware/SENSITIVE-README.txt
+  rm -rf "$R"
+  (cd /out/gpu-firmware && sha256sum waffle-gpu-firmware.tar.gz > SHA256SUMS && cat SHA256SUMS && tar -tzvf waffle-gpu-firmware.tar.gz)
 }
 
 cmd_netroot() {
@@ -564,8 +672,16 @@ cmd_netroot() {
   netroot_audio_dhcp "$R"
   if [[ -d /backup ]]; then
     netroot_phone_files "$R"
+    netroot_bt_firmware "$R"
   else
-    echo "no PHONE_BACKUP: netroot without DSP firmware and EFS copies"
+    echo "no PHONE_BACKUP: netroot without DSP/BT firmware and EFS copies"
+  fi
+  if [[ -d /vendor-files ]]; then
+    gpu_firmware "$R"
+    vendor_file vendor/firmware/vpu33_4v.mbn "$R/$WAFFLE_FW/vpu33_4v.mbn"
+    echo "Iris firmware: $WAFFLE_FW/vpu33_4v.mbn (unit)"
+  else
+    echo "no VENDOR_FILES: netroot without GPU zap shader and Iris firmware"
   fi
   echo "unpacked: $(du -sxm "$R" | cut -f1) MiB (tiny-init tmpfs: fap.netroot_size= in the netroot DT)"
   mkdir -p "$D"
@@ -611,7 +727,7 @@ cmd_bisect() {
   (cd /out/bisect && sha256sum waffle-bisect-*.img uniLoader-bisect-*.bin kernel-daddevil.config > SHA256SUMS && cat SHA256SUMS)
 }
 
-[[ $# -ge 1 ]] || die "usage: fap-waffle-build.sh [--full|--daddevil] kernel|config-check|dtb|initramfs|images|netroot|all|bisect|shell"
+[[ $# -ge 1 ]] || die "usage: fap-waffle-build.sh [--full|--daddevil] kernel|config-check|dtb|initramfs|images|netroot|gpu-firmware|all|bisect|shell"
 for c in "$@"; do
   case $c in
     kernel) cmd_kernel ;;
@@ -620,6 +736,7 @@ for c in "$@"; do
     initramfs) cmd_initramfs ;;
     images) cmd_images ;;
     netroot) cmd_netroot ;;
+    gpu-firmware) cmd_gpu_firmware ;;
     all) cmd_kernel; cmd_dtb; cmd_initramfs; cmd_images ;;
     bisect) cmd_bisect ;;
     shell) exec bash ;;

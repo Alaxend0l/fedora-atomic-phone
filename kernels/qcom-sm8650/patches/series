@@ -1,0 +1,3 @@
+# SPDX-License-Identifier: AGPL-3.0-or-later
+# Applied in this order to the waffle-voice tree (fap-waffle-build.sh fetch_tree).
+0001-power-sequencing-qcom-wcn-power-down-at-shutdown.patch

@@ -7,12 +7,13 @@
  * build time and never copied into this repository: it carries no licence
  * line yet (research/mainline-status.md), so we must not redistribute it.
  *
- * What stays on (v6): simplefb until msm, MDSS/DSI panel, UFS, touch,
- * ADSP/CDSP/MPSS/IPA, pmic-glink, PCIe0 Wi-Fi, reboot-mode, the WCD9395
- * audio path (sound card, RX/TX SoundWire, LPASS macros), USB in device
- * mode (gadget), power/volume keys, ramoops. Off: GPU, video, DP, the
- * speaker amplifiers and their I2S link, cameras, Bluetooth, IR, flash LED,
- * haptics, the charger/redriver/USB-C-audio-switch I2C buses.
+ * What stays on (v7): simplefb until msm, MDSS/DSI panel, GPU (Adreno 750),
+ * video codec (Iris), UFS, touch, ADSP/CDSP/MPSS/IPA, pmic-glink, PCIe0
+ * Wi-Fi, Bluetooth (UART14), haptics (stock drive voltage), reboot-mode,
+ * the WCD9395 audio path (sound card, RX/TX SoundWire, LPASS macros), USB
+ * in device mode (gadget), power/volume keys, ramoops. Off: DP, the speaker
+ * amplifiers and their I2S link, cameras, IR, flash LED, the
+ * charger/redriver/USB-C-audio-switch I2C buses.
  */
 
 #include "sm8650-oneplus-waffle.dts"
@@ -100,18 +101,53 @@
  * only a bridge (simpledrm) until msm takes over. DP is off: it needs the
  * QMP combo PHY and pmic-glink altmode, neither of which runs at first light,
  * and a DP controller that never binds would hold back the whole msm DRM
- * device. No GPU (needs zap firmware), no video.
+ * device. The GPU is a component of the same device (v7, below): if it
+ * failed to bind, the display would stay on simpledrm.
  */
 &mdss_dp0 { status = "disabled"; };
-&gpu { status = "disabled"; };
-&iris { status = "disabled"; };
 
 /*
- * Bluetooth (UART14), cameras, and the speaker amplifiers' I2C bus (TFA9874
- * x2, see the audio comment above). swr1/swr2 (WCD9395 RX/TX) are on as of
- * v6, as the board DT has them.
+ * v7 GPU: Adreno 750 (chip id 0x43051401, msm "gen70900"). The board DT
+ * enables &gpu; GMU, gpucc and the Adreno SMMU are on in sm8650.dtsi.
+ * Firmware, loaded at the first open of the DRM device: SQE and GMU from
+ * Fedora's qcom-firmware (qcom/gen70900_sqe.fw, qcom/gmu_gen70900.bin), the
+ * zap shader from this unit's /vendor/firmware (OnePlus-signed; the
+ * qcom/sm8650/gen70900_zap.mbn in linux-firmware is Qualcomm's QRD one,
+ * which this phone's TrustZone rejects). The zap file is a squashed .mbn
+ * (all segments in one ELF), as the vendor ships it.
  */
-&uart14 { status = "disabled"; };
+&gpu_zap_shader {
+	firmware-name = "qcom/sm8650/oneplus/waffle/gen70900_zap.mbn";
+};
+
+/*
+ * v7 video: Iris (vpu33). OnePlus-signed firmware from this unit's
+ * /vendor/firmware/vpu33_4v.mbn (Fedora's qcom/vpu/vpu33_p4.mbn is
+ * Qualcomm-signed); the board DT already names it, repeated here so the
+ * firmware path is ours.
+ */
+&iris {
+	firmware-name = "qcom/sm8650/oneplus/waffle/vpu33_4v.mbn";
+};
+
+/*
+ * v7 haptics: PM8550B LRA driver (qcom,spmi-haptics, DaDDevil). The board
+ * DT drives it at 2.4 V; OnePlus's own DT (dtbo entry 15, qcom,hv-haptics)
+ * uses qcom,vmax-mv = 1720 and qcom,lra-period-us = 7692. We use the stock
+ * vmax (lower), and the board DT's 7690 us period (same LRA, 5 us steps).
+ */
+&pm8550b_haptics {
+	qcom,vmax-microvolt = <1720000>;
+};
+
+/*
+ * Cameras and the speaker amplifiers' I2C bus (TFA9874 x2, see the audio
+ * comment above). swr1/swr2 (WCD9395 RX/TX) are on as of v6, Bluetooth
+ * (UART14, qcom,wcn7850-bt on the WCN7850 PMU) as of v7, as the board DT
+ * has them. BT firmware: qca/hmtbtfw20.tlv + qca/hmtnv20.<board id> from
+ * this unit's bluetooth_a partition, installed by the netroot in
+ * /usr/lib/firmware/updates/qca (ahead of Fedora's generic copies).
+ */
 &camss { status = "disabled"; };
 &cci0 { status = "disabled"; };
 &cci1 { status = "disabled"; };
@@ -129,9 +165,8 @@
 &i2c6 { status = "disabled"; };
 &i2c9 { status = "disabled"; };
 
-/* Flash LED and haptics: PMIC outputs, nothing to drive at first light. */
+/* Flash LED: PMIC output, nothing to drive yet. */
 &pm8550_flash { status = "disabled"; };
-&pm8550b_haptics { status = "disabled"; };
 
 /*
  * v5: DSPs, pmic-glink (battery via ADSP), Wi-Fi (PCIe0 + WCN7850 PMU) and
