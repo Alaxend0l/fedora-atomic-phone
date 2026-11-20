@@ -23,3 +23,6 @@ adwaita-sans-fonts
 adwaita-mono-fonts
 # OpenGL/GBM drivers (freedreno; llvmpipe while a GPU isn't up).
 mesa-dri-drivers
+# KWin/phoc dlopen() libGLESv2.so.2 at runtime (no RPM dependency); without it
+# the compositor aborts in a loop. Found on the OnePlus 12, 2026-11-20.
+libglvnd-gles

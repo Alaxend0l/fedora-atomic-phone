@@ -72,3 +72,6 @@ google-noto-color-emoji-fonts
 # OpenGL/GBM drivers: freedreno (Adreno) and llvmpipe/kms_swrast for phones
 # whose GPU isn't up yet. Nothing hard-requires the drivers themselves.
 mesa-dri-drivers
+# KWin/phoc dlopen() libGLESv2.so.2 at runtime (no RPM dependency); without it
+# the compositor aborts in a loop. Found on the OnePlus 12, 2026-11-20.
+libglvnd-gles
