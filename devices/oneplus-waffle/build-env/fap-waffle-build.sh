@@ -351,13 +351,14 @@ open(p, "w").write(s.replace(old, new))
 PY
 }
 
-# uniloader_build <name> [<Image> <dtb> <ramdisk> [reloc-safe]]: defaults are
-# the first-light inputs of variant <name> (plain|netroot).
+# uniloader_build <name> [<Image> <dtb> <ramdisk> [reloc-safe]]: empty or
+# missing inputs default to the first-light inputs of <name> (plain|netroot).
 uniloader_build() {
   local v=$1 U=/work/uniloader-$1
-  local img=${2:-$S/Image-waffle}
-  local dtb=${3:-$S/sm8650-oneplus-waffle-fap$([[ $v == plain ]] || echo "-$v").dtb}
-  local rd=${4:-$S/initramfs.cpio.gz}
+  local img=${2:-} dtb=${3:-} rd=${4:-}
+  [[ -n $img ]] || img=$S/Image-waffle
+  [[ -n $dtb ]] || dtb=$S/sm8650-oneplus-waffle-fap$([[ $v == plain ]] || echo "-$v").dtb
+  [[ -n $rd ]] || rd=$S/initramfs.cpio.gz
   rm -rf "$U"
   if [[ ! -d /work/src/uniLoader/.git ]]; then
     git clone -q "$UNILOADER_URL" /work/src/uniLoader
@@ -397,8 +398,10 @@ cmd_images() {
   rm -rf "$I" && mkdir -p "$I"/ramboot "$I"/parts
   : | cpio -o -H newc --quiet > "$S/empty.cpio"
   for v in $VARIANTS; do
-    say "uniLoader ($v)"
-    uniloader_build "$v"
+    say "uniLoader ($v, overlap-safe relocation)"
+    # reloc-safe: without it uniLoader corrupts itself on this ABL (bisect
+    # 2026-11-20: v1/stock uniLoader froze, v2/reloc-safe booted).
+    uniloader_build "$v" "" "" "" reloc-safe
     local sfx=""; [[ $v == plain ]] || sfx=-$v
     # (A) header v4, as stock boot_a: kernel only, empty cmdline, stock
     # os_version/patch level. ABL takes the stock DTB (vendor_boot) + dtbo +

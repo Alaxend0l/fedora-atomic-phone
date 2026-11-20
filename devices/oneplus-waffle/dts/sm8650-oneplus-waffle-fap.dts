@@ -1,31 +1,19 @@
 // SPDX-License-Identifier: (GPL-2.0+ OR BSD-3-Clause)
 /*
  * OnePlus 12 first light, plain variant: debug initramfs only (USB serial +
- * telnet on 172.16.42.1). Uses only the memory below 4 GiB, so a wrong
- * guess about the high DDR banks (the board DT hard-codes a 16 GB layout)
- * can't take the first boot down.
+ * telnet on 172.16.42.1). Memory: the board DT's full map, which is exactly
+ * what ABL writes into /memory on this unit (LineageOS
+ * /sys/firmware/devicetree/base/memory/reg, OnePlus12/log/stock-memory-map.txt;
+ * MemTotal 15.6 GB). uniLoader passes no memory node of its own, so the DT's
+ * is the one the kernel gets. uniLoader's leftovers (0xa8010000.., ramdisk
+ * copy at 0xb6f95000, reserved by the kernel via linux,initrd-*) sit in
+ * System RAM on both maps.
  */
 /dts-v1/;
 
 #include "sm8650-oneplus-waffle-fap.dtsi"
 
 / {
-	/*
-	 * The board DT's ranges below 4 GiB (about 1.6 GiB). Same values as
-	 * there; the 0x8_8000_0000+ banks are left out on purpose.
-	 */
-	memory@a0000000 {
-		reg = <0x0 0x816e0000 0x0 0x00320000>,
-		      <0x0 0x81cf5000 0x0 0x0000b000>,
-		      <0x0 0x81f20000 0x0 0x00580000>,
-		      <0x0 0x82800000 0x0 0x02000000>,
-		      <0x0 0x84a00000 0x0 0x02100000>,
-		      <0x0 0xa3180000 0x0 0x31ca3000>,
-		      <0x0 0xd5100000 0x0 0x02f00000>,
-		      <0x0 0xe1bb0000 0x0 0x1dc50000>,
-		      <0x0 0xffe00000 0x0 0x00200000>;
-	};
-
 	chosen {
 		bootargs = "console=tty0 loglevel=7 ignore_loglevel printk.devkmsg=on clk_ignore_unused pd_ignore_unused regulator_ignore_unused nokaslr fbcon=font:TER16x32";
 	};

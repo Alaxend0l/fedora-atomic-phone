@@ -82,8 +82,15 @@
 &remoteproc_mpss { status = "disabled"; };
 &ipa { status = "disabled"; };
 
-/* Display stays on simple-framebuffer: no MDSS/DSI (would reset the splash), no GPU, no video. */
-&mdss { status = "disabled"; };
+/*
+ * Display: MDSS + DSI0 + the BOE AA545 panel as the board DT has them (built
+ * into the kernel). The panel is in command mode, so the splash buffer is
+ * only a bridge (simpledrm) until msm takes over. DP is off: it needs the
+ * QMP combo PHY and pmic-glink altmode, neither of which runs at first light,
+ * and a DP controller that never binds would hold back the whole msm DRM
+ * device. No GPU (needs zap firmware), no video.
+ */
+&mdss_dp0 { status = "disabled"; };
 &gpu { status = "disabled"; };
 &iris { status = "disabled"; };
 
