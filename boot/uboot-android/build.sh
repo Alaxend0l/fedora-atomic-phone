@@ -22,7 +22,17 @@ source "$here/../bootimg-args.sh"
 
 # qcom_defconfig is U-Boot's generic Qualcomm build; the board comes from the
 # device tree, which U-Boot carries a copy of under dts/upstream/.
-make -C "$src" "${UBOOT_DEFCONFIG:-qcom_defconfig}"
+# Config fragments (e.g. qcom-phone.config) are merged on top of the defconfig.
+# shellcheck disable=SC2086
+make -C "$src" "${UBOOT_DEFCONFIG:-qcom_defconfig}" ${UBOOT_CONFIG_FRAGMENTS:-}
+# A device can ship its own default environment (e.g. to boot into fastboot
+# when its buttons don't work in U-Boot).
+if [ -n "${UBOOT_ENV_FILE:-}" ]; then
+    "$src/scripts/config" --file "$src/.config" \
+        --enable ENV_USE_DEFAULT_ENV_TEXT_FILE \
+        --set-str ENV_DEFAULT_ENV_TEXT_FILE "$(realpath "$dev/$UBOOT_ENV_FILE")"
+    make -C "$src" olddefconfig
+fi
 make -C "$src" -j "$(nproc)" DEVICE_TREE="$UBOOT_DTB"
 gzip -c "$src/u-boot-nodtb.bin" > "$out/u-boot-nodtb.bin.gz"
 

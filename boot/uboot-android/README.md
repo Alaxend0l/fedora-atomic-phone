@@ -141,9 +141,45 @@ Ubuntu Touch boots. So the stock overlay wasn't the only blocker.
    phone within seconds; the phone comes back in ABL fastboot (likely because
    the normal boot fails without dtbo). No-op dtbo + variant v3 from a fresh
    session: no handoff. So: **erase dtbo**; the no-op dtbo isn't the way.
-9. **Why U-Boot resets** (next): build with `qcom-phone.config`; get output on
-   the framebuffer or a USB gadget; check whether a watchdog left running by
-   ABL bites (hypothesis).
+9. **Why U-Boot reset (solved 2026-11-20):** `qcom_defconfig` alone has
+   `CONFIG_REQUIRE_SERIAL_CONSOLE=y` and no `PANIC_HANG`; the billie2 DT has no
+   serial console, so U-Boot panicked and reset. With `qcom-phone.config`
+   (`UBOOT_CONFIG_FRAGMENTS`) **U-Boot runs and draws on the screen**
+   (2027.01-rc2, `Model: OnePlus Nord N100`, the mainline DT).
+
+### U-Boot on the N100: what works (2026-11-20)
+Booted from RAM with dtbo_a erased, fresh ABL session.
+- Display (framebuffer console), clocks (`gcc_sm6115`), pinctrl, power
+  domains, USB device mode (`dwc3`), qusb2 PHY, RNG, SMMU.
+- **USB fastboot** (`18d1:4ee0`, product `oneplus-billie2`) via our
+  `devices/oneplus-billie2/uboot.env`: boots into fastboot when there's no OS,
+  because no button works. `fastboot oem console` reads U-Boot's log;
+  `fastboot oem run:<cmd>` runs commands.
+- Watchdog: `WDT: Not starting watchdog@f017000` (not the reset cause).
+
+What doesn't:
+- **UFS:** `ufshc@4804000` (qcom-ufshcd), its SCSI child and the qmp-ufs PHY
+  are bound but never probed; `scsi scan` and `part list scsi 0` fail. U-Boot
+  can't read internal storage, so it can't load GRUB/kernels from the ESP yet.
+  Likely missing RPM/PMIC regulator support for the UFS supplies (unverified).
+- **SPMI/PMIC:** `spmi@1c40000` not probed, so the power key (and volume keys,
+  which the mainline DT doesn't describe) don't work.
+- **SD card:** `power-domain driver not found` (rpmpd).
+- `GENI-SE wrapper not found` (QUP serial/I2C/SPI).
+
+Gotchas:
+- U-Boot's console record is 24 KB. Reading it over fastboot produces
+  `dwc3 ... was not queued` lines that fill it; read it **once**, after running
+  the `oem run:` commands. Afterwards: `Error reading console`.
+- To get out of U-Boot without buttons: `fastboot reboot`, or hold
+  **Power + Volume Up** (~15 s; Power alone does nothing).
+- If ABL landed in fastboot because a normal boot failed (e.g. dtbo erased),
+  that counts as a failed boot: `fastboot reboot bootloader` before `fastboot boot`.
+
+**Consequence:** until U-Boot can drive UFS, `uboot-android` can't boot an
+installed system. `android-bootimg` (kernel + initramfs + DT in the boot image,
+Linux drives UFS itself) is the way to a first Linux boot, and works from RAM
+with `fastboot boot`.
 
 ### Session artifact: `Load Error` after a failed boot
 After a `fastboot boot` that ABL accepts but doesn't start, the next

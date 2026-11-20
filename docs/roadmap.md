@@ -72,7 +72,7 @@ serious.
 Each step is reversible via fastboot or EDL.
 1. [x] Check Fedora's kernel config for SM6115 drivers: all present in 7.3.4 (fc45), incl. the billie2 DTB (kernels/qcom-sm6115)
 2. [x] Build U-Boot (`just uboot`, boot/uboot-android/): uboot.img built 2026-11-20
-2b. [ ] `fastboot boot uboot.img` (RAM only) shows U-Boot on screen. Tried 2026-11-20: ABL accepts but doesn't start it; stock boot_a RAM-boots fine. See boot/uboot-android/README.md
+2b. [x] `fastboot boot uboot.img` (RAM only) shows U-Boot on screen: works with dtbo erased + qcom-phone.config (2026-11-20). U-Boot USB fastboot works; UFS/PMIC not yet in U-Boot.
 3. [ ] Decide the ESP partition; extract `vendor` firmware first if it's `super`
 4. [ ] First flash: Fedora tty image boots to the framebuffer console
 5. [ ] SSH over USB; pstore collects crash logs
