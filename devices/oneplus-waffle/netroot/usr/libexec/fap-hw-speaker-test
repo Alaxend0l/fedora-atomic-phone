@@ -23,9 +23,9 @@ tone=/usr/share/fap-hw/tone-1k-${lvl}dBFS-$side.wav
 
 C=$(sed -n 's/^ *\([0-9]*\) \[.*\]: .* - OnePlus 12$/\1/p' /proc/asound/cards | head -1)
 [[ -n $C ]] || { echo "no 'OnePlus 12' sound card" >&2; exit 1; }
-ctl() { amixer -q -c "$C" cset "name=$1" "$2"; }
+ctl() { amixer -q -D "hw:$C" cset "name=$1" "$2"; }
 name() {   # name <pattern>: the one control whose name matches
-  local n; n=$(amixer -c "$C" controls | sed -n "s/.*name='\(.*\)'.*/\1/p" | grep -E "$1" || true)
+  local n; n=$(amixer -D "hw:$C" controls | sed -n "s/.*name='\(.*\)'.*/\1/p" | grep -E "$1" || true)
   [[ $(grep -c . <<< "$n") == 1 && -n $n ]] || { echo "control matching /$1/: '${n//$'\n'/, }'" >&2; exit 1; }
   echo "$n"
 }
