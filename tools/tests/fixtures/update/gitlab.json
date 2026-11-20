@@ -1,0 +1,26 @@
+{
+ "_comment": "SPDX-License-Identifier: AGPL-3.0-or-later. Recorded gitlab.freedesktop.org /projects/mesa%2Fmesa/issues?search=a610 on 2026-11-20, trimmed to the fields review.py reads; user names replaced.",
+ "issues": [
+  {
+   "iid": 10354,
+   "title": "Device loss when calling vkCmdBindVertexBuffers with 16 bindings on Turnip",
+   "state": "opened",
+   "web_url": "https://gitlab.freedesktop.org/mesa/mesa/-/work_items/10354",
+   "updated_at": "2023-12-29T17:46:54.150Z",
+   "labels": [
+    "turnip"
+   ]
+  },
+  {
+   "iid": 8055,
+   "title": "Turnip does not load on A11/VNDK10",
+   "state": "opened",
+   "web_url": "https://gitlab.freedesktop.org/mesa/mesa/-/work_items/8055",
+   "updated_at": "2023-04-30T01:14:48.978Z",
+   "labels": [
+    "enhancement",
+    "turnip"
+   ]
+  }
+ ]
+}

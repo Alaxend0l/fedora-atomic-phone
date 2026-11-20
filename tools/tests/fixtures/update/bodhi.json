@@ -1,0 +1,88 @@
+{
+ "_comment": "SPDX-License-Identifier: AGPL-3.0-or-later. Recorded https://bodhi.fedoraproject.org/updates/?builds=less-710-2.fc45 on 2026-11-20, trimmed to the fields review.py reads; user names replaced.",
+ "updates": [
+  {
+   "alias": "FEDORA-2026-360e7c14e7",
+   "status": "stable",
+   "type": "bugfix",
+   "severity": "low",
+   "karma": 4,
+   "stable_karma": 3,
+   "test_gating_status": "passed",
+   "notes": "-  fix parsing gpg files \"GPG symmetrically encrypted data\"",
+   "url": "https://bodhi.fedoraproject.org/updates/FEDORA-2026-360e7c14e7",
+   "builds": [
+    {
+     "nvr": "less-710-2.fc45",
+     "signed": true,
+     "release_id": 96,
+     "type": "rpm",
+     "epoch": 0
+    }
+   ],
+   "bugs": [
+    {
+     "bug_id": 2562986,
+     "title": "lesspipe does not decrypt older gpg encrypted files",
+     "security": false
+    },
+    {
+     "bug_id": 2600001,
+     "title": "synthetic security bug (fixture)",
+     "security": true
+    }
+   ],
+   "comments": [
+    {
+     "karma": 0,
+     "text": "This update has been submitted for testing by mhlavink. ",
+     "timestamp": "2026-11-02 11:12:37",
+     "user": {
+      "name": "bodhi"
+     }
+    },
+    {
+     "karma": 0,
+     "text": "This update's test gating status has been changed to 'waiting'.",
+     "timestamp": "2026-11-02 11:12:46",
+     "user": {
+      "name": "bodhi"
+     }
+    },
+    {
+     "karma": 0,
+     "text": "This update's test gating status has been changed to 'waiting'.",
+     "timestamp": "2026-11-02 11:12:52",
+     "user": {
+      "name": "bodhi"
+     }
+    },
+    {
+     "karma": 0,
+     "text": "This update's test gating status has been changed to 'passed'.",
+     "timestamp": "2026-11-02 13:06:55",
+     "user": {
+      "name": "bodhi"
+     }
+    },
+    {
+     "karma": 0,
+     "text": "This update has been submitted for testing by maintainer.",
+     "timestamp": "2026-11-01 10:00:00",
+     "user": {
+      "name": "bodhi"
+     }
+    },
+    {
+     "karma": -1,
+     "text": "Synthetic: breaks lesspipe on my aarch64 box (fixture).",
+     "timestamp": "2026-11-03 10:00:00",
+     "user": {
+      "name": "tester9"
+     }
+    }
+   ]
+  }
+ ],
+ "total": 1
+}

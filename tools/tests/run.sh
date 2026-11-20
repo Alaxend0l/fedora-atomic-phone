@@ -13,4 +13,6 @@ for t in "$here"/test-*.sh; do
 done
 echo "== test_lp_parse.py"
 python3 -I "$here/test_lp_parse.py" || rc=1
+echo "== test_update.py (needs PyYAML)"
+python3 -I "$here/test_update.py" || rc=1
 exit $rc
