@@ -10,17 +10,18 @@ when you stop. Newest log entries at the top.
 - **N100 kernel:** Fedora 45's kernel (7.3.4) has every SM6115 driver needed
   to mount root on UFS and ships `sm4250-oneplus-billie2.dtb`. No custom kernel
   needed for a first boot.
-- **N100 boot:** U-Boot builds (`uboot.img`). ABL accepts it via `fastboot boot`
-  but doesn't hand over (or U-Boot dies before doing anything visible).
+- **N100 boot:** U-Boot builds and **runs** when ABL gets a DT it accepts
+  (stock DTB table). ABL rejects the mainline billie2 DT (whatever kernel).
   Stock `boot_a` RAM-boots fine, so `fastboot boot` works on this phone.
 - **Phone state:** Ubuntu Touch 24.04 build 697, stock `dtbo_a` (hash
   verified), slot `a`, bootloader unlocked. Nothing of ours is installed.
 
 ## Next steps
-1. Bisect ABL vs U-Boot, RAM-only, stock dtbo: (a) stock kernel + our
-   mainline DTB, (b) U-Boot + the stock DTB section. Whichever hands over
-   (ABL fastboot disappears from USB) shows which half ABL rejects. Then
-   rebuild U-Boot with `qcom-phone.config`. See boot/uboot-android/README.md.
+1. Find what ABL needs in a DT. Stock base DTs have `__symbols__`, `/memory`
+   and `/soc`; mainline has no `__symbols__`, `/memory@80000000`, `/soc@0`.
+   Variants built in fap-build/dtvariants/ (v1 +symbols, v2 renamed nodes,
+   v3 both). RAM-boot each with stock dtbo; then with the no-op dtbo if
+   needed (a write: ask). Then `qcom-phone.config`.
 2. If U-Boot still won't start: try header v0 with appended DTB; check the
    Image header; or fall back to `BOOT_METHOD=android-bootimg` (kernel +
    initramfs directly, same dtbo constraint applies).
@@ -60,4 +61,6 @@ when you stop. Newest log entries at the top.
 | 2026-11-20 | `dtbo_a` erased + `uboot.img` | `Load Error`; dtbo restored, verified |
 | 2026-11-20 | `dtbo_a` = no-op dtbo + `uboot.img` | no handoff; dtbo restored, verified |
 | 2026-11-20 | `vbmeta_a` flags 0→2 (verification disabled) + stock dtbo + `uboot.img` | no handoff |
+| 2026-11-20 | swap B: U-Boot + **stock** DTB section, stock dtbo | **ABL hands over** (fastboot gone in <3 s); U-Boot resets the phone almost at once (user: "restarted right after the OnePlus logo"); Ubuntu Touch then boots normally. First proof U-Boot runs. |
+| 2026-11-20 | swap A: **stock kernel** + mainline DTB, stock dtbo | no handoff: ABL rejects the mainline DT itself |
 | 2026-11-20 | same vbmeta + `dtbo_a` erased + `uboot.img` | `Load Error` again: ABL needs a loadable dtbo regardless of AVB flags. vbmeta_a and dtbo_a restored, both hashes verified |
