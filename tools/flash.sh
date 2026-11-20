@@ -17,12 +17,20 @@ out=${2:?usage: $0 devices/<id> <outdir>}
 # shellcheck disable=SC1091
 source "$dev/device.env"
 
-# Partitions that hold per-device identity/calibration (IMEI, RF tuning).
-# A full restore from EDL does not bring them back. Never write them.
-PROTECTED="modemst1 modemst2 fsg fsc persist"
+# Never written, whatever a device.env says (A/B suffixes included):
+# - identity/calibration (IMEI, RF tuning); EDL restores don't bring them back
+PROTECTED_IDENTITY="modemst1 modemst2 fsg fsc persist"
+# - boot chain and secure firmware (Qualcomm); a bad write here can hard-brick
+PROTECTED_BOOTCHAIN="xbl xbl_config abl tz hyp rpm devcfg aop keymaster cmnlib cmnlib64 qupfw uefisecapp imagefv storsec multiimgoem featenabler vbmeta vbmeta_system"
+# - firmware the OS needs at runtime (extracted on the phone, never replaced)
+PROTECTED_FIRMWARE="modem dsp bluetooth bt_firmware"
+PROTECTED="$PROTECTED_IDENTITY $PROTECTED_BOOTCHAIN $PROTECTED_FIRMWARE"
+# This script never runs `fastboot flashing lock` / `oem lock`: relocking
+# with a non-stock OS installed can leave a phone unbootable.
 
 die() { echo "flash: $*" >&2; exit 1; }
 guard() {
+    local p
     for p in $PROTECTED; do
         case "$1" in "$p"|"${p}_a"|"${p}_b") die "refusing to write protected partition $1" ;; esac
     done

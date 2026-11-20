@@ -9,6 +9,52 @@
 - [ ] CI: build images on push (manual trigger for now)
 - [ ] Firmware extraction at first boot (modeled on droid-juicer)
 - [ ] Publish images to a registry; `bootc upgrade` from a phone
+- [x] Pluggable boot methods: uboot-android, android-bootimg, lk2nd (planned)
+
+## Porting tooling
+What slows ports down is per-device bring-up (device tree, panel, touch,
+firmware), not the distro layer. These make that loop fast and the dangerous
+things impossible. Top three first.
+
+1. [ ] **No-flash dev loop (top).** `fastboot boot` a kernel + initramfs from RAM,
+       root filesystem over USB networking (NBD/NFS) from the build host.
+       Rebuild kernel/DT → boot → test, nothing written to the phone. Flash only
+       once a device works. Make this the default porting path in docs/porting.md.
+2. [ ] **Crash logs on by default (top).**
+   - [ ] ramoops required in every device tree (`check-device.sh` warns if the
+         kernel DTB has no `ramoops` node)
+   - [ ] next-boot crash report service: pstore + PMIC power-off/power-on reasons
+         + last journal lines → one report (what UBports-N100's capture.sh /
+         reset-report.sh did from the host, built into the OS)
+   - [ ] netconsole over the USB network link, so the last kernel lines reach
+         the host even on a hard reset
+   - [ ] read the bootloader log region (`bootloader_log_mem` in the billie2 DT)
+3. [ ] **Hardware inventory → draft device (top).** Generalize hw-inventory.sh
+       (from the UBports-N100 notes repo); run it on stock/Halium and generate a
+       draft device folder plus a skeleton mainline DT from the vendor tree:
+       panel name and timings, touch bus/address, GPIOs, regulators, partition
+       table, firmware locations. Partial is fine; it saves days of reading.
+4. [ ] **Brick-proofing in the tools.**
+   - [x] `flash.sh` refuses identity, boot-chain and firmware partitions and
+         never relocks the bootloader
+   - [ ] automatic first-flash backups (identity partitions, stock boot, dtbo,
+         vbmeta)
+   - [ ] gate the first flash on a passed recovery check (EDL detected, verified
+         restore package for the exact model)
+   - [x] never write the slot we booted from (`fap-android-boot` writes the
+         inactive slot; fallback via the bootloader's failed-boot counter)
+5. [ ] **ABI mismatch check** for Halium-style vendor modules: compare
+       modversions and key header constants (e.g. `__GFP_BITS_SHIFT`) at build
+       time. Would have caught the UBports N100 audio bug immediately.
+6. [ ] **One kernel per chip family, devices as data:** a new phone = DT +
+       panel + touch driver. The device folder format is shaped for this.
+7. [ ] **Real-device CI:** phones on USB-controlled power with automated EDL
+       recovery, booting every build (LAVA-style, as Linaro does).
+
+Runtime-swappable drivers: modules and DT overlays already load at runtime and
+help when trying panel/touch settings, but many Qualcomm drivers don't unload
+cleanly (`rmmod` was risky on the N100). Use the RAM-boot loop for anything
+serious.
 
 ## OnePlus Nord N100 (`oneplus-billie2`)
 Each step is reversible via fastboot or EDL.
