@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- SPDX-License-Identifier: AGPL-3.0-or-later -->
+<!--
+  Run tools/update/review-pr.sh against the newest open update PR every
+  Tuesday 09:00 (the update workflow runs Mondays). Template: replace
+  @REPO@ with the absolute repo path and @HOME@ with your home directory,
+  then (docs/updates.md, "Scheduled reviews"):
+    sed -e "s|@REPO@|$PWD|g" -e "s|@HOME@|$HOME|g" \
+        tools/update/launchd/org.fap.update-review.plist.template \
+        > ~/Library/LaunchAgents/org.fap.update-review.plist
+    launchctl bootstrap gui/$(id -u) ~/Library/LaunchAgents/org.fap.update-review.plist
+  Ollama must be running then (the Ollama app, or `brew services start ollama`);
+  without it the comment has the evidence but no AI summary.
+-->
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+  <key>Label</key>
+  <string>org.fap.update-review</string>
+  <key>ProgramArguments</key>
+  <array>
+    <string>@REPO@/tools/update/review-pr.sh</string>
+    <string>--latest</string>
+  </array>
+  <key>WorkingDirectory</key>
+  <string>@REPO@</string>
+  <key>EnvironmentVariables</key>
+  <dict>
+    <key>PATH</key>
+    <string>/opt/homebrew/bin:@HOME@/.local/bin:/usr/local/bin:/usr/bin:/bin</string>
+    <key>FAP_LLM_URL</key>
+    <string>http://localhost:11434/v1</string>
+    <key>FAP_LLM_MODEL</key>
+    <string>qwen2.5:14b</string>
+  </dict>
+  <key>StartCalendarInterval</key>
+  <dict>
+    <key>Weekday</key>
+    <integer>2</integer>
+    <key>Hour</key>
+    <integer>9</integer>
+    <key>Minute</key>
+    <integer>0</integer>
+  </dict>
+  <key>StandardOutPath</key>
+  <string>@HOME@/Library/Logs/fap-update-review.log</string>
+  <key>StandardErrorPath</key>
+  <string>@HOME@/Library/Logs/fap-update-review.log</string>
+</dict>
+</plist>
