@@ -1,13 +1,9 @@
 #!/usr/bin/env bash
 # SPDX-License-Identifier: AGPL-3.0-or-later
-# Phosh: GNOME-based phone shell. Starts from Silverblue (see Justfile).
+# Phosh: GNOME-based phone shell. ./packages is the explicit package list;
+# this script only configures. Runs inside the build (tools/image/run-layer).
 set -euxo pipefail
 
-# Replace GNOME Shell + GDM with Phosh and its greeter (phrog).
-dnf5 -y remove gnome-shell gdm
-dnf5 -y install phosh phrog stevia
+# phrog is the greeter (greetd + phosh); it owns display-manager.service.
 systemctl enable --force phrog.service
-
-# Desktop-only apps that don't fit a phone. Firefox stays out of the image;
-# install it as a Flatpak so updates don't need an image rebuild.
-dnf5 -y remove firefox firefox-langpacks gnome-tour gnome-classic-session yelp || true
+systemctl set-default graphical.target

@@ -1,8 +1,16 @@
 #!/usr/bin/env bash
 # SPDX-License-Identifier: AGPL-3.0-or-later
-# Plasma Mobile: KDE's phone shell. Starts from Kinoite (see Justfile).
-# Untested placeholder; package set to be confirmed against Fedora's repos.
+# Plasma Mobile: KDE's phone shell. ./packages is the explicit package list;
+# this script only configures. Runs inside the build (tools/image/run-layer).
 set -euxo pipefail
 
-dnf5 -y install plasma-mobile
-dnf5 -y remove firefox firefox-langpacks || true
+# The desktop System Settings comes in by a hard dependency chain
+# (plasma-workspace → plasma-desktop → plasma-systemsettings), so it can't be
+# left out; keep it off the app grid (plasma-settings is the phone's).
+f=/usr/share/applications/systemsettings.desktop
+grep -q '^NoDisplay=true' "$f" || sed -i '/^\[Desktop Entry\]/a NoDisplay=true' "$f"
+
+# Boot to the graphical session through SDDM (autologin: rootfs/etc/sddm.conf.d).
+systemctl enable sddm.service
+systemctl set-default graphical.target
+

@@ -1,0 +1,25 @@
+# SPDX-License-Identifier: AGPL-3.0-or-later
+# Phosh: the GNOME-based phone shell. Explicit list, no weak deps
+# (docs/decisions/0003). Resolves on Fedora 45 aarch64 (2026-11-20, 528
+# packages on a bare root); not booted on a phone yet.
+
+# Shell, compositor (phoc, a hard dep), greeter, on-screen keyboard.
+# Fedora 45 dropped squeekboard; stevia provides phosh-osk.
+phosh
+phrog
+stevia
+# Phone settings (shell, feedback, OSK) and GNOME's settings app, the two
+# phosh recommends.
+phosh-mobile-settings
+gnome-control-center
+# Phone calls (ModemManager from base) and haptic/LED/sound feedback.
+calls
+feedbackd
+# Portals for Flatpak apps.
+xdg-desktop-portal-gnome
+xdg-desktop-portal-gtk
+# GNOME's default fonts.
+adwaita-sans-fonts
+adwaita-mono-fonts
+# OpenGL/GBM drivers (freedreno; llvmpipe while a GPU isn't up).
+mesa-dri-drivers
