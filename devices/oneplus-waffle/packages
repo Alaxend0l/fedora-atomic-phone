@@ -14,3 +14,7 @@ atheros-firmware
 # Vulkan (turnip) for the Adreno 750; GL/GBM (freedreno) is mesa-dri-drivers
 # from the desktop layer. GPU firmware: build-env/fap-waffle-build.sh.
 mesa-vulkan-drivers
+
+# Telephony (ModemManager, NetworkManager-wwan come from base): qmicli for
+# read-only QMI checks over QRTR (TEL.md in the build output, docs).
+libqmi-utils

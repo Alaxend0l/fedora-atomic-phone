@@ -60,12 +60,12 @@ features:
     camera-front:      {title: "Front camera", status: untested, notes: "", evidence: ""}
     camera-flash:      {title: "Camera flash / torch", status: untested, notes: "", evidence: ""}
   telephony:
-    modem:             {title: "Modem firmware boots", status: untested, notes: "mpss off in the first-light DT; ARB fuse 1: never flash firmware", evidence: ""}
-    sim:               {title: "SIM detection", status: untested, notes: "", evidence: ""}
-    sms:               {title: "SMS", status: untested, notes: "", evidence: ""}
-    mobile-data:       {title: "Mobile data", status: untested, notes: "", evidence: ""}
-    calls:             {title: "Voice calls (incl. call audio)", status: untested, notes: "", evidence: ""}
-    gnss:              {title: "GNSS / GPS", status: untested, notes: "", evidence: ""}
+    modem:             {title: "Modem firmware boots", status: untested, notes: "v6: modem runs (rmtfs -r on EFS RAM copies); tel: starts at boot (fap-rmtfs.service); ARB fuse 1: never flash firmware", evidence: "devices/oneplus-waffle/TELEPHONY.md"}
+    sim:               {title: "SIM detection", status: untested, notes: "tel: ModemManager 1.24 over QRTR; eSIM switch GPIOs not driven by our kernel; built, not tested", evidence: "devices/oneplus-waffle/TELEPHONY.md"}
+    sms:               {title: "SMS", status: untested, notes: "tel: Spacebar + ModemManager; no SMS over IMS; built, not tested", evidence: "devices/oneplus-waffle/TELEPHONY.md"}
+    mobile-data:       {title: "Mobile data", status: untested, notes: "tel: IPA v5.5 (board DT) + rmnet + NetworkManager-wwan; built, not tested", evidence: "devices/oneplus-waffle/TELEPHONY.md"}
+    calls:             {title: "Voice calls (incl. call audio)", status: broken, notes: "signalling via plasma-dialer/MM only; no call audio (voice topology, VCPM tables, TFA9874 earpiece); no VoLTE; never for emergency calls", evidence: "devices/oneplus-waffle/TELEPHONY.md"}
+    gnss:              {title: "GNSS / GPS", status: untested, notes: "tel: MM QMI LOC -> GeoClue modem-gps; qmicli --loc-* without SIM; built, not tested", evidence: "devices/oneplus-waffle/TELEPHONY.md"}
   software:
     desktop:           {title: "Mobile desktop (Plasma Mobile / Phosh)", status: untested, notes: "Plasma Mobile RAM-boot dev root built (make-devroot.sh + fap-waffle-build.sh netroot, llvmpipe: GPU off in the DT); not booted", evidence: "boot/android-bootimg/make-devroot.sh"}
     waydroid:          {title: "Android apps (Waydroid)", status: untested, notes: "", evidence: ""}

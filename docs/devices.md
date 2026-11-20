@@ -61,7 +61,7 @@ Status: **works** · **partial** (works with limits or a workaround) ·
 | telephony | SIM detection | untested | untested |
 | telephony | SMS | untested | untested |
 | telephony | Mobile data | broken | untested |
-| telephony | Voice calls (incl. call audio) | broken | untested |
+| telephony | Voice calls (incl. call audio) | broken | broken |
 | telephony | GNSS / GPS | untested | untested |
 | software | Mobile desktop (Plasma Mobile / Phosh) | works | untested |
 | software | Android apps (Waydroid) | works | untested |
@@ -163,12 +163,12 @@ From [devices/oneplus-waffle/features.yaml](../devices/oneplus-waffle/features.y
 | Rear camera | untested |  |  |
 | Front camera | untested |  |  |
 | Camera flash / torch | untested |  |  |
-| Modem firmware boots | untested | mpss off in the first-light DT; ARB fuse 1: never flash firmware |  |
-| SIM detection | untested |  |  |
-| SMS | untested |  |  |
-| Mobile data | untested |  |  |
-| Voice calls (incl. call audio) | untested |  |  |
-| GNSS / GPS | untested |  |  |
+| Modem firmware boots | untested | v6: modem runs (rmtfs -r on EFS RAM copies); tel: starts at boot (fap-rmtfs.service); ARB fuse 1: never flash firmware | [TELEPHONY.md](../devices/oneplus-waffle/TELEPHONY.md) |
+| SIM detection | untested | tel: ModemManager 1.24 over QRTR; eSIM switch GPIOs not driven by our kernel; built, not tested | [TELEPHONY.md](../devices/oneplus-waffle/TELEPHONY.md) |
+| SMS | untested | tel: Spacebar + ModemManager; no SMS over IMS; built, not tested | [TELEPHONY.md](../devices/oneplus-waffle/TELEPHONY.md) |
+| Mobile data | untested | tel: IPA v5.5 (board DT) + rmnet + NetworkManager-wwan; built, not tested | [TELEPHONY.md](../devices/oneplus-waffle/TELEPHONY.md) |
+| Voice calls (incl. call audio) | broken | signalling via plasma-dialer/MM only; no call audio (voice topology, VCPM tables, TFA9874 earpiece); no VoLTE; never for emergency calls | [TELEPHONY.md](../devices/oneplus-waffle/TELEPHONY.md) |
+| GNSS / GPS | untested | tel: MM QMI LOC -> GeoClue modem-gps; qmicli --loc-* without SIM; built, not tested | [TELEPHONY.md](../devices/oneplus-waffle/TELEPHONY.md) |
 | Mobile desktop (Plasma Mobile / Phosh) | untested | Plasma Mobile RAM-boot dev root built (make-devroot.sh + fap-waffle-build.sh netroot, llvmpipe: GPU off in the DT); not booted | [make-devroot.sh](../boot/android-bootimg/make-devroot.sh) |
 | Android apps (Waydroid) | untested |  |  |
 | Image updates (bootc upgrade/rollback) | untested |  |  |

@@ -30,4 +30,5 @@ Legend: [x] done · [~] partly / workaround · [ ] not started
 - [ ] P2 Speakers/earpiece: TFA9874 x2 need a driver + OnePlus tuning container (vendor, not backed up); SECONDARY_MI2S topology
 - [ ] P2 USB-C analog headset: i2c3 wcd939x-usbss + codec graph link + altmode
 - [~] P2 Haptics (v7: stock 1.72 V vmax, untested), [ ] alert slider
-- [ ] P3 Modem, cameras, sensors (SSC)
+- [~] P2 Telephony (modem at boot, ModemManager/QRTR, IPA data, SMS, call signalling, GPS): built, untested ([TELEPHONY.md](TELEPHONY.md)); call audio, VoLTE, lpac open
+- [ ] P3 Cameras, sensors (SSC)

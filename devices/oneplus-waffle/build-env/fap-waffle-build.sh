@@ -71,7 +71,9 @@
 set -euo pipefail
 
 IMAGE=localhost/fap-waffle-build
-VOLUME=waffle-build
+# FAP_WAFFLE_VOLUME: another podman volume (e.g. a copy of waffle-build) so
+# parallel work doesn't share the build tree and stage.
+VOLUME=${FAP_WAFFLE_VOLUME:-waffle-build}
 
 # Pinned sources
 WAFFLE_URL=https://github.com/DaDDevil/linux
@@ -553,6 +555,12 @@ netroot_phone_files() {   # netroot_phone_files <root>
 NETROOT_PKGS="alsa-utils alsa-ucm alsa-ucm-utils dnsmasq chrony"
 # v7: GPU userspace + test tools, Bluetooth, haptics (fftest) and V4L2 tools.
 NETROOT_PKGS_V7="mesa-dri-drivers mesa-vulkan-drivers egl-utils kmscube glmark2 vulkan-tools bluez linuxconsoletools v4l-utils"
+# Telephony: ModemManager over QRTR (Fedora's MM 1.24 links libqrtr-glib),
+# qmicli for read-only checks, NetworkManager's WWAN plugin, the APN
+# database, SMS/calls apps, GeoClue + its demo agent/where-am-i for GPS.
+# Most are already in base/desktop; listed so a dev root from before those
+# lists (or a plain netroot) gets them too.
+NETROOT_PKGS_TEL="ModemManager libqmi-utils NetworkManager-wwan mobile-broadband-provider-info spacebar plasma-dialer callaudiod geoclue2 geoclue2-demos"
 # The card is driver "sm8650", name "OnePlus 12" (board DT model), so q6apm
 # asks for qcom/sm8650/OnePlus 12-tplg.bin. Its back ends are SM8650-QRD's
 # (RX_CODEC_DMA_RX_0, TX_CODEC_DMA_TX_3); qcom-firmware's SM8650-QRD/MTP/HDK
@@ -563,7 +571,7 @@ netroot_audio_dhcp() {   # netroot_audio_dhcp <root>
   local R=$1 P=/work/stage/netroot-rpms
   say "netroot: $NETROOT_PKGS (Fedora 45) + AudioReach topology + UCM"
   dnf5 -y -q --installroot="$R" --use-host-config --releasever=45 \
-    --setopt=install_weak_deps=False install $NETROOT_PKGS $NETROOT_PKGS_V7
+    --setopt=install_weak_deps=False install $NETROOT_PKGS $NETROOT_PKGS_V7 $NETROOT_PKGS_TEL
   dnf5 -y -q --installroot="$R" --use-host-config --releasever=45 clean all >/dev/null
   qcom_firmware_rpm "$P" "./$TPLG_SRC"
   [[ -s $P/$TPLG_SRC ]] || die "qcom-firmware has no $TPLG_SRC"
