@@ -22,17 +22,32 @@ targets:
     sources:
       - boot/android-bootimg/netroot/Containerfile
 
+  # Dev roots (boot/android-bootimg/make-devroot.sh): the netroot plus the
+  # layers' package lists (base, desktop, opt-in layers, device). Pinned
+  # build: FAP_PINNED=1 make-devroot.sh, lock target DEVROOT_LOCK (default
+  # <device>-<desktop>-devroot), after a pinned netroot.
   installroot:
-    description: installed N100 development root, netroot + Plasma Mobile (make-installroot.sh)
+    description: installed N100 development root, Plasma Mobile + Waydroid (make-installroot.sh = make-devroot.sh --installroot)
+    kind: devroot
     base: registry.fedoraproject.org/fedora:45
     kernel_image: quay.io/fedora/fedora-silverblue:45
-    sources:
-      - boot/android-bootimg/netroot/Containerfile
-      - boot/android-bootimg/installroot/Containerfile
+    device: oneplus-billie2
+    desktop: plasma-mobile
+    layers: [waydroid]
+
+  oneplus-waffle-plasma-mobile-devroot:
+    description: OnePlus 12 Plasma Mobile RAM-boot root (make-devroot.sh oneplus-waffle plasma-mobile)
+    kind: devroot
+    base: registry.fedoraproject.org/fedora:45
+    kernel_image: quay.io/fedora/fedora-silverblue:45
+    device: oneplus-waffle
+    desktop: plasma-mobile
 
   # bootc images (Containerfile): sources are derived like the Justfile
-  # does: base/build, desktops/<desktop>/build, boot/<BOOT_METHOD from
-  # device.env>/build, devices/<device>/build (those that exist).
+  # does: per layer packages, packages.image and build (base, desktops/
+  # <desktop>, boot/<BOOT_METHOD from device.env>, layers/<layers>,
+  # devices/<device>), those that exist. All start from base-atomic
+  # (decision 0003).
   oneplus-billie2-tty:
     description: bootc image, just DEVICE=oneplus-billie2 DESKTOP=tty build
     base: quay.io/fedora-ostree-desktops/base-atomic:45
@@ -41,12 +56,12 @@ targets:
 
   oneplus-billie2-phosh:
     description: bootc image, just DEVICE=oneplus-billie2 DESKTOP=phosh build
-    base: quay.io/fedora/fedora-silverblue:45
+    base: quay.io/fedora-ostree-desktops/base-atomic:45
     device: oneplus-billie2
     desktop: phosh
 
   oneplus-billie2-plasma-mobile:
     description: bootc image, just DEVICE=oneplus-billie2 DESKTOP=plasma-mobile build
-    base: quay.io/fedora/fedora-kinoite:45
+    base: quay.io/fedora-ostree-desktops/base-atomic:45
     device: oneplus-billie2
     desktop: plasma-mobile
