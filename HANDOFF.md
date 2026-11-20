@@ -94,6 +94,12 @@ EFS/IMEI copies and OEM firmware; never commit or upload):
 2. **Waydroid polish**: first-run checks, `fap-waydroid-init`, network (nftables NAT), GPU in the container.
 3. userdata alignment (mkfs warned 80 KiB offset): measure I/O; repartitioning only with a plan.
 4. Plasma Wi‑Fi details page blank; lm_sensors.service fails (harmless).
+6. **No sound card on the installed boot** (works in RAM boot): sndcard
+   deferred, "snd-sc8280xp: WCD Playback: codec dai not found" → WCD9395 didn't
+   probe from flash. Suspects: pmic_glink altmode / USB‑C mux ("failed to
+   acquire mode-switch"), SoundWire/LPASS clocks left on by ABL fastboot.
+   Third RAM-vs-flash difference after USB pipe clock and the RTC.
+7. p11-kit-server was missing (Flatpak CA trust; fixed, dualboot 7329700).
 5. Clock: PMIC RTC reads 1970 (not writable for us; Android keeps an offset), so
    time starts ~1 month behind until chrony syncs → TLS errors in Firefox right
    after boot. Fix: keep `/var/lib/systemd/timesync/clock` fresh (PID 1 uses its
