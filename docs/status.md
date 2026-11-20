@@ -15,8 +15,10 @@ when you stop. Newest log entries at the top.
   with `--installroot` (N100: 763 packages on fedora:45, was 1168).
   OnePlus 12 Plasma Mobile RAM root built (`fap-build/waffle/plasma-netroot/`,
   sensitive: EFS + OEM firmware), with a v6 boot image whose tiny-init takes
-  `fap.netroot_size=6g`. **Nothing of this booted yet**; lockfiles
-  regenerated. Plasma Mobile 6.8 uses plasma-keyboard (no Maliit); the
+  `fap.netroot_size=6g`. **Nothing of this booted on a phone yet**; in the
+  container, `kwin_wayland --virtual` + `plasmashell -p
+  org.kde.plasma.mobileshell` runs (folio homescreen, no missing QML
+  modules; plasmashell ~630 MB RSS on llvmpipe). Lockfiles regenerated. Plasma Mobile 6.8 uses plasma-keyboard (no Maliit); the
   desktop System Settings and QtWebEngine are unavoidable hard deps.
 - **Update pipeline (branch `update-bot`, 2026-11-20):** `lock/` pins every
   image (netroot, installroot, billie2 tty + plasma-mobile) to exact NEVRAs
