@@ -15,6 +15,7 @@ RUN dnf -y install --setopt=install_weak_deps=False \
       gcc make bc flex bison perl diffutils openssl openssl-devel elfutils-libelf-devel \
       dwarves rpm cpio dtc libfdt git-core python3 lz4 xz gzip zstd kmod findutils which \
       file rsync busybox curl patch mtools \
+      rust rust-src bindgen-cli clang-libs \
     && dnf clean all
 
 # AOSP tools at fixed commits.
