@@ -88,6 +88,7 @@ when you stop. Newest log entries at the top.
 ## Experiment log
 | Date | Experiment | Result |
 |---|---|---|
+| 2026-11-20 | **Waydroid (branch `waydroid`, untested)**: installroot layer `dnf5 install waydroid` + `fap-waydroid-init` + binderfs ordering drop-in + OTA channels; see docs/waydroid.md | `podman build` of the installroot OK; nothing run on the phone. Kernel needs nothing: Fedora 7.3.4 has Rust binder + binderfs built in (`CONFIG_ANDROID_BINDER_IPC_RUST=y`), PSI=y, memfd. Waydroid's vendor image has Mesa 26.0.8 freedreno (FD610); UBWC off via `debug.mesa.fd.mesa.debug=noubwc` |
 | 2026-11-20 | RAM-boot `uboot.img` (stock dtbo, from fastbootd) | `Unrecognized command boot`: fastbootd can't `boot` |
 | 2026-11-20 | RAM-boot `uboot.img` (stock dtbo, bootloader fastboot) | `Booting OKAY`, logo, ABL fastboot stays |
 | 2026-11-20 | RAM-boot stock `boot_a` | Ubuntu Touch boots from RAM (~30 s) |
