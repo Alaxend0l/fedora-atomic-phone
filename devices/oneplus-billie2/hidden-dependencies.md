@@ -7,7 +7,8 @@ bootloader (ABL) or another device left it on. ABL leaves different state in
 fastboot mode than on a normal boot, and we boot with
 `clk_ignore_unused pd_ignore_unused`, which hides all of it.
 
-How to look (on the phone, as root):
+How to look: `tools/fap-dev audit` from the host does all of the below over
+SSH and prints a Markdown report. By hand (on the phone, as root):
 - unclaimed clocks: `awk 'NR>3 && $2==0 && $9=="Y" {print $1}' /sys/kernel/debug/clk/clk_summary`
 - bandwidth votes: `/sys/kernel/debug/interconnect/interconnect_summary`
 - power domains: `/sys/kernel/debug/pm_genpd/pm_genpd_summary`
