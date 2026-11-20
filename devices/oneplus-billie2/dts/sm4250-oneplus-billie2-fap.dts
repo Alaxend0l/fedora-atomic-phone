@@ -280,3 +280,40 @@
 &gpu_zap_shader {
 	firmware-name = "qcom/sm6115/OnePlus/billie2/a610_zap.mdt";
 };
+
+/*
+ * GPU memory bandwidth: mainline sm6115.dtsi gives the GPU no interconnect
+ * path, so it never votes for DDR bandwidth; measured on the N100, EBI sat at
+ * ~0.8 GB/s peak while the GPU was pegged at 600 MHz and Plasma stuttered.
+ * Path and per-OPP peaks follow agatti.dtsi (QCM2290, same Adreno 610 and
+ * RPM interconnect design) at similar GPU clocks.
+ */
+&gpu {
+	interconnects = <&bimc MASTER_GRAPHICS_3D RPM_ALWAYS_TAG
+			 &bimc SLAVE_EBI_CH0 RPM_ALWAYS_TAG>;
+	interconnect-names = "gfx-mem";
+};
+
+&{/soc@0/gpu@5900000/opp-table/opp-320000000} {
+	opp-peak-kBps = <1720000>;
+};
+
+&{/soc@0/gpu@5900000/opp-table/opp-465000000} {
+	opp-peak-kBps = <2929000>;
+};
+
+&{/soc@0/gpu@5900000/opp-table/opp-600000000} {
+	opp-peak-kBps = <3879000>;
+};
+
+/*
+ * USB is wired USB 2.0-only on billie2 (no QMP USB3 PHY in use), but the
+ * DWC3 core still wants a PIPE clock. Without this the controller only works
+ * when the bootloader's fastboot mode left the USB3 PHY's pipe clock running
+ * (fastboot boot): after a normal boot, "dwc3: failed to enable ep0out" and
+ * no USB gadget. Found with clk_summary: gcc_usb3_prim_phy_pipe_clk on in
+ * hardware but unclaimed. dwc3-qcom-legacy.c honours this property.
+ */
+&usb {
+	qcom,select-utmi-as-pipe-clk;
+};

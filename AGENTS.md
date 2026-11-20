@@ -26,6 +26,7 @@ checkout, built images). Pocketblue reference clones:
 | docs/re-tooling.md | ranked reverse-engineering tool ideas |
 | docs/decisions/ | why things are the way they are |
 | devices/oneplus-billie2/README.md | N100 hardware, partitions, recovery |
+| devices/oneplus-billie2/TODO.md | N100 feature checklist (what works, what is next) |
 | kernels/qcom-sm6115/README.md | Fedora kernel coverage for the SoC |
 | boot/uboot-android/README.md | U-Boot build + the N100 boot experiments |
 | boot/android-bootimg/README.md | the RAM-boot dev loop (`fastboot boot` + netroot over USB) |
