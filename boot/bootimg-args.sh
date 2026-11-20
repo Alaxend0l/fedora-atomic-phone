@@ -21,6 +21,9 @@ bootimg_layout_args() {
          --kernel_offset "$BOOTIMG_KERNEL_OFFSET" \
          --ramdisk_offset "$BOOTIMG_RAMDISK_OFFSET" \
          --tags_offset "$BOOTIMG_TAGS_OFFSET"
+    # Some bootloaders check these (stock images always set them).
+    [ -n "${BOOTIMG_OS_VERSION:-}" ] && echo --os_version "$BOOTIMG_OS_VERSION"
+    [ -n "${BOOTIMG_OS_PATCH_LEVEL:-}" ] && echo --os_patch_level "$BOOTIMG_OS_PATCH_LEVEL"
     # Header v2 carries the DTB as its own section, at a fixed address.
     if [ "$BOOTIMG_HEADER_VERSION" = 2 ]; then
         [ -n "${BOOTIMG_DTB_OFFSET:-}" ] || { echo "bootimg: v2 needs BOOTIMG_DTB_OFFSET" >&2; return 1; }

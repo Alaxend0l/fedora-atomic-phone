@@ -70,10 +70,22 @@ bootloader` is refused for the normal user; use
 | our `uboot.img` (above) | ABL: `Booting OKAY`, screen stays on the OnePlus logo, ABL fastboot still answers afterwards → ABL most likely never jumped to U-Boot |
 | stock/UBports `boot_a` (backup) | boots Ubuntu Touch from RAM in ~30 s → `fastboot boot` works on this phone |
 
-So something in our image makes ABL refuse it. Candidates, cheapest test first:
-1. `os_version`/`os_patch_level` unset in our header (stock: 10.0.0 / 2020-10).
-2. ABL applies the `dtbo` partition's overlays (written for the vendor DT) to
-   our mainline DT and aborts on failure. Pocketblue erases `dtbo` before
-   flashing U-Boot; testing this needs `dtbo` erased (a write; backup exists).
-3. DT selection: the stock image carries a 4.8 MB DTB table; ours one 60 KB DT
-   without `qcom,pmic-id`.
+Follow-up tests the same day:
+
+| Test | Result |
+|---|---|
+| set `os_version` 10.0.0 / `os_patch_level` 2020-10 (as stock) | no change: accepted, never started |
+| `fastboot erase dtbo_a`, then boot | ABL: `Failed to load/authenticate boot image: Load Error` (dtbo_a restored from backup afterwards, hash verified) |
+
+**Diagnosis.** ABL picks a `dtbo` overlay by the phone's *hardware* board id
+(CDT), `0x1000b` (QRD): entries 5 "Bengal QRD" and 23 "Bengal OEM QRD" in this
+phone's 33-entry dtbo table. It applies it to whatever DT the boot image holds;
+the overlay references vendor-only labels, so on the mainline DT it fails and
+ABL doesn't start the image. Changing our DT's ids can't avoid it (selection
+uses the hardware id). And unlike e.g. the OnePlus 6, this ABL refuses to boot
+with `dtbo` erased.
+
+**Fix to try next:** a minimal valid dtbo (`mkdtboimg`): one empty overlay for
+board-id `0x1000b` and msm-id `0x1a1`/`0x1bc`, so ABL loads it and applies a
+no-op. Applies to `android-bootimg` as well. Flashing it means Ubuntu Touch
+won't boot until the stock dtbo is restored.
