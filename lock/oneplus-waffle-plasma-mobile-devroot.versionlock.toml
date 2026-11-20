@@ -2740,6 +2740,14 @@ comparator = "="
 value = "1:1.7.0-10.fc45"
 
 [[packages]]
+name = "libglvnd-gles"
+comment = "oneplus-waffle-plasma-mobile-devroot"
+[[packages.conditions]]
+key = "evr"
+comparator = "="
+value = "1:1.7.0-10.fc45"
+
+[[packages]]
 name = "libglvnd-glx"
 comment = "oneplus-waffle-plasma-mobile-devroot"
 [[packages.conditions]]
@@ -3693,6 +3701,14 @@ value = "26.2.7-1.fc45"
 
 [[packages]]
 name = "mesa-libgbm"
+comment = "oneplus-waffle-plasma-mobile-devroot"
+[[packages.conditions]]
+key = "evr"
+comparator = "="
+value = "26.2.7-1.fc45"
+
+[[packages]]
+name = "mesa-vulkan-drivers"
 comment = "oneplus-waffle-plasma-mobile-devroot"
 [[packages.conditions]]
 key = "evr"

@@ -158,25 +158,34 @@ those ourselves.
   the USB port is the RAM boot's only link.
 - Physical mic mapping (which AMIC is bottom/top/back) unknown.
 
-## Plasma Mobile RAM root (built 2026-11-20, not booted yet)
+## Plasma Mobile RAM root (v7, GPU; built 2026-11-20, not booted yet)
 The generic layers (base, desktops/plasma-mobile) plus this folder's
 `packages`/`build` (FAP_TARGET=devroot), then this kernel's modules, the
-`netroot/` overlay and the unit's DSP/modem firmware and EFS copies:
+`netroot/` overlay and the v7 netroot bits (audio, DHCP, chrony, GPU/BT/Iris
+userspace and firmware, the unit's DSP/modem firmware and EFS copies):
 ```sh
-boot/android-bootimg/make-devroot.sh oneplus-waffle plasma-mobile ~/Develop/fap-build/waffle/plasma-devroot
-NETROOT_GENERIC=~/Develop/fap-build/waffle/plasma-devroot/netroot.tar.gz NETROOT_OUTDIR=plasma-netroot \
+boot/android-bootimg/make-devroot.sh oneplus-waffle plasma-mobile ~/Develop/fap-build/waffle/plasma-devroot-gpu
+OUT=~/Develop/fap-build/waffle/plasma-netroot-gpu/boot devices/oneplus-waffle/build-env/fap-waffle-build.sh kernel dtb initramfs images
+OUT=~/Develop/fap-build/waffle/plasma-netroot-gpu NETROOT_OUTDIR=. \
+  NETROOT_GENERIC=~/Develop/fap-build/waffle/plasma-devroot-gpu/netroot.tar.gz \
   PHONE_BACKUP=~/Develop/OnePlus12/backup/partitions-20261120 \
+  VENDOR_FILES=~/Develop/OnePlus12/backup/vendor-files-20261120 \
   devices/oneplus-waffle/build-env/fap-waffle-build.sh netroot
-OUT=~/Develop/fap-build/waffle/plasma-netroot/boot devices/oneplus-waffle/build-env/fap-waffle-build.sh dtb initramfs images
 ```
-`plasma-netroot/netroot.tar.gz` holds the unit's EFS/IMEI data and OEM
-firmware: **local only**, like the plain netroot. It unpacks to ~2.4 GB,
-more than tiny-init's default 2560m tmpfs leaves room for, so the netroot
-DT asks for `fap.netroot_size=6g` (16 GB phone); the boot image must come
-from a tree with that tiny-init and DT (the `plasma-netroot/boot/` build).
-The GPU stays off in the DT, so `build` sets LIBGL/GBM_ALWAYS_SOFTWARE
-(llvmpipe at 1440×3168: expect it to be slow). SDDM logs `phone` in
+The tarball holds the unit's EFS/IMEI data and OEM firmware: **local
+only**, like the plain netroot. It unpacks to ~2.5 GB, more than
+tiny-init's default 2560m tmpfs leaves room for, so the netroot DT asks for
+`fap.netroot_size=6g` (16 GB phone); the boot image must come from a tree
+with that tiny-init and DT (`boot/ramboot/waffle-uniloader-v4-netroot.img`
+of the build above). GPU: freedreno/turnip with the v7 DT and firmware
+(v5/v6 forced llvmpipe with LIBGL/GBM_ALWAYS_SOFTWARE; gone). If the GPU
+doesn't start, Mesa falls back to llvmpipe by itself. SDDM logs `phone` in
 (password 147147, dev only); SSH as root over USB as before.
+
+Wi‑Fi: NetworkManager manages `wlp1s0` in this root, so the netroot's
+manual wpa_supplicant method fails. Use `fap-wifi <ssid>` (asks for the
+password, or `FAP_WIFI_PSK=… fap-wifi <ssid>`; `fap-wifi --list` scans) or
+the Plasma settings.
 
 ## GPU, Bluetooth, video, haptics (v7, built 2026-11-20, untested)
 - **GPU:** Adreno 750 (`qcom,adreno-43051401`, msm "gen70900") on, with
@@ -186,8 +195,8 @@ The GPU stays off in the DT, so `build` sets LIBGL/GBM_ALWAYS_SOFTWARE
   qcom-firmware) and `qcom/sm8650/oneplus/waffle/gen70900_zap.mbn` (unit
   /vendor; linux-firmware's `qcom/sm8650/gen70900_zap.mbn` is QRD-signed).
   Userspace: Fedora mesa (freedreno, turnip). Any root can take the firmware
-  from `fap-waffle-build.sh gpu-firmware`; with it, drop
-  `LIBGL_ALWAYS_SOFTWARE`.
+  from `fap-waffle-build.sh gpu-firmware` (the device layer no longer
+  forces software rendering).
 - **Bluetooth:** WCN7850 on UART14 (`qcom,wcn7850-bt`, hci_qca, 3.2 Mbaud),
   powered by the same PMU as Wi‑Fi. Firmware from the unit's `bluetooth_a`
   (`hmtbtfw20.tlv`, board-specific `hmtnv20.*`) in

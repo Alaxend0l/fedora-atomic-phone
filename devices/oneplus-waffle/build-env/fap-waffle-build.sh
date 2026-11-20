@@ -601,9 +601,10 @@ GPU_FW_FEDORA="usr/lib/firmware/qcom/gen70900_sqe.fw.xz usr/lib/firmware/qcom/gm
 GPU_ZAP=vendor/firmware/gen70900_zap.mbn
 WAFFLE_FW=usr/lib/firmware/qcom/sm8650/oneplus/waffle
 gpu_firmware() {   # gpu_firmware <root>
-  local R=$1 P=/work/stage/gpu-rpm f
+  local R=$1 P=/work/stage/gpu-rpm f paths=()
   [[ -d /vendor-files ]] || die "set VENDOR_FILES (for $GPU_ZAP)"
-  qcom_firmware_rpm "$P" $(for f in $GPU_FW_FEDORA; do echo "./$f"; done)
+  for f in $GPU_FW_FEDORA; do paths+=("./$f"); done
+  qcom_firmware_rpm "$P" "${paths[@]}"
   for f in $GPU_FW_FEDORA; do
     [[ -s $P/$f ]] || die "qcom-firmware has no $f"
     install -D -m 644 "$P/$f" "$R/$f"

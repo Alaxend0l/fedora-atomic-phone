@@ -7,12 +7,12 @@
 set -euxo pipefail
 source ./device.env
 
-# No GPU yet: the v5 DT keeps &gpu disabled (needs the a750 zap shader from
-# the phone). The display is msm KMS without a render node, so Mesa would try
-# freedreno first and fall back; say it outright: llvmpipe for KWin (GBM,
-# kms_swrast) and for clients (EGL). Remove once the GPU is enabled.
-grep -q '^LIBGL_ALWAYS_SOFTWARE=' /etc/environment || \
-    printf '%s\n' 'LIBGL_ALWAYS_SOFTWARE=1' 'GBM_ALWAYS_SOFTWARE=1' >> /etc/environment
+# GPU (v7): Adreno 750 is on in the DT, so Mesa's freedreno (GL/GBM) and
+# turnip (Vulkan) render; no LIBGL/GBM_ALWAYS_SOFTWARE here any more (v5/v6
+# forced llvmpipe). The GPU firmware (Fedora SQE/GMU + the unit's zap
+# shader) is added outside the build: build-env/fap-waffle-build.sh netroot
+# or gpu-firmware. Without it the GPU fails to start and Mesa falls back to
+# llvmpipe on its own.
 
 if [ "$FAP_TARGET" = devroot ]; then
     # Kernel modules, netroot/ (modules-load, fap-modem-ram) and this unit's

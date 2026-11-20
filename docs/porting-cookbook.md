@@ -300,8 +300,19 @@ Contents
 - **Fix:** say it outright in the device layer: `LIBGL_ALWAYS_SOFTWARE=1`
   and `GBM_ALWAYS_SOFTWARE=1` in `/etc/environment` (llvmpipe; KWin on
   kms_swrast). `mesa-dri-drivers` carries both. Remove once the GPU is on.
-- **Where:** devices/oneplus-waffle/build (v5/v6 DT: `&gpu` disabled).
-  Not yet seen on a phone.
+- **Where:** was devices/oneplus-waffle/build for the v5/v6 DT (`&gpu`
+  disabled); removed with v7 (GPU on). Without the GPU firmware Mesa falls
+  back to llvmpipe by itself.
+
+### Wi‑Fi by hand fails once NetworkManager runs
+- **Symptom:** in a Plasma (or phosh) root, the netroot's manual
+  `wpa_supplicant -i wlp1s0 …` + DHCP never associates or drops at once.
+- **Cause:** NetworkManager manages `wlp1s0` and runs its own supplicant
+  over D-Bus; a second one fights it.
+- **Fix:** go through NM: `fap-wifi <ssid>` (base/rootfs/usr/bin) asks for
+  the password (or reads `FAP_WIFI_PSK`) and installs a root-only keyfile
+  profile, never passing the PSK as an argument; or the Plasma settings.
+- **Where:** OnePlus 12 Plasma RAM root, 2026-11-20.
 
 ### Hostname set in a container build doesn't stick
 - **Symptom:** the RAM root or installed root boots with a random or

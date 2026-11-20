@@ -15,10 +15,10 @@ steps:
   specs: [openssh-server, dnsmasq, NetworkManager, NetworkManager-wifi, NetworkManager-wwan, ModemManager, pipewire, wireplumber, pipewire-pulseaudio, bluez, upower, systemd-pam, chrony, glibc-langpack-en, sudo, e2fsprogs, usbutils, pciutils, i2c-tools, dtc]
 - where: desktops/plasma-mobile/packages:1
   action: install
-  specs: [plasma-mobile, plasma-mobile-sounds, kwin, plasma-workspace, plasma-keyboard, plasma-settings, plasma-dialer, plasma-discover, plasma-discover-flatpak, flatpak, fedora-flathub-remote, plasma-nm, plasma-pa, powerdevil, bluedevil, kscreen, xdg-desktop-portal-kde, sddm, sddm-wayland-plasma, google-noto-sans-fonts, google-noto-sans-mono-fonts, google-noto-color-emoji-fonts, mesa-dri-drivers]
+  specs: [plasma-mobile, plasma-mobile-sounds, kwin, plasma-workspace, plasma-keyboard, plasma-settings, plasma-dialer, plasma-discover, plasma-discover-flatpak, flatpak, fedora-flathub-remote, plasma-nm, plasma-pa, powerdevil, bluedevil, kscreen, xdg-desktop-portal-kde, sddm, sddm-wayland-plasma, google-noto-sans-fonts, google-noto-sans-mono-fonts, google-noto-color-emoji-fonts, mesa-dri-drivers, libglvnd-gles]
 - where: devices/oneplus-waffle/packages:1
   action: install
-  specs: [qrtr, rmtfs, tqftpserv, atheros-firmware]
+  specs: [qrtr, rmtfs, tqftpserv, atheros-firmware, mesa-vulkan-drivers]
 kernel_image:
   image: quay.io/fedora/fedora-silverblue:45
   digest: sha256:96cc142ddf2cdc215c0d589bb4c0c4b94733de32a962a718fd9c20b0953f4fc7
@@ -529,6 +529,7 @@ packages:
 - {name: libfyaml, evr: 0.8-10.fc45, arch: aarch64, repo: fedora, source: libfyaml-0.8-10.fc45.src.rpm, checksum: 'sha256:13e97822030af60aecc011b9748191967c5410bb7e0906696a6c37cc222ac566', size: 202298, location: Packages/l/libfyaml-0.8-10.fc45.aarch64.rpm}
 - {name: libglvnd, evr: '1:1.7.0-10.fc45', arch: aarch64, repo: fedora, source: libglvnd-1.7.0-10.fc45.src.rpm, checksum: 'sha256:8a5a45d42a8a9959442d6361113c84fcb09fe74e36ab473f94a1cb66be14b132', size: 111148, location: Packages/l/libglvnd-1.7.0-10.fc45.aarch64.rpm}
 - {name: libglvnd-egl, evr: '1:1.7.0-10.fc45', arch: aarch64, repo: fedora, source: libglvnd-1.7.0-10.fc45.src.rpm, checksum: 'sha256:556935d24876e62014bea189599f2584804756a1cbe7622c83a255838c8d3406', size: 36922, location: Packages/l/libglvnd-egl-1.7.0-10.fc45.aarch64.rpm}
+- {name: libglvnd-gles, evr: '1:1.7.0-10.fc45', arch: aarch64, repo: fedora, source: libglvnd-1.7.0-10.fc45.src.rpm, checksum: 'sha256:f0934dbf452fc1f4c5198833fffa270be2b65bc13400de17682f58a6e0e478b2', size: 30845, location: Packages/l/libglvnd-gles-1.7.0-10.fc45.aarch64.rpm}
 - {name: libglvnd-glx, evr: '1:1.7.0-10.fc45', arch: aarch64, repo: fedora, source: libglvnd-1.7.0-10.fc45.src.rpm, checksum: 'sha256:7a1f7e74a19005ca602f5555ca08a14b34b9a62dab0ca1aa8a44da41443fdd01', size: 131900, location: Packages/l/libglvnd-glx-1.7.0-10.fc45.aarch64.rpm}
 - {name: libglvnd-opengl, evr: '1:1.7.0-10.fc45', arch: aarch64, repo: fedora, source: libglvnd-1.7.0-10.fc45.src.rpm, checksum: 'sha256:b454f5e7dfed381f39affffb2c8b3f949449243c092fdd5a0167372fa12b7939', size: 40118, location: Packages/l/libglvnd-opengl-1.7.0-10.fc45.aarch64.rpm}
 - {name: libgudev, evr: 238-10.fc45, arch: aarch64, repo: fedora, source: libgudev-238-10.fc45.src.rpm, checksum: 'sha256:acdb89e0c2fb8409653369ac55e30a57b8e0da39dc950a1e91143c7c8fb0d401', size: 34653, location: Packages/l/libgudev-238-10.fc45.aarch64.rpm}
@@ -649,6 +650,7 @@ packages:
 - {name: mesa-libEGL, evr: 26.2.7-1.fc45, arch: aarch64, repo: updates, source: mesa-26.2.7-1.fc45.src.rpm, checksum: 'sha256:ff9b3c1f5020b0b6b3358212b0290a23414a9f8dd821e0d3e4b6144b1ece0d3d', size: 136459, location: Packages/m/mesa-libEGL-26.2.7-1.fc45.aarch64.rpm}
 - {name: mesa-libGL, evr: 26.2.7-1.fc45, arch: aarch64, repo: updates, source: mesa-26.2.7-1.fc45.src.rpm, checksum: 'sha256:bd69d2f9ca1f0b38e65dc18e0870cc07eadade56befecb9a5fd4b6d625a8f5f2', size: 135558, location: Packages/m/mesa-libGL-26.2.7-1.fc45.aarch64.rpm}
 - {name: mesa-libgbm, evr: 26.2.7-1.fc45, arch: aarch64, repo: updates, source: mesa-26.2.7-1.fc45.src.rpm, checksum: 'sha256:2819c8bfa9641122c154e50d19838929ea937e94c4e5dc3cb3eec9914f28ee08', size: 21989, location: Packages/m/mesa-libgbm-26.2.7-1.fc45.aarch64.rpm}
+- {name: mesa-vulkan-drivers, evr: 26.2.7-1.fc45, arch: aarch64, repo: updates, source: mesa-26.2.7-1.fc45.src.rpm, checksum: 'sha256:fdfbc672f18b3d149873975b600772de6c4029f182470e0118eaf897d292ba0b', size: 19907692, location: Packages/m/mesa-vulkan-drivers-26.2.7-1.fc45.aarch64.rpm}
 - {name: minizip-ng-compat, evr: 4.1.0-5.fc45, arch: aarch64, repo: fedora, source: minizip-ng-4.1.0-5.fc45.src.rpm, checksum: 'sha256:dd7e03de11114ca559a2c6e6bbe76085416b3dda6bf0643eada505c677ae400d', size: 61851, location: Packages/m/minizip-ng-compat-4.1.0-5.fc45.aarch64.rpm}
 - {name: mpdecimal, evr: 4.0.1-4.fc45, arch: aarch64, repo: fedora, source: mpdecimal-4.0.1-4.fc45.src.rpm, checksum: 'sha256:96f533428ddbcbeac929a51d889f751c68715d0e3b6798ea16d2c9c600286924', size: 97718, location: Packages/m/mpdecimal-4.0.1-4.fc45.aarch64.rpm}
 - {name: mpg123-libs, evr: 1.33.6-3.fc45, arch: aarch64, repo: fedora, source: mpg123-1.33.6-3.fc45.src.rpm, checksum: 'sha256:b42eb7fd2cc96669ae177ed30e1e8c2773cf5acee16cf79fc6ddcbe07995582e', size: 369954, location: Packages/m/mpg123-libs-1.33.6-3.fc45.aarch64.rpm}

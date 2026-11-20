@@ -136,12 +136,12 @@ From [devices/oneplus-waffle/features.yaml](../devices/oneplus-waffle/features.y
 | Crash logs (ramoops/pstore) | untested | ramoops at 0x85000000 (0x240000) in DaDDevil's DT; PSTORE_RAM built in |  |
 | Display panel | untested | first light: simple-framebuffer on the splash buffer 0xd5100000 (1440x3168); panel-boe-aa545 in DaDDevil's tree (module), MDSS off |  |
 | Backlight | untested |  |  |
-| GPU acceleration | untested |  |  |
-| Hardware video decode/encode | untested |  |  |
+| GPU acceleration | untested | v7: Adreno 750 (msm/freedreno), gpucc built in, Fedora SQE/GMU + unit zap shader, mesa in the netroot; built, not tested |  |
+| Hardware video decode/encode | untested | v7: Iris (vpu33) with the unit vpu33_4v.mbn; built, not tested |  |
 | Buttons (power, volume) | untested | power + volume up on PON (resin = vol up), volume down on PM8550 GPIO6 (DaDDevil's DT) |  |
 | Touchscreen | untested | Synaptics S3910 driver in DaDDevil's tree (module); SPI4 off in the first-light DT |  |
 | Wi-Fi | untested | WCN7850/ath12k upstream + DaDDevil's 0x1107 board-data fallback; PCIe off in the first-light DT |  |
-| Bluetooth | untested |  |  |
+| Bluetooth | untested | v7: WCN7850 over UART14 (hci_qca), firmware from the bluetooth_a backup, bluez; built, not tested |  |
 | USB host / OTG | untested |  |  |
 | Hotspot / USB tethering | untested |  |  |
 | NFC | untested |  |  |
@@ -152,7 +152,7 @@ From [devices/oneplus-waffle/features.yaml](../devices/oneplus-waffle/features.y
 | Battery level | untested |  |  |
 | Charging and charge status | untested |  |  |
 | Fast charging | untested |  |  |
-| Vibrator / haptics | untested |  |  |
+| Vibrator / haptics | untested | v7: PM8550B LRA (qcom-spmi-haptics, DaDDevil) at the stock 1.72 V vmax; built, not tested |  |
 | Accelerometer / gyroscope (rotation) | untested |  |  |
 | Proximity sensor | untested |  |  |
 | Ambient light sensor | untested |  |  |

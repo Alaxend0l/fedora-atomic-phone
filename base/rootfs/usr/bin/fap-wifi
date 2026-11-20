@@ -1,0 +1,132 @@
+#!/usr/bin/env bash
+# SPDX-License-Identifier: AGPL-3.0-or-later
+# Join a Wi-Fi network through NetworkManager, from a shell (ssh over USB),
+# without putting the password on a command line.
+#
+#   fap-wifi [--open] [--hidden] [--sae] [--ifname <dev>] <ssid>
+#   fap-wifi --list
+#
+# The password comes from $FAP_WIFI_PSK if set, else it is asked for
+# (no echo). It is never an argument (argv is world-readable in /proc): the
+# connection profile is built with `nmcli --offline` (no secret), the PSK is
+# added to it from the environment, and the result is installed as a
+# root-only keyfile in /etc/NetworkManager/system-connections/, then loaded
+# and activated. So the password is stored on the phone (on a RAM root it is
+# gone at the next boot); `nmcli connection delete fap-wifi-<ssid>` removes
+# it. Nothing about a network is part of any image.
+#
+#   --open      no password (open network)
+#   --hidden    the network does not broadcast its SSID
+#   --sae       WPA3-only network (key-mgmt sae; default wpa-psk, which also
+#               joins WPA2/WPA3 transition networks)
+#   --ifname    Wi-Fi interface (default: the first one NetworkManager has)
+#
+# Use this instead of a hand-run wpa_supplicant whenever NetworkManager runs
+# (Plasma, phosh): NM manages the interface and would fight a second
+# supplicant.
+set -euo pipefail
+
+die() { echo "fap-wifi: $*" >&2; exit 1; }
+usage() {
+    echo "usage: fap-wifi [--open] [--hidden] [--sae] [--ifname <dev>] <ssid>" >&2
+    echo "       fap-wifi --list    (password: \$FAP_WIFI_PSK or asked for)" >&2
+    exit 2
+}
+
+open='' hidden='' keymgmt=wpa-psk ifname=''
+orig=("$@")
+while [ $# -gt 0 ]; do
+    case $1 in
+        --open) open=1 ;;
+        --hidden) hidden=1 ;;
+        --sae) keymgmt=sae ;;
+        --ifname) ifname=${2:?--ifname needs a device}; shift ;;
+        --list) nmcli radio wifi on; nmcli device wifi rescan 2>/dev/null || true; sleep 3
+                exec nmcli device wifi list ;;
+        -h|--help) usage ;;
+        --) shift; break ;;
+        -*) die "unknown option $1" ;;
+        *) break ;;
+    esac
+    shift
+done
+[ $# -eq 1 ] || usage
+ssid=$1
+[ -n "$ssid" ] && [ "${#ssid}" -le 32 ] || die "SSID must be 1-32 bytes"
+command -v nmcli >/dev/null || die "no nmcli (NetworkManager not installed)"
+if [ "$(id -u)" != 0 ]; then
+    # Keep FAP_WIFI_PSK in the environment, not in sudo's argv.
+    exec sudo --preserve-env=FAP_WIFI_PSK "$0" "${orig[@]}"
+fi
+systemctl is-active -q NetworkManager || die "NetworkManager is not running"
+
+psk=
+if [ -z "$open" ]; then
+    psk=${FAP_WIFI_PSK-}
+    if [ -z "$psk" ]; then
+        [ -t 0 ] || die "no password: set FAP_WIFI_PSK or run on a terminal (or --open)"
+        IFS= read -rsp "Password for \"$ssid\": " psk; echo >&2
+    fi
+    n=${#psk}
+    if [ "$n" -eq 64 ] && [[ $psk =~ ^[0-9a-fA-F]+$ ]]; then :
+    elif [ "$keymgmt" = sae ] && [ "$n" -ge 1 ]; then :
+    elif [ "$n" -ge 8 ] && [ "$n" -le 63 ]; then :
+    else die "WPA password must be 8-63 characters (or 64 hex digits)"; fi
+    case $psk in *$'\n'*|*$'\r'*) die "password contains a line break" ;; esac
+fi
+
+nmcli radio wifi on
+if [ -z "$ifname" ]; then
+    for _ in $(seq 30); do
+        ifname=$(nmcli -t -f DEVICE,TYPE device | awk -F: '$2 == "wifi" {print $1; exit}')
+        [ -n "$ifname" ] && break
+        sleep 1
+    done
+    [ -n "$ifname" ] || die "no Wi-Fi device in NetworkManager (iw dev; dmesg | grep ath)"
+fi
+echo "Wi-Fi device: $ifname"
+
+name="fap-wifi-$ssid"
+# Replace an earlier profile of ours for this SSID (all of them, by name).
+while read -r uuid; do
+    [ -n "$uuid" ] && nmcli connection delete uuid "$uuid" >/dev/null
+done < <(nmcli -t -f UUID,NAME connection show | awk -F: -v n="$name" '{u=$1; sub(/^[^:]*:/, "")} $0 == n {print u}')
+
+args=(type wifi con-name "$name" ifname "$ifname" ssid "$ssid" connection.autoconnect yes)
+[ -n "$hidden" ] && args+=(802-11-wireless.hidden yes)
+[ -z "$open" ] && args+=(wifi-sec.key-mgmt "$keymgmt")
+profile=$(nmcli --offline connection add "${args[@]}")
+uuid=$(printf '%s\n' "$profile" | sed -n 's/^uuid=//p')
+[ -n "$uuid" ] || die "nmcli --offline gave no uuid"
+
+umask 077
+dir=/etc/NetworkManager/system-connections
+file=$dir/$uuid.nmconnection
+mkdir -p "$dir"
+if [ -z "$open" ]; then
+    # GKeyFile string escaping: backslash first, then a leading space.
+    esc=${psk//\\/\\\\}
+    [ "${esc# }" != "$esc" ] && esc="\\s${esc# }"
+    # The PSK goes in through the environment (awk's ENVIRON), never argv.
+    printf '%s\n' "$profile" | FAP_PSK_ESC=$esc awk '
+        { print }
+        /^\[wifi-security\]$/ { print "psk=" ENVIRON["FAP_PSK_ESC"]; print "psk-flags=0" }
+    ' > "$file.tmp"
+    grep -q '^psk=' "$file.tmp" || { rm -f "$file.tmp"; die "profile has no [wifi-security]"; }
+else
+    printf '%s\n' "$profile" > "$file.tmp"
+fi
+chmod 600 "$file.tmp"
+mv "$file.tmp" "$file"
+unset psk esc FAP_WIFI_PSK
+
+nmcli connection load "$file"
+echo "Connecting to \"$ssid\" ($name) ..."
+nmcli device wifi rescan ifname "$ifname" 2>/dev/null || true
+sleep 2
+if ! nmcli --wait 60 connection up uuid "$uuid"; then
+    echo "fap-wifi: not connected; profile kept ($file). Check:" >&2
+    echo "  nmcli device wifi list; journalctl -b -u NetworkManager -u wpa_supplicant | tail -50" >&2
+    exit 1
+fi
+nmcli -t -f IP4.ADDRESS,IP4.GATEWAY,IP4.DNS device show "$ifname"

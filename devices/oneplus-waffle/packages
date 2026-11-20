@@ -10,3 +10,7 @@ tqftpserv
 
 # WCN7850 (ath12k) Wi-Fi firmware and board data.
 atheros-firmware
+
+# Vulkan (turnip) for the Adreno 750; GL/GBM (freedreno) is mesa-dri-drivers
+# from the desktop layer. GPU firmware: build-env/fap-waffle-build.sh.
+mesa-vulkan-drivers
