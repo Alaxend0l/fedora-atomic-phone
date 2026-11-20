@@ -40,10 +40,13 @@ if [ -n "${NETROOT_EXTRA_FIRMWARE:-}" ]; then
     echo "extra firmware: $(cd "$NETROOT_EXTRA_FIRMWARE" && find . -type f | tr '\n' ' ')"
 fi
 
-podman build -t localhost/fap-netroot:latest "$ctx"
+# NETROOT_IMAGE: image tag (default localhost/fap-netroot:latest, which
+# installroot/Containerfile builds FROM; use another tag for other devices).
+tag=${NETROOT_IMAGE:-localhost/fap-netroot:latest}
+podman build -t "$tag" "$ctx"
 
 # Export the filesystem (not the image layers) as one tarball.
-cid=$(podman create localhost/fap-netroot:latest /bin/true)
+cid=$(podman create "$tag" /bin/true)
 podman export "$cid" | gzip -1 > "$out/netroot.tar.gz"
 podman rm "$cid" >/dev/null
 ls -lh "$out/netroot.tar.gz"
