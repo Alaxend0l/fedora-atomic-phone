@@ -1,0 +1,24 @@
+#!/usr/bin/env bash
+# SPDX-License-Identifier: AGPL-3.0-or-later
+# Pin the packages this image build installs to a lockfile (docs/updates.md).
+# Runs inside the container build (see Containerfile), before the layers.
+#   pin-packages ""          unpinned build (the default): does nothing
+#   pin-packages <target>    install lock/<target>.versionlock.toml as dnf5's
+#                            versionlock, so every later `dnf5 install`
+#                            gets exactly the locked versions
+# tools/image/finalize removes the versionlock again, so the image ships
+# without it.
+set -euo pipefail
+
+target=${1:-}
+if [ -z "$target" ]; then
+    echo "pin-packages: unpinned build (newest Fedora packages)"
+    exit 0
+fi
+lock=/ctx/lock/$target.versionlock.toml
+[ -f "$lock" ] || { echo "pin-packages: no $lock (tools/update/lock.py --target $target)" >&2; exit 1; }
+install -Dm644 "$lock" /etc/dnf/versionlock.toml
+# Superseded versions are only in Fedora's updates archive.
+install -Dm644 /ctx/tools/fap-updates-archive.repo /etc/yum.repos.d/fap-updates-archive.repo
+touch /etc/dnf/.fap-pinned
+echo "pin-packages: pinned to lock/$target ($(grep -c '^\[\[packages\]\]' "$lock") packages)"
