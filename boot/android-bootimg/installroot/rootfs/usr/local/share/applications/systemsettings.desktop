@@ -1,5 +1,6 @@
 # TODO Plasma 7: Change kcm_powerdevilprofilesconfig to kcm_powerdevil
 [Desktop Entry]
+NoDisplay=true
 Exec=systemsettings
 Icon=preferences-system
 Type=Application
