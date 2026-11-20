@@ -1,0 +1,16 @@
+# SPDX-License-Identifier: AGPL-3.0-or-later
+# Dual-boot install (INSTALL.md 5.4): mark slot b successful once Fedora is
+# healthy, so ABL stops counting down its retries. On failure nothing is
+# written and ABL falls back to LineageOS after the retries run out.
+[Unit]
+Description=Mark boot slot b successful (fedora-atomic-phone dual boot)
+After=graphical.target
+Wants=graphical.target
+ConditionKernelCommandLine=fap.slot=b
+
+[Service]
+Type=oneshot
+ExecStart=/usr/libexec/fap-boot-ok
+
+[Install]
+WantedBy=graphical.target

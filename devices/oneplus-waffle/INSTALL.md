@@ -636,6 +636,21 @@ ones under `backup/`).
 
 ---------------------------------------------------------------------------
 
+## Implementation status (branch oneplus12-dualboot, 2026-11-20)
+Built, not run on the phone: `CONFIG_BLK_DEV_DM=y` (+ `SCSI_UFS_BSG`);
+`boot/android-bootimg/helpers/fap-lpmap.c` (tested offline against this
+unit's super metadata: **metadata slots 1 and 2 hold a stale, empty table**,
+so fap-lpmap takes slot 0 and requires other slots to agree only if they list
+the partition; it also refuses overlaps with other partitions) and
+`fap-keywait.c`; tiny-init `fap.root=lp:`, `fap.menu=`, `fap.menu_dry=`;
+DTBs `-install` (boot_b) and `-lptest` (RAM-only menu test);
+`fap-waffle-build.sh helpers` / `installroot` and the padded
+`boot_b/fap-boot_b.img`; root overlay `devices/oneplus-waffle/installroot/`
+(fap-boot-ok, fap-switch-os, launcher, polkit, qbootctl.service masked).
+Deviations: qbootctl in the initramfs is Fedora's binary with its libc
+bundled, not a static build; `fap-lpcheck.service` and the modem ordering
+fix are not done. Runbook: `fap-build/waffle/install/INSTALL-RUNBOOK.md`.
+
 ## Work list before W1 (desk/RAM only)
 1. `fap-lpmap` helper + tiny-init `fap.root=lp:` + `fap.menu=` (boot menu) +
    by-partlabel links + static qbootctl v0.2.2 in the initramfs.

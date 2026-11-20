@@ -1,0 +1,4 @@
+# SPDX-License-Identifier: AGPL-3.0-or-later
+# Dual-boot install: the root is the logical partition fap_root in super,
+# mapped by tiny-init's fap-lpmap and mounted rw before systemd starts.
+LABEL=fap-root  /  ext4  rw,noatime  0 0

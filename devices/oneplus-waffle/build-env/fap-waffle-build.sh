@@ -16,6 +16,14 @@
 #   dtb           our first-light DTBs (dts/*.dts, built in the waffle tree)
 #   initramfs     static busybox + boot/android-bootimg/tiny-init + modules
 #   images        uniLoader per variant, wrapped in boot images (ramboot/)
+#   helpers       initramfs helpers for the dual-boot install (network):
+#                 fap-lpmap, fap-keywait (static), qbootctl bundle; run
+#                 before initramfs
+#   installroot   dual-boot install (INSTALL.md): the ext4 root image for
+#                 fastbootd's "flash fap_root" (INSTALLROOT_SRC= a netroot
+#                 tarball, e.g. plasma-netroot-gpu) and fap-boot_b.img
+#                 (boot/ramboot/waffle-uniloader-v4-install.img padded to
+#                 boot_b's size); outputs in OUT/install-images
 #   netroot       generic netroot tarball + this kernel's modules (optional)
 #   gpu-firmware  only the Adreno 750 firmware set (Fedora SQE/GMU + the
 #                 unit's zap shader) as OUT/gpu-firmware/waffle-gpu-firmware.tar.gz,
@@ -40,6 +48,11 @@
 #
 # Environment:
 #   OUT            output directory on the host
+#   FAP_WAFFLE_VOLUME  podman volume (default waffle-build); parallel work
+#                  lines use their own copy (e.g. waffle-build-inst)
+#   INSTALLROOT_SRC  host path of the netroot tarball the installroot
+#                  command turns into the fap_root image; INSTALLROOT_SIZE
+#                  its size in bytes (default 8589934592 = 8 GiB)
 #   KERNEL_TREE    waffle (default): DaDDevil/linux waffle-voice @ WAFFLE_COMMIT,
 #                  the first-light kernel (board DT + panel/touch drivers);
 #                  fedora: Fedora's kernel-7.3.4-300.fc45 src.rpm (tier 2, the
@@ -71,7 +84,7 @@
 set -euo pipefail
 
 IMAGE=localhost/fap-waffle-build
-VOLUME=waffle-build
+VOLUME=${FAP_WAFFLE_VOLUME:-waffle-build}   # a copy per parallel work line (waffle-build-inst, ...)
 
 # Pinned sources
 WAFFLE_URL=https://github.com/DaDDevil/linux
@@ -92,7 +105,8 @@ UL_TEXT_BASE=0xa8010000
 UL_PAYLOAD_ENTRY=0xa3200000
 UL_RAMDISK_ENTRY=0xb6f95000
 UL_BANK_END=0xd4e23000
-VARIANTS="plain netroot"
+BOOT_B_SIZE=201326592   # boot_b partition (192 MiB, INSTALL.md 3)
+VARIANTS="plain netroot install lptest"   # install = boot_b (INSTALL.md), lptest = RAM-only menu test
 
 if [[ -z ${FAP_WAFFLE_INNER:-} ]]; then
   HERE=$(cd "$(dirname "$0")/.." && pwd)        # devices/oneplus-waffle
@@ -117,6 +131,7 @@ if [[ -z ${FAP_WAFFLE_INNER:-} ]]; then
       { echo "VENDOR_FILES needs tree/ and phone-manifest.sha256" >&2; exit 1; }
     extra+=(-v "$(cd "$VENDOR_FILES" && pwd):/vendor-files:ro")
   fi
+  [[ -n ${INSTALLROOT_SRC:-} ]] && extra+=(-v "$(cd "$(dirname "$INSTALLROOT_SRC")" && pwd)/$(basename "$INSTALLROOT_SRC"):/installroot-src.tar.gz:ro" -e INSTALLROOT_SRC_NAME="$INSTALLROOT_SRC" -e INSTALLROOT_SIZE="${INSTALLROOT_SIZE:-8589934592}")
   [[ -n ${NETROOT_GENERIC:-} ]] && extra+=(-v "$(cd "$(dirname "$NETROOT_GENERIC")" && pwd)/$(basename "$NETROOT_GENERIC"):/netroot-generic.tar.gz:ro")
   tty=(); [[ -t 0 && -t 1 ]] && tty=(-it)
   net=(--network=none)
@@ -296,7 +311,7 @@ image_size_check() {   # the kernel's image_size (incl. BSS) must end below uniL
   (( isz + (2 << 20) <= room )) || die "kernel image_size too big for uniLoader's layout (needs PAYLOAD_ENTRY moved)"
 }
 
-DTS_NAMES="sm8650-oneplus-waffle-fap sm8650-oneplus-waffle-fap-netroot"
+DTS_NAMES="sm8650-oneplus-waffle-fap sm8650-oneplus-waffle-fap-netroot sm8650-oneplus-waffle-fap-install sm8650-oneplus-waffle-fap-lptest"
 cmd_dtb() {
   [[ $KERNEL_TREE == waffle ]] || die "dtb needs KERNEL_TREE=waffle (the board DT lives there)"
   fetch_tree
@@ -323,6 +338,32 @@ cmd_dtb() {
   for n in "$DEV"/dts/*.dts "$DEV"/dts/*.dtsi; do rm -f "$D/$(basename "$n")"; done
 }
 
+# Dual-boot install helpers for the initramfs (INSTALL.md 3 + 5.3), built
+# into $S/helpers (needs the network once: glibc-static, qbootctl):
+# fap-lpmap and fap-keywait (boot/android-bootimg/helpers, static), and
+# Fedora 45's qbootctl with the shared libraries it needs (ldd), since a
+# static build of qbootctl needs its own packaging work (INSTALL.md 5.1).
+QBOOTCTL_NVR=qbootctl-0.2.2-3.fc45
+cmd_helpers() {
+  local H=$S/helpers f lib
+  say "initramfs helpers: fap-lpmap, fap-keywait (static), $QBOOTCTL_NVR bundle"
+  dnf5 -y -q --setopt=install_weak_deps=False install glibc-static "$QBOOTCTL_NVR" >/dev/null
+  rm -rf "$H" && mkdir -p "$H/bin" "$H/qbootctl"
+  for f in fap-lpmap fap-keywait; do
+    gcc -static -Os -Wall -Wextra -Werror -o "$H/bin/$f" "/repo/boot/android-bootimg/helpers/$f.c"
+    strip "$H/bin/$f"
+    file "$H/bin/$f" | grep -q 'statically linked' || die "$f is not static"
+  done
+  # qbootctl + its libraries at their own paths (the initramfs has no other
+  # dynamic binaries, so nothing else depends on these).
+  install -D -m 755 "$(command -v qbootctl)" "$H/qbootctl/usr/bin/qbootctl"
+  for lib in $(ldd "$(command -v qbootctl)" | awk '/=>/ {print $3} /^\t\/lib/ {print $1}' | sort -u); do
+    install -D -m 755 "$lib" "$H/qbootctl$lib"
+  done
+  rpm -q qbootctl > "$H/qbootctl.version"
+  (cd "$H" && find bin qbootctl -type f | LC_ALL=C sort | xargs sha256sum) | tee "$H/SHA256SUMS"
+}
+
 RAMBOOT_MODULES="pm8941-pwrkey gpio_keys rtc-pm8xxx qcom-pon"
 cmd_initramfs() {
   [[ -f $S/kernel-release-waffle ]] || die "run 'kernel' first"
@@ -335,6 +376,12 @@ cmd_initramfs() {
   file -L "$R/bin/busybox" | grep -q 'statically linked' || die "busybox is not static"
   for m in $(/usr/sbin/busybox --list); do [[ -e $R/bin/$m ]] || ln -s busybox "$R/bin/$m"; done
   install -m 755 /repo/boot/android-bootimg/tiny-init "$R/init"
+  [[ -x $S/helpers/bin/fap-lpmap ]] || die "run 'helpers' first (fap-lpmap, fap-keywait, qbootctl)"
+  install -m 755 "$S"/helpers/bin/* "$R/bin/"
+  cp -a "$S/helpers/qbootctl/." "$R/"
+  ln -sf /usr/bin/qbootctl "$R/bin/qbootctl"
+  [[ -e $R/lib64 || ! -d $R/usr/lib64 ]] || ln -s usr/lib64 "$R/lib64"
+  echo "helpers: $(cd "$S/helpers" && ls bin | tr '\n' ' ')+ $(cat "$S/helpers/qbootctl.version")"
   : > "$R/etc/modules.order"
   # Same mechanism as make-ramboot.sh: dependency order from modprobe.
   for m in $RAMBOOT_MODULES; do
@@ -446,7 +493,7 @@ uniloader_build() {
 
 cmd_images() {
   local f v I=$S/images
-  for f in Image-waffle initramfs.cpio.gz sm8650-oneplus-waffle-fap.dtb sm8650-oneplus-waffle-fap-netroot.dtb; do
+  for f in Image-waffle initramfs.cpio.gz sm8650-oneplus-waffle-fap{,-netroot,-install,-lptest}.dtb; do
     [[ -f $S/$f ]] || die "missing $S/$f: run kernel, dtb and initramfs first"
   done
   image_size_check "$S/Image-waffle"
@@ -471,6 +518,13 @@ cmd_images() {
     fi
     cp "$S/uniLoader-$v.bin" "$I/parts/"
   done
+  # Dual-boot install: the boot_b image is the install variant zero-padded
+  # to the whole partition (INSTALL.md 3: no stale LineageOS bytes or AVB
+  # footer survive, and a read-back of boot_b must hash like this file).
+  mkdir -p "$I/boot_b"
+  cp "$I/ramboot/waffle-uniloader-v4-install.img" "$I/boot_b/fap-boot_b.img"
+  (( $(stat -c %s "$I/boot_b/fap-boot_b.img") <= BOOT_B_SIZE )) || die "install image bigger than boot_b"
+  truncate -s "$BOOT_B_SIZE" "$I/boot_b/fap-boot_b.img"
   cp "$S/Image-waffle" "$I/parts/Image"
   cp "$S"/sm8650-oneplus-waffle-fap*.dtb "$S/initramfs.cpio.gz" "$I/parts/"
   cp "$S/kernel-waffle.config" "$I/parts/kernel.config"
@@ -484,9 +538,9 @@ cmd_images() {
   done
 
   say "Copy out"
-  rm -rf /out/ramboot /out/parts
+  rm -rf /out/ramboot /out/parts /out/boot_b
   rm -f /out/SHA256SUMS /out/BUILDINFO
-  cp -r "$I"/ramboot "$I"/parts /out/
+  cp -r "$I"/ramboot "$I"/parts "$I"/boot_b /out/
   {
     echo "kernel: $(cat "$S/kernel-source") ($kver)"
     if [[ $(cat "$S/kernel-config-mode-waffle") == full ]]; then
@@ -500,7 +554,7 @@ cmd_images() {
     echo "boot image: header v4, os_version $OS_VERSION, os_patch_level $OS_PATCH_LEVEL"
     echo "repo: $(git -c safe.directory='*' -C /repo rev-parse --short HEAD 2>/dev/null || echo '?')"
   } > /out/BUILDINFO
-  (cd /out && find ramboot parts -type f | LC_ALL=C sort | xargs sha256sum > SHA256SUMS)
+  (cd /out && find ramboot parts boot_b -type f | LC_ALL=C sort | xargs sha256sum > SHA256SUMS)
   cat /out/BUILDINFO
   (cd /out && ls -l ramboot parts)
 }
@@ -521,6 +575,60 @@ stock_v2() {   # stock_v2 <variant> <out.img>: uniLoader + stock vendor_boot DTB
     --ramdisk_offset "${rofs:-0x1000000}" --tags_offset "${tofs:-0x100}" --dtb_offset "${dofs:-0x1f00000}" \
     --kernel "$S/uniLoader-$v.bin" --ramdisk "$S/empty.cpio" --dtb "$T/dtb" --cmdline '' \
     --os_version "$OS_VERSION" --os_patch_level "$OS_PATCH_LEVEL" --output "$o"
+}
+
+# Dual-boot install root (INSTALL.md 2, W2): INSTALLROOT_SRC (a netroot
+# tarball with this unit's firmware, e.g. plasma-netroot-gpu) + this
+# kernel's modules + the phone-essentials apps (desktops/plasma-mobile
+# since 41f6104) + qbootctl + devices/oneplus-waffle/installroot, as an ext4
+# image of INSTALLROOT_SIZE bytes (label fap-root) and its sparse form for
+# fastbootd. The raw image stays in the volume (its sha256 is what a
+# read-back of /dev/block/mapper/fap_root must give); outputs carry the
+# unit's firmware and EFS copies: local only.
+INSTALLROOT_SIZE=${INSTALLROOT_SIZE:-8589934592}
+INSTALLROOT_PKGS="qbootctl angelfish kalk kclock kweather koko qmlkonsole spacebar elisa-player haruna krecorder okular-mobile qrca"
+cmd_installroot() {
+  local R=/work/installroot IMG=/work/fap-root.img D=/out/install-images kver
+  [[ -f /installroot-src.tar.gz ]] || die "set INSTALLROOT_SRC=<netroot.tar.gz>"
+  kver=$(cat "$S/kernel-release-waffle")
+  say "install root: $INSTALLROOT_SRC_NAME + modules $kver + $INSTALLROOT_PKGS"
+  dnf5 -y -q --setopt=install_weak_deps=False install e2fsprogs android-tools >/dev/null
+  rm -rf "$R" && mkdir -p "$R"
+  tar --numeric-owner --xattrs --xattrs-include='*' -xzf /installroot-src.tar.gz -C "$R"
+  rm -rf "$R/usr/lib/modules" && mkdir -p "$R/usr/lib/modules"
+  cp -a "$S/modroot-waffle/lib/modules/$kver" "$R/usr/lib/modules/"
+  dnf5 -y -q --installroot="$R" --use-host-config --releasever=45 \
+    --setopt=install_weak_deps=False install $INSTALLROOT_PKGS
+  dnf5 -y -q --installroot="$R" --use-host-config --releasever=45 clean all >/dev/null
+  cp -a "$DEV/installroot/." "$R/"
+  # Nothing in this root may write slot a: no fap-android-boot, no
+  # qbootctl.service (masked by the overlay), fap-boot-ok marks b only.
+  [[ ! -e $R/usr/bin/fap-android-boot && ! -e $R/usr/libexec/fap-android-boot ]] ||
+    die "fap-android-boot in the install root: it would write boot_a (INSTALL.md 7)"
+  [[ $(readlink "$R/etc/systemd/system/qbootctl.service") == /dev/null ]] || die "qbootctl.service not masked"
+  [[ -x $R/usr/bin/qbootctl ]] || die "no qbootctl in the root"
+  rpm --root="$R" -q $INSTALLROOT_PKGS > "$S/installroot-pkgs.txt" || die "packages missing"
+  echo "root: $(du -sxm "$R" | cut -f1) MiB used"
+  rm -f "$IMG"
+  mkfs.ext4 -q -F -L fap-root -b 4096 -m 1 -E root_owner=0:0 -d "$R" "$IMG" "$((INSTALLROOT_SIZE / 4096))"
+  [[ $(stat -c %s "$IMG") == "$INSTALLROOT_SIZE" ]] || die "image size != INSTALLROOT_SIZE"
+  e2fsck -fn "$IMG" >/dev/null || die "e2fsck of the new image failed"
+  mkdir -p "$D"
+  rm -f "$D"/fap-root.simg "$D"/SHA256SUMS
+  img2simg "$IMG" "$D/fap-root.simg"
+  local raw; raw=$(sha256sum "$IMG" | cut -d' ' -f1)
+  {
+    echo "source: $INSTALLROOT_SRC_NAME ($(sha256sum /installroot-src.tar.gz | cut -d' ' -f1))"
+    echo "kernel modules: $kver"
+    echo "size: $INSTALLROOT_SIZE bytes (fastboot create-logical-partition fap_root $INSTALLROOT_SIZE)"
+    echo "label: $(e2label "$IMG"), used: $(dumpe2fs -h "$IMG" 2>/dev/null | awk -F: '/^Block count/{t=$2} /^Free blocks/{f=$2} END{printf "%d MiB of %d MiB", (t-f)*4/1024, t*4/1024}')"
+    echo "raw image sha256 (= read-back of /dev/block/mapper/fap_root): $raw"
+    sed 's/^/package: /' "$S/installroot-pkgs.txt"
+  } > "$D/INSTALLROOT-INFO"
+  (cd "$D" && sha256sum fap-root.simg > SHA256SUMS && echo "$raw  fap-root.img (raw, not copied out; in volume /work/fap-root.img)" >> SHA256SUMS)
+  printf '%s\n' "SENSITIVE: fap-root.simg contains this unit's modem/DSP/BT/GPU firmware and EFS (IMEI) copies. Local only." > "$D/SENSITIVE-README.txt"
+  cat "$D/INSTALLROOT-INFO" "$D/SHA256SUMS"
+  rm -rf "$R"
 }
 
 # DSP/modem firmware from the unit's modem_a partition (vfat, read with
@@ -728,7 +836,7 @@ cmd_bisect() {
   (cd /out/bisect && sha256sum waffle-bisect-*.img uniLoader-bisect-*.bin kernel-daddevil.config > SHA256SUMS && cat SHA256SUMS)
 }
 
-[[ $# -ge 1 ]] || die "usage: fap-waffle-build.sh [--full|--daddevil] kernel|config-check|dtb|initramfs|images|netroot|gpu-firmware|all|bisect|shell"
+[[ $# -ge 1 ]] || die "usage: fap-waffle-build.sh [--full|--daddevil] kernel|config-check|dtb|helpers|initramfs|images|installroot|netroot|gpu-firmware|all|bisect|shell"
 for c in "$@"; do
   case $c in
     kernel) cmd_kernel ;;
@@ -736,6 +844,8 @@ for c in "$@"; do
     dtb) cmd_dtb ;;
     initramfs) cmd_initramfs ;;
     images) cmd_images ;;
+    helpers) cmd_helpers ;;
+    installroot) cmd_installroot ;;
     netroot) cmd_netroot ;;
     gpu-firmware) cmd_gpu_firmware ;;
     all) cmd_kernel; cmd_dtb; cmd_initramfs; cmd_images ;;

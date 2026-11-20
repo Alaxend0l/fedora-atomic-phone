@@ -1,0 +1,19 @@
+#!/bin/sh
+# SPDX-License-Identifier: AGPL-3.0-or-later
+# Health check, then `qbootctl -m b` (INSTALL.md 5.4). Only on the image
+# installed on slot b (fap.slot=b), never on a RAM boot.
+set -u
+log() { echo "fap-boot-ok: $*"; }
+grep -qw 'fap.slot=b' /proc/cmdline || { log "not the slot-b install image: nothing to do"; exit 0; }
+up=$(cut -d. -f1 /proc/uptime)
+[ "$up" -lt 60 ] && sleep $((60 - up))
+bad=
+grep -qx connected /sys/class/drm/card*-DSI-1/status 2>/dev/null || bad="$bad display"
+for u in display-manager.service NetworkManager.service fap-usb-dhcp.service; do
+    systemctl -q is-active "$u" || bad="$bad $u"
+done
+if [ -n "$bad" ]; then
+    log "unhealthy:$bad: slot b NOT marked successful (ABL keeps counting down)"
+    exit 1
+fi
+qbootctl -m b && log "slot b marked successful"

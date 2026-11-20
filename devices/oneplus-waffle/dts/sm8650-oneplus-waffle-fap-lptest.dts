@@ -1,0 +1,17 @@
+// SPDX-License-Identifier: (GPL-2.0+ OR BSD-3-Clause)
+/*
+ * OnePlus 12 dual-boot install, RAM-boot test only (boot-mode matrix vi):
+ * the install image's menu and failure branch with a partition that doesn't
+ * exist (fap.root=lp:fap_nonexistent) and a dry-run menu (fap.menu_dry=1:
+ * "LineageOS" prints the qbootctl command instead of running it, then
+ * reboots). Writes nothing; safe before W1. Never flash it.
+ */
+/dts-v1/;
+
+#include "sm8650-oneplus-waffle-fap.dtsi"
+
+/ {
+	chosen {
+		bootargs = "console=tty0 loglevel=4 fbcon=font:TER16x32 clk_ignore_unused pd_ignore_unused regulator_ignore_unused nokaslr fap.slot=ram fap.root=lp:fap_nonexistent fap.menu=3 fap.menu_dry=1";
+	};
+};

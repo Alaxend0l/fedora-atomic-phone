@@ -21,6 +21,62 @@ while read -r ko; do
     insmod "$ko" 2>/dev/null || echo "fap-init: insmod $ko failed" > /dev/kmsg
 done < /etc/modules.order
 
+# By-partlabel links (qbootctl finds partitions there; tiny-init finds super).
+partlinks() {
+    mkdir -p /dev/disk/by-partlabel
+    for u in /sys/class/block/*/uevent; do
+        pn=$(sed -n 's/^PARTNAME=//p' "$u")
+        dn=$(sed -n 's/^DEVNAME=//p' "$u")
+        [ -n "$pn" ] && [ -n "$dn" ] && ln -sf "/dev/$dn" "/dev/disk/by-partlabel/$pn"
+    done
+}
+
+# Boot menu (fap.menu=<seconds>, dual-boot install, INSTALL.md 5.3): before
+# the root is touched, so it works with a broken or missing root.
+# Vol Up / timeout: Fedora. Vol Down: LineageOS (qbootctl -s a + reboot).
+# fap.menu_dry=1: print the slot command instead of running it (RAM tests).
+cmdarg() { sed -n "s/.*[[:space:]]$1=\([^ ]*\).*/\1/p; s/^$1=\([^ ]*\).*/\1/p" /proc/cmdline | head -n 1; }
+say() { printf '%s\n' "$*" > /dev/tty0; echo "fap-init: $*" > /dev/kmsg; }
+to_lineage() {
+    say "Restarting into LineageOS (slot a)"
+    if [ "$(cmdarg fap.menu_dry)" = 1 ]; then
+        say "dry run: would run: qbootctl -s a; sync; reboot -f"
+        sleep 5; sync; reboot -f
+    fi
+    partlinks
+    if qbootctl -s a > /dev/tty0 2>&1; then
+        sync; sleep 1; reboot -f
+    fi
+    say "qbootctl -s a FAILED: slot not changed"
+    return 1
+}
+menu_secs=$(cmdarg fap.menu)
+case "$menu_secs" in ''|*[!0-9]*) menu_secs=0 ;; esac
+if [ "$menu_secs" -gt 0 ]; then
+    # Give gpio-keys / pon (modules above) a moment to register.
+    i=0; while [ ! -e /dev/input/event0 ] && [ $i -lt 20 ]; do sleep 0.1; i=$((i + 1)); done
+    sleep 0.3
+    printf '\033[2J\033[H' > /dev/tty0
+    printf '\n\n   fedora-atomic-phone\n\n   Vol Up / wait %s s :  Fedora\n   Vol Down          :  LineageOS\n\n' "$menu_secs" > /dev/tty0
+    k=$(fap-keywait "$menu_secs")
+    say "menu: $k"
+    if [ "$k" = down ]; then
+        to_lineage || say "booting Fedora instead"
+    fi
+fi
+
+# Failure branch of an installed root: menu without timeout. Never returns
+# into a write: Vol Down = LineageOS, Vol Up = continue to the debug shell.
+root_failed() {
+    [ "$menu_secs" -gt 0 ] || return 0
+    while :; do
+        printf '\n   Fedora root not usable:\n   %s\n\n   Vol Down :  LineageOS\n   Vol Up   :  debug shell (USB)\n\n' "$1" > /dev/tty0
+        k=$(fap-keywait 0)
+        [ "$k" = up ] && return 0
+        [ "$k" = down ] && to_lineage
+    done
+}
+
 # USB serial gadget once the device controller shows up.
 i=0
 while [ -z "$(ls /sys/class/udc 2>/dev/null)" ] && [ $i -lt 30 ]; do sleep 1; i=$((i + 1)); done
@@ -65,14 +121,30 @@ else
     done
 fi
 
-# Installed root (kernel argument fap.root=LABEL=<label> or a device path):
+# Installed root (kernel argument fap.root=LABEL=<label>, a device path, or
+# lp:<name> = a logical partition in super, mapped by fap-lpmap):
 # mount it read-write and switch to its systemd. The USB gadget carries over.
 root=$(sed -n 's/.*fap\.root=\([^ ]*\).*/\1/p' /proc/cmdline)
 if [ -n "$root" ]; then
     dev=
+    why=
     i=0
     while [ $i -lt 30 ]; do
         case "$root" in
+            lp:*)
+                # Logical partition in super (fap-lpmap: LP metadata slots 0
+                # and 1 must agree; ext4 label fap-root required).
+                sdev=
+                for u in /sys/class/block/*/uevent; do
+                    grep -qx PARTNAME=super "$u" && sdev=/dev/$(sed -n 's/^DEVNAME=//p' "$u")
+                done
+                if [ -b "$sdev" ]; then
+                    why=$(fap-lpmap -l fap-root "$sdev" "${root#lp:}" 2>&1 >/dev/null) \
+                        && dev=/dev/mapper/${root#lp:}
+                    [ -n "$dev" ] || break   # metadata answers don't change: no retries
+                else
+                    why="no super partition"
+                fi ;;
             /dev/*) [ -b "$root" ] && dev=$root ;;
             *) dev=$(findfs "$root" 2>/dev/null) ;;
         esac
@@ -92,6 +164,7 @@ if [ -n "$root" ]; then
     fi
     echo "fap-init: root $root not usable (device: ${dev:-none}), staying here" > /dev/kmsg
     umount /newroot 2>/dev/null
+    root_failed "$root: ${why:-device ${dev:-not found} not mountable}"
 fi
 
 # Network root (kernel argument fap.netroot=http://...tar.gz): download a root
