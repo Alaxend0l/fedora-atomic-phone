@@ -1,0 +1,19 @@
+[Unit]
+Description=Keep the Android boot partition in sync with the next bootc deployment
+Documentation=file:///usr/libexec/fap-android-boot
+# bootc writes the staged deployment's boot entry in ostree-finalize-staged's
+# ExecStop, at shutdown. Units stop in reverse start order, so ordering this
+# unit Before= it makes our ExecStop run after the entry exists.
+Before=ostree-finalize-staged.service
+After=local-fs.target
+RequiresMountsFor=/boot /var
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+ExecStart=/usr/libexec/fap-android-boot record
+ExecStop=/usr/libexec/fap-android-boot sync
+TimeoutStopSec=120
+
+[Install]
+WantedBy=multi-user.target

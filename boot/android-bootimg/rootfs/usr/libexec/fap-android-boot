@@ -1,0 +1,122 @@
+#!/usr/bin/env bash
+# Build and flash the Android boot image for the android-bootimg boot method.
+#
+# The phone's bootloader (ABL) boots the Linux kernel straight from boot_a /
+# boot_b, so the boot partition must always match the deployment bootc will
+# start. bootc/ostree describe each deployment in a Boot Loader Spec entry
+# (/boot/loader/entries/*.conf: linux, initrd, options incl. ostree=...);
+# this tool turns the default entry into a boot image.
+#
+#   fap-android-boot build <boot-root> <out.img>   build only (also used at image time)
+#   fap-android-boot sync                          build for the next boot, flash the
+#                                                  inactive slot, make it active
+#   fap-android-boot record                        remember what the current slot holds
+#
+# A/B: `sync` writes the *other* slot and switches to it, so the slot we
+# booted from stays intact as a fallback (qbootctl falls back after failed
+# boots). Without qbootctl it writes the current slot and warns.
+#
+# Status: untested.
+set -euo pipefail
+
+CONF=/usr/lib/fap/device.env
+STATE=/var/lib/fap/android-boot.state
+# shellcheck disable=SC1090
+source "$CONF"
+# shellcheck disable=SC1091
+source /usr/lib/fap/bootimg-args.sh
+
+log() { echo "fap-android-boot: $*" >&2; }
+
+# The entry bootc/ostree will boot next: highest "version" wins.
+default_entry() {
+    local root=$1
+    grep -H '^version' "$root"/loader/entries/*.conf 2>/dev/null \
+        | sort -t' ' -k2 -V | tail -1 | cut -d: -f1
+}
+
+entry_field() { sed -n "s/^$2[[:space:]]\+//p" "$1" | head -1; }
+
+# Fedora's aarch64 vmlinuz is an EFI zboot image ("MZ" .. "zimg"): a PE stub
+# wrapping a compressed Image. ABL needs the Image itself (gzip is fine).
+kernel_for_abl() {
+    local vmlinuz=$1 out=$2
+    if [ "$(dd if="$vmlinuz" bs=1 skip=4 count=4 status=none)" = zimg ]; then
+        local off size comp
+        off=$(od -An -t u4 -j 8 -N 4 "$vmlinuz" | tr -d ' ')
+        size=$(od -An -t u4 -j 12 -N 4 "$vmlinuz" | tr -d ' ')
+        comp=$(dd if="$vmlinuz" bs=1 skip=24 count=8 status=none | tr -d '\0')
+        case "$comp" in
+            zstd) tail -c +"$((off + 1))" "$vmlinuz" | head -c "$size" | zstd -dc ;;
+            gzip) tail -c +"$((off + 1))" "$vmlinuz" | head -c "$size" | gzip -dc ;;
+            *) log "unsupported zboot compression '$comp'"; return 1 ;;
+        esac | gzip -9n > "$out"
+    else
+        gzip -9nc "$vmlinuz" > "$out"
+    fi
+}
+
+build() {
+    local root=$1 out=$2 entry linux initrd options dtb tmp
+    entry=$(default_entry "$root")
+    [ -n "$entry" ] || { log "no boot entries under $root/loader/entries"; return 1; }
+    linux=$root$(entry_field "$entry" linux)
+    initrd=$root$(entry_field "$entry" initrd)
+    options=$(entry_field "$entry" options)
+    # ostree copies the kernel's dtb directory next to the kernel.
+    dtb="$(dirname "$linux")/dtb/$KERNEL_DTB"
+    [ -f "$dtb" ] || dtb="/usr/lib/modules/$(basename "$(dirname "$linux")")/dtb/$KERNEL_DTB"
+    for f in "$linux" "$initrd" "$dtb"; do
+        [ -f "$f" ] || { log "missing $f (entry $entry)"; return 1; }
+    done
+
+    tmp=$(mktemp -d)
+    trap 'rm -rf "$tmp"' RETURN
+    kernel_for_abl "$linux" "$tmp/Image.gz"
+    local args=(--kernel "$tmp/Image.gz" --ramdisk "$initrd"
+                --cmdline "$options ${BOOTIMG_CMDLINE:-}")
+    if [ "$BOOTIMG_HEADER_VERSION" = 2 ]; then
+        args+=(--dtb "$dtb")
+    else
+        cat "$tmp/Image.gz" "$dtb" > "$tmp/Image.gz-dtb"
+        args[1]="$tmp/Image.gz-dtb"
+    fi
+    # shellcheck disable=SC2046
+    mkbootimg $(bootimg_layout_args) "${args[@]}" -o "$out"
+    log "built $out from $(basename "$entry")"
+}
+
+current_slot() { qbootctl -c 2>/dev/null | awk '{print $NF}'; }   # "_a" / "_b"
+
+sync_boot() {
+    local img hash slot target part
+    mkdir -p "$(dirname "$STATE")"
+    img=$(mktemp)
+    build /boot "$img"
+    hash=$(sha256sum "$img" | cut -d' ' -f1)
+    if grep -qx "next $hash" "$STATE" 2>/dev/null; then
+        log "boot image unchanged, nothing to flash"; rm -f "$img"; return 0
+    fi
+
+    if command -v qbootctl >/dev/null && slot=$(current_slot) && [ -n "$slot" ]; then
+        target=$([ "$slot" = "_a" ] && echo _b || echo _a)
+        part=/dev/disk/by-partlabel/${FLASH_BOOT_PARTITION}${target}
+        log "flashing $part (current slot ${slot})"
+        dd if="$img" of="$part" bs=4M conv=fsync status=none
+        qbootctl -s "${target#_}"
+    else
+        part=/dev/disk/by-partlabel/${FLASH_BOOT_PARTITION}$([ "${FLASH_AB:-}" = true ] && echo _a)
+        log "WARNING: no slot switching available, overwriting $part in place"
+        dd if="$img" of="$part" bs=4M conv=fsync status=none
+    fi
+    echo "next $hash" > "$STATE"
+    rm -f "$img"
+}
+
+case "${1:-}" in
+    build) build "${2:?boot root}" "${3:?output image}" ;;
+    sync) sync_boot ;;
+    record) mkdir -p "$(dirname "$STATE")"; img=$(mktemp); build /boot "$img" \
+              && echo "next $(sha256sum "$img" | cut -d' ' -f1)" > "$STATE"; rm -f "$img" ;;
+    *) echo "usage: $0 build <boot-root> <out.img> | sync | record" >&2; exit 2 ;;
+esac

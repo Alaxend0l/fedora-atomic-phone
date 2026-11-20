@@ -28,7 +28,7 @@ simple-framebuffer, UFS, SD card, USB, PM6125 regulators and **ramoops**
 ## Boot chain (planned)
 Android bootloader (ABL) → `boot_a`/`boot_b` holds U-Boot (`qcom_defconfig` +
 the mainline billie2 DTB, Android boot image header v2) → U-Boot's EFI →
-GRUB from the ESP → Fedora kernel + DTB. See `boot/u-boot/`.
+GRUB from the ESP → Fedora kernel + DTB. See `boot/uboot-android/`; `android-bootimg` is the fallback.
 
 ## Partitions
 A/B device with Android dynamic partitions: `system`/`vendor` are logical

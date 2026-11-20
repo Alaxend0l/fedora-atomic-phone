@@ -20,6 +20,9 @@ BASE_IMAGE := env("FAP_BASE_IMAGE", if DESKTOP == "plasma-mobile" {
 
 IMAGE := REGISTRY / "fap-" + DEVICE + "-" + DESKTOP + ":" + FEDORA
 
+# Read from the device's device.env, so devices can't disagree with the build.
+BOOT_METHOD := shell('. devices/"$1"/device.env 2>/dev/null && echo "$BOOT_METHOD"', DEVICE)
+
 default:
     @just --list
 
@@ -35,11 +38,16 @@ build: check
         --build-arg BASE_IMAGE={{BASE_IMAGE}} \
         --build-arg DEVICE={{DEVICE}} \
         --build-arg DESKTOP={{DESKTOP}} \
+        --build-arg BOOT_METHOD={{BOOT_METHOD}} \
         -t {{IMAGE}} .
 
 # Turn the image into flashable disk images in ./output (needs root podman).
 disk:
     tools/make-disk.sh {{IMAGE}} devices/{{DEVICE}} output
+
+# Build U-Boot for a uboot-android device (needs a U-Boot checkout).
+uboot SRC:
+    boot/uboot-android/build-in-container.sh {{SRC}} devices/{{DEVICE}} output
 
 # Flash ./output to a phone in fastboot mode, using the device's flash plan.
 flash:
@@ -47,6 +55,6 @@ flash:
 
 # Print the resolved settings.
 info:
-    @echo "device={{DEVICE}} desktop={{DESKTOP}} fedora={{FEDORA}}"
+    @echo "device={{DEVICE}} desktop={{DESKTOP}} fedora={{FEDORA}} boot={{BOOT_METHOD}}"
     @echo "base={{BASE_IMAGE}}"
     @echo "image={{IMAGE}}"

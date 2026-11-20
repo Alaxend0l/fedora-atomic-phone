@@ -8,6 +8,7 @@
 #   disk.raw     whole GPT disk from image-builder (layout: the device's disk.yaml)
 #   esp.img      EFI system partition, Android sparse format, for fastboot
 #   rootfs.img   root filesystem, Android sparse format, for fastboot
+#   boot.img     (android-bootimg only) kernel boot image for the boot partition
 #
 # Status: untested.
 set -euo pipefail
@@ -46,7 +47,15 @@ for p in t["partitions"]:
     print(f"{name}: {p['size'] * ss // (1 << 20)} MiB")
 EOF
 
-# 3. fastboot handles big images best in Android sparse format.
+# 3. Boot methods that put the kernel in the boot partition build it from the
+#    disk image's own boot entries (before disk.raw is cleaned up).
+# shellcheck disable=SC1091
+BOOT_METHOD=$(. "$dev/device.env" && echo "$BOOT_METHOD")
+if [ "$BOOT_METHOD" = android-bootimg ]; then
+    "$(dirname "$0")/../boot/android-bootimg/make-bootimg.sh" "$image" "$out"
+fi
+
+# 4. fastboot handles big images best in Android sparse format.
 for n in esp rootfs; do
     img2simg "$out/$n.raw" "$out/$n.img"
     rm "$out/$n.raw"

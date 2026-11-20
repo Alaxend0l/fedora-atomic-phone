@@ -18,7 +18,7 @@ Fedora Silverblue on a laptop.
   the image, which each device ships.
 - **Android bootloader (ABL).** Every Qualcomm phone has one. It only boots
   Android boot images from `boot_a`/`boot_b`. We don't replace it; we give it
-  U-Boot to load (see `boot/u-boot/README.md`).
+  U-Boot or a kernel to load (see `boot/README.md` for the boot methods).
 
 ## Build flow
 ```
@@ -26,13 +26,15 @@ just build ──> podman build (Containerfile)
                  FROM quay.io/fedora/fedora-silverblue:45 (or kinoite, base-atomic)
                  run-layer base/
                  run-layer desktops/$DESKTOP/
+                 run-layer boot/$BOOT_METHOD/     (BOOT_METHOD from device.env)
                  run-layer devices/$DEVICE/
                  finalize
                  bootc container lint
                = localhost/fap-$DEVICE-$DESKTOP:45
 
 just disk  ──> tools/make-disk.sh: image-builder → disk.raw → esp.img + rootfs.img
-boot/u-boot/build.sh ──> uboot.img
+                 (+ boot.img for BOOT_METHOD=android-bootimg)
+just uboot <src> ──> uboot.img          (BOOT_METHOD=uboot-android)
 just flash ──> tools/flash.sh: fastboot flash boot/ESP/userdata per device.env
 ```
 

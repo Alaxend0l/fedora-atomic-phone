@@ -20,7 +20,8 @@ option; open an issue.
 2. Fill in `device.env`. `just DEVICE=<id> check` tells you what's missing.
 3. Pick partitions for the ESP and root filesystem. Write down why in the
    device README (sizes, what you're overwriting).
-4. Build U-Boot for it (`boot/u-boot/`). Try `fastboot boot uboot.img` first:
+4. Pick a `BOOT_METHOD` (`boot/README.md`). For uboot-android, `just uboot <src>`;
+   either way, try `fastboot boot <image>` first:
    it boots from RAM without writing anything.
 5. `just build`, `just disk`, `just flash`.
 6. First boot: use `DESKTOP=tty`. Reach it over USB at 172.16.42.1 (ssh).
