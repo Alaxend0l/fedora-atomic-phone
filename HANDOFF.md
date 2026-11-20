@@ -80,6 +80,25 @@ Build outputs (local only, several are SENSITIVE: they contain the phone's
 EFS/IMEI copies and OEM firmware; never commit or upload):
 `~/Develop/fap-build/waffle/{bisect,plasma-netroot-gpu,hw,power,tel,install}/`.
 
+## Research notes for the next session (2026-11-21, desk research, nothing proven on the phone)
+- `devices/oneplus-waffle/SPEAKERS-RESEARCH.md` (branch `oneplus12-hw`, 147305b):
+  the SECONDARY_MI2S device graph has **no MFC/converter** (`logger -> i2s_rx`),
+  so v9 fed 16-bit PCM into a 32-bit I2S endpoint → likely ADSP fatal → reset.
+  Proper fix: build a topology from audioreach-topology m4 with
+  `LOG -> MFC -> I2S_RX` at S32_LE (replaces the binary patcher). Staged plan
+  starts with logging (ramoops check, netconsole) and an ADSP-only crash test.
+- `devices/oneplus-waffle/SENSORS-RESEARCH.md` (`oneplus12-hw`, 399c633): sensors
+  run in the ADSP's sensor PD (same DSP as charging/USB‑C); likely the DSP
+  chokes on our served config (no socinfo, read-only registry). Staged plan.
+- `devices/oneplus-waffle/RESETS-GPS-RESEARCH.md` (`oneplus12-dualboot`, c0c834e):
+  why pstore was always empty (LineageOS reuses the ramoops RAM; no
+  record-size in the DT); reset suspects (DSP fatal escalated by TZ, Gunyah
+  watchdog, PCIe); GPS: engine lock / standalone mode via QMI LOC, no SIM needed
+  for plain GNSS.
+- Common first step for all three: make crashes visible (ramoops record-size,
+  `panic=5 oops=panic`, netconsole, remoteproc recovery + coredump) and stream
+  `dmesg -w` over Wi‑Fi during every risky test.
+
 ## Next steps, in order
 0. **Done 2026-11-21: the installed kernel uses Fedora's full config**
    (`--full`, 17 min build, image_size 65 of 78 MiB; boot_b sha `7feeffad…`).
