@@ -91,6 +91,14 @@
 	maximum-speed = "high-speed";
 	phys = <&usb_1_hsphy>;
 	phy-names = "usb2-phy";
+	/*
+	 * Without a USB3 PHY the core still expects the pipe clock: under ABL's
+	 * fastboot (RAM boot) it happens to run, on a normal boot from flash it
+	 * doesn't and "DWC3 controller soft reset failed" (-ETIMEDOUT),
+	 * 2026-11-20. Clock the pipe from UTMI instead, as on the N100
+	 * (devices/oneplus-billie2/hidden-dependencies.md).
+	 */
+	qcom,select-utmi-as-pipe-clk;
 	/delete-property/ usb-role-switch;
 };
 
