@@ -28,6 +28,23 @@ checkout, built images). Pocketblue reference clones:
 | devices/oneplus-billie2/README.md | N100 hardware, partitions, recovery |
 | kernels/qcom-sm6115/README.md | Fedora kernel coverage for the SoC |
 | boot/uboot-android/README.md | U-Boot build + the N100 boot experiments |
+| boot/android-bootimg/README.md | the RAM-boot dev loop (`fastboot boot` + netroot over USB) |
+| docs/hardware/ | per-area bring-up plans for the N100's remaining hardware |
+| kmod/, devices/*/kmod/ | out-of-tree modules (touch, battery, panel); each README has its lessons |
+
+## Reproducing the current N100 state (all RAM-only, nothing written)
+1. `tools/build-dtb.sh <linux v7.3 tree> devices/oneplus-billie2/dts/sm4250-oneplus-billie2-fap.dts <out.dtb>`
+2. `tools/build-kmod.sh <module dir> 7.3.4-300.fc45.aarch64 <kmod-out>` for
+   kmod/ili9882n-ts, kmod/adc-ocv-battery, devices/oneplus-billie2/kmod/panel-ili9882n
+3. Firmware from the phone (never commit): touch ILI image at
+   `<fw-dir>/ilitek/oneplus-billie2-ili9882n-txd.bin` (kmod/ili9882n-ts/README.md).
+4. `NETROOT_EXTRA_MODULES="<kmod-out> <kver>" NETROOT_EXTRA_FIRMWARE=<fw-dir> boot/android-bootimg/make-netroot.sh <netroot-dir>`
+5. `RAMBOOT_DTB=<out.dtb> RAMBOOT_CMDLINE="fap.netroot=http://172.16.42.2:8000/netroot.tar.gz" boot/android-bootimg/make-ramboot.sh devices/oneplus-billie2 <img-dir>`
+6. Serve: `python3 -m http.server --bind 172.16.42.2 8000` in `<netroot-dir>` (once the
+   USB network is up); phone in bootloader fastboot, fresh session
+   (`fastboot reboot bootloader` first), `fastboot boot <img-dir>/ramboot.img`;
+   `ssh root@172.16.42.1`. Modem/Wi‑Fi: `/usr/libexec/fap-modem-ram`.
+Needs `dtbo_a` erased (it is, as of 2026-11-20; backup in UBports-N100/backup/).
 
 ## Rules
 **Safety (the phone is real hardware):**
