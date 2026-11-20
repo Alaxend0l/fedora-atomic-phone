@@ -4,6 +4,10 @@ Living document: update the "Where things stand" and "Next steps" sections
 when you stop. Newest log entries at the top.
 
 ## Where things stand (2026-11-20, end of day 1)
+- **Fedora 45 userspace runs on the N100** (RAM only): `make-ramboot.sh` with
+  `RAMBOOT_CMDLINE=fap.netroot=http://172.16.42.2:8000/netroot.tar.gz`, the
+  tarball from `make-netroot.sh` served by `python3 -m http.server --bind
+  172.16.42.2`. `ssh root@172.16.42.1`.
 - **🎉 First Linux boot on the N100 (16:22):** Fedora 45 kernel 7.3.4 + mainline
   billie2 DT, RAM-booted with `make-ramboot.sh` (tiny busybox initramfs).
   UFS (all LUNs, 108 partitions), USB device mode (serial shell on the Mac),
@@ -23,8 +27,9 @@ when you stop. Newest log entries at the top.
   verified), slot `a`, bootloader unlocked. Nothing of ours is installed.
 
 ## Next steps
-1. **Boot a real Fedora rootfs, still without writing UFS:** from a microSD
-   card (sdhci works) or over the USB network (NBD/NFS from the Mac).
+1. **Fedora userspace boots over the USB network (done 2026-11-20):** next,
+   use it to bring up hardware (PMIC DT nodes, display, touch, Wi‑Fi), then a
+   microSD-based root, then the real bootc install.
 2. **Mainline DT gaps for billie2** (devices/oneplus-billie2/dt-modules.txt):
    no PMIC nodes (pm6125/pmi632 on SPMI) → no power key, battery, charger,
    PMIC ADC/thermal; no panel, touch, Wi‑Fi, audio nodes. DT work, ideally
@@ -92,6 +97,7 @@ when you stop. Newest log entries at the top.
 | 2026-11-20 | + `qcom_apcs_ipc_mailbox`, `rpm_proc` | RPM up: **UFS works** (sda–sdf); USB still missing |
 | 2026-11-20 | + `dwc3_qcom_legacy` (legacy nested DT layout) | **USB serial shell** (`/dev/cu.usbmodem101`); nothing deferred |
 | 2026-11-20 | round 1: + ramoops, tsens, cpufreq-hw, sdhci-msm, rng, NCM | **USB networking** (Mac gets 172.16.42.2 via DHCP, telnet root shell on 172.16.42.1), 16 thermal zones (~33 °C), cpufreq 0.3–1.8 GHz, SD controller up (no card), pstore mounted (empty). Reboot from the shell (`reboot -f`) lands in ABL fastboot in ~6 s: no buttons needed while Linux runs |
+| 2026-11-20 | **netroot**: tiny-init downloads a 278 MB Fedora 45 rootfs (make-netroot.sh) over USB HTTP into tmpfs, `switch_root` to systemd | **Fedora 45 userspace on the N100**, SSH as root over USB (key auth) ~35 s after boot; udev loads 66 modules; only `a7c0000.pinctrl` (LPASS, audio) deferred; logind failed (no D-Bus in the rootfs, fixed for next build) |
 | 2026-11-20 | **dtbo_a erased**, fresh session, `uboot.img` (mainline DT) | **ABL hands over**; U-Boot resets within seconds; phone returns to ABL fastboot |
 | 2026-11-20 | no-op dtbo, fresh session, variant v3 | no handoff. dtbo_a restored, hash verified |
 | 2026-11-20 | v2, v3 booted right after a failed boot in the same ABL session | `Load Error`, which turned out to be a session artifact (see Constraints) |

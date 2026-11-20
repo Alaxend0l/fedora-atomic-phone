@@ -25,7 +25,8 @@ mkdir -p "$out"
 out=$(realpath "$out")
 boot=$(cd "$(dirname "$0")/.." && pwd)
 
-podman run --rm -v "$dev:/device:ro" -v "$boot:/boot-methods:ro" -v "$out:/out" "$image" bash -euc '
+podman run --rm -e RAMBOOT_CMDLINE="${RAMBOOT_CMDLINE:-}" \
+    -v "$dev:/device:ro" -v "$boot:/boot-methods:ro" -v "$out:/out" "$image" bash -euc '
     source /device/device.env
     source /boot-methods/bootimg-args.sh
     dnf5 -y -q install android-tools zstd cpio xz >/dev/null 2>&1
@@ -80,7 +81,9 @@ podman run --rm -v "$dev:/device:ro" -v "$boot:/boot-methods:ro" -v "$out:/out" 
         cmdline=""
     fi
 
-    cmdline="console=tty0 loglevel=7 ignore_loglevel clk_ignore_unused pd_ignore_unused $cmdline ${BOOTIMG_CMDLINE:-}"
+    # RAMBOOT_CMDLINE (from the environment) adds kernel arguments for this
+    # build, e.g. fap.netroot=http://172.16.42.2:8000/netroot.tar.gz.
+    cmdline="console=tty0 loglevel=7 ignore_loglevel clk_ignore_unused pd_ignore_unused $cmdline ${BOOTIMG_CMDLINE:-} ${RAMBOOT_CMDLINE:-}"
     args=(--kernel /out/Image.gz --ramdisk /out/initramfs.img --cmdline "$cmdline")
     if [ "$BOOTIMG_HEADER_VERSION" = 2 ]; then
         args+=(--dtb "$dtb")

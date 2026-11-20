@@ -50,7 +50,6 @@ if [ -n "$udc" ]; then
         echo "fap-init: USB network $ifname 172.16.42.1 (telnet)" > /dev/kmsg
     fi
     echo "fap-init: USB serial gadget up on $udc" > /dev/kmsg
-    ( while :; do setsid sh -c 'exec sh </dev/ttyGS0 >/dev/ttyGS0 2>&1'; sleep 1; done ) &
 else
     echo "fap-init: no USB device controller after 30 s" > /dev/kmsg
     # Show what's waiting for what, on the screen (a photo is enough to debug).
@@ -65,6 +64,36 @@ else
     done
 fi
 
-# A shell on the screen as well (no keyboard on a phone, but output shows).
+# Network root (kernel argument fap.netroot=http://...tar.gz): download a root
+# filesystem into RAM over the USB network and switch to its systemd. The
+# gadget and its network address carry over. Nothing touches the phone's
+# storage. On failure, fall through to the busybox shells below.
+netroot=$(sed -n 's/.*fap\.netroot=\([^ ]*\).*/\1/p' /proc/cmdline)
+if [ -n "$netroot" ] && [ -n "$udc" ]; then
+    mkdir -p /newroot
+    mount -t tmpfs -o size=2560m,mode=0755 tmpfs /newroot
+    i=0
+    until wget -q -O - "$netroot" | tar -xzf - -C /newroot 2>/dev/null; do
+        i=$((i + 1))
+        [ $i -ge 40 ] && break
+        echo "fap-init: netroot fetch failed ($i), retrying: $netroot" > /dev/kmsg
+        rm -rf /newroot/* 2>/dev/null
+        sleep 5
+    done
+    if [ -x /newroot/usr/lib/systemd/systemd ]; then
+        echo "fap-init: netroot unpacked, switching to systemd" > /dev/kmsg
+        killall telnetd udhcpd 2>/dev/null
+        for m in /dev /proc /sys /run; do
+            mkdir -p /newroot$m
+            mount --move $m /newroot$m
+        done
+        exec switch_root /newroot /usr/lib/systemd/systemd
+    fi
+    echo "fap-init: netroot failed, staying in the initramfs" > /dev/kmsg
+    umount /newroot 2>/dev/null
+fi
+
+# Busybox shells: on the USB serial port and on the screen.
+[ -n "$udc" ] && ( while :; do setsid sh -c 'exec sh </dev/ttyGS0 >/dev/ttyGS0 2>&1'; sleep 1; done ) &
 dmesg | tail -n 20
 exec setsid cttyhack sh

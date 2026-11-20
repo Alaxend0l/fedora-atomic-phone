@@ -1,0 +1,32 @@
+# A small Fedora root filesystem for network-booting a phone into RAM
+# (boot/android-bootimg/make-netroot.sh, tiny-init's fap.netroot=). Not a
+# product image: a development userspace to explore hardware with systemd,
+# udev and SSH, while nothing is written to the phone's storage.
+#
+# Build args:
+#   KERNEL_IMAGE  image whose /usr/lib/modules matches the kernel being booted
+
+ARG KERNEL_IMAGE=quay.io/fedora/fedora-silverblue:45
+FROM ${KERNEL_IMAGE} AS kernel
+
+FROM registry.fedoraproject.org/fedora:45
+
+RUN dnf5 -y install --setopt=install_weak_deps=False \
+        systemd systemd-udev dbus-broker kmod openssh-server iproute iputils procps-ng \
+        util-linux less pciutils usbutils i2c-tools dtc evtest lm_sensors \
+        linux-firmware-whence \
+    && dnf5 clean all
+
+# Kernel modules matching the booted kernel exactly (not the fedora:45 repos'
+# newest kernel). Skip Fedora's generic initramfs and the kernel image itself.
+COPY --from=kernel /usr/lib/modules /usr/lib/modules
+RUN find /usr/lib/modules -maxdepth 2 \( -name 'initramfs*.img' -o -name vmlinuz \) -delete \
+    && depmod -a "$(ls /usr/lib/modules | sort -V | tail -1)"
+
+# The USB network and serial gadget are set up by the initramfs and survive
+# switch_root; keep them as they are (no NetworkManager).
+COPY rootfs/ /
+
+RUN systemctl enable sshd.service serial-getty@ttyGS0.service \
+    && systemctl set-default multi-user.target \
+    && echo n100-dev > /etc/hostname
