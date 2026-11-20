@@ -60,7 +60,7 @@ rewrite slot b. Re-enable: `adb shell pm enable org.lineageos.updater`.
 | Cameras, USB‑C headset | built in `oneplus12-hw`, untested |
 | GPS | `qmicli --loc-start` → QMI GeneralError; untested via ModemManager |
 | SMS, data, calls | need a SIM; call audio + VoLTE missing; never rely on it for emergency calls |
-| Waydroid | Rust binder + binderfs in the kernel, `waydroid` 1.6.3, images initialised (vanilla), container service enabled; first UI start being tested |
+| Waydroid | runs (Android UI starts). **No network inside Android**: netd needs policy routing + legacy iptables (oneplus12-dualboot 636f0e6, build `fap-build/waffle/install-waydroid-net/`) |
 | Suspend | disabled on purpose (`AllowSuspend=no`); staged test plan in POWER.md |
 | Alert slider | needs a new driver (MXM1120 hall sensors), plan in POWER.md |
 | Spontaneous resets | 2 tonight (sensors test; telephony build idle), cause unknown |
@@ -81,6 +81,13 @@ EFS/IMEI copies and OEM firmware; never commit or upload):
 `~/Develop/fap-build/waffle/{bisect,plasma-netroot-gpu,hw,power,tel,install}/`.
 
 ## Next steps, in order
+0. **Leave the slim kernel config** (owner's request, 2026-11-20): the slim
+   config cost three rounds in one evening (binder → Rust, then Waydroid
+   networking: policy routing + legacy iptables). Build with Fedora's full
+   config (`fap-waffle-build.sh --full kernel …`, background, expect > 1 h),
+   check `image_size` against uniLoader's 78 MiB limit (if too big: keep
+   Fedora's config but move large built-ins to modules), then update the
+   installed system (boot_b + all modules).
 1. **Merge** `oneplus12-dualboot` (install + USB fix + Rust binder) with
    `-power` and `-tel`, rebuild, and update the installed system (boot_b +
    modules, as done on 2026-11-20 for Waydroid).
