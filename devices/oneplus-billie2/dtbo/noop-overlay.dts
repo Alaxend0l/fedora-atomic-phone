@@ -1,0 +1,21 @@
+// A device-tree overlay that changes nothing, for this phone's dtbo partition.
+//
+// ABL on the N100 refuses to boot with dtbo erased, and otherwise applies the
+// stock OnePlus overlay (written for the vendor DT) to whatever DT it boots,
+// which fails on the mainline DT. So we give it a valid overlay table whose
+// only entry matches this phone and has no fragments.
+//
+// Selection properties are copied from the stock overlay ABL picks on this
+// unit: dtbo entry 23, "Bengal OEM QRD" (board-id 0x1000b = QRD; OnePlus
+// project id 12 = this phone's prj_version). Root properties of an overlay
+// are selection metadata; only fragments get applied.
+/dts-v1/;
+/plugin/;
+
+/ {
+	model = "OnePlus Nord N100 (no-op overlay)";
+	compatible = "oneplus,billie2", "qcom,sm4250";
+	qcom,board-id = <0x1000b 0x00>;
+	oem,project-id = <0x0c>;
+	oem,hw-id = <0x01 0x02 0x03 0x04 0x05 0x06 0x07>;
+};

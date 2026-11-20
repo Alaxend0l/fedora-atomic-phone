@@ -89,3 +89,15 @@ with `dtbo` erased.
 board-id `0x1000b` and msm-id `0x1a1`/`0x1bc`, so ABL loads it and applies a
 no-op. Applies to `android-bootimg` as well. Flashing it means Ubuntu Touch
 won't boot until the stock dtbo is restored.
+
+### No-op dtbo (built 2026-11-20, not flashed yet)
+`boot/noop-dtbo.sh devices/oneplus-billie2/dtbo/noop-overlay.dts <billie2.dtb> <out>`
+builds a one-entry DT table (page size 4096, like stock). The overlay copies
+the selection properties of stock entry 23 (`qcom,board-id <0x1000b 0>`,
+`oem,project-id <0x0c>` = this phone's `prj_version` 12, `oem,hw-id`) and has
+no fragments. The script refuses unless `fdtoverlay` leaves the mainline
+billie2 DT byte-identical.
+
+Result: `dtbo-noop.img`, 4096 bytes, sha256 `0bee5680…c22e72dd`.
+Flashing it to `dtbo_a` means Ubuntu Touch won't boot until the stock dtbo
+backup is restored.
