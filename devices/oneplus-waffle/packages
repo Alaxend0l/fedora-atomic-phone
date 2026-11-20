@@ -1,0 +1,12 @@
+# SPDX-License-Identifier: AGPL-3.0-or-later
+# OnePlus 12 (SM8650): what only this phone (or its SoC) needs.
+
+# Qualcomm userspace for the modem: QRTR tools, EFS server (fap-modem-ram
+# runs it read-only on RAM copies), TFTP for the modem's config files. The
+# protection-domain mapper is the kernel's (qcom_pd_mapper), so no pd-mapper.
+qrtr
+rmtfs
+tqftpserv
+
+# WCN7850 (ath12k) Wi-Fi firmware and board data.
+atheros-firmware

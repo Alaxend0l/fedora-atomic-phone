@@ -1,0 +1,15 @@
+# SPDX-License-Identifier: AGPL-3.0-or-later
+# OnePlus Nord N100 (SM4250): what only this phone (or its SoC) needs.
+
+# Qualcomm userspace for the remote processors (modem, DSPs, Wi-Fi via the
+# modem's WLAN firmware): QRTR, EFS server, protection-domain mapper, TFTP.
+qrtr
+rmtfs
+pd-mapper
+tqftpserv
+
+# Adreno 610 firmware (a630_sqe, a610 GMU-less gmem); the zap shader is
+# OnePlus-signed and comes from the phone (README.md).
+qcom-firmware
+# WCN3990 (ath10k) board data.
+atheros-firmware

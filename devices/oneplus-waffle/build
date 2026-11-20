@@ -1,11 +1,25 @@
 #!/usr/bin/env bash
 # SPDX-License-Identifier: AGPL-3.0-or-later
-# Device layer. Runs inside the container build, after base/ and the desktop.
-# Files in ./rootfs are already installed. Keep this script about *this*
-# phone; anything shared by a whole SoC family belongs in kernels/<soc>/ or a
-# package.
+# OnePlus 12 device layer. Runs inside the build after ./packages and
+# ./rootfs (tools/image/run-layer). FAP_TARGET=image: the bootc image;
+# devroot: a RAM-boot dev root. Keep this script about *this* phone; anything
+# shared by a whole SoC family belongs in kernels/<soc>/ or a package.
 set -euxo pipefail
 source ./device.env
+
+# No GPU yet: the v5 DT keeps &gpu disabled (needs the a750 zap shader from
+# the phone). The display is msm KMS without a render node, so Mesa would try
+# freedreno first and fall back; say it outright: llvmpipe for KWin (GBM,
+# kms_swrast) and for clients (EGL). Remove once the GPU is enabled.
+grep -q '^LIBGL_ALWAYS_SOFTWARE=' /etc/environment || \
+    printf '%s\n' 'LIBGL_ALWAYS_SOFTWARE=1' 'GBM_ALWAYS_SOFTWARE=1' >> /etc/environment
+
+if [ "$FAP_TARGET" = devroot ]; then
+    # Kernel modules, netroot/ (modules-load, fap-modem-ram) and this unit's
+    # firmware/EFS copies are added outside the container build, by
+    # build-env/fap-waffle-build.sh netroot (never in git, never published).
+    exit 0
+fi
 
 # Kernel: by default Fedora's kernel is already in the base image.
 if [ "$KERNEL_PACKAGE" != "fedora" ]; then
@@ -13,7 +27,3 @@ if [ "$KERNEL_PACKAGE" != "fedora" ]; then
     rm -rf /usr/lib/modules/*
     dnf5 -y install "$KERNEL_PACKAGE"
 fi
-
-# Device-specific packages and services go here, e.g.:
-# dnf5 -y install qrtr rmtfs pd-mapper tqftpserv
-# systemctl enable rmtfs.service

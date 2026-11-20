@@ -2,7 +2,7 @@
 # SPDX-License-Identifier: AGPL-3.0-or-later
 # Set up Waydroid on the phone: download the LineageOS images (or use ones
 # copied to /etc/waydroid-extra/images), then write our Android properties
-# (UBWC off, density, optional software rendering). Run as root, with
+# (density, the device's Mesa options, optional software rendering). Run as root, with
 # network (Wi-Fi) up. See docs/waydroid.md in the fedora-atomic-phone repo.
 #
 #   fap-waydroid-init [--gapps] [--force] [--software|--hardware] [--density N]
@@ -12,13 +12,20 @@
 #                (re-downloads; keeps the Android user data in ~/.local/share/waydroid)
 #   --software   SwiftShader instead of the GPU (fallback if the GPU path misrenders)
 #   --hardware   back to the GPU (Mesa freedreno via minigbm), the default
-#   --density N  Android screen density (default 320, what OxygenOS used on the N100)
+#   --density N  Android screen density (default: the device's, else 320)
+#
+# Device defaults come from /usr/lib/fap/waydroid.conf (shell KEY=value,
+# shipped by devices/<id>/rootfs/): WAYDROID_DENSITY, WAYDROID_MESA_DEBUG
+# (FD_MESA_DEBUG/TU_DEBUG options for Android's Mesa, e.g. noubwc).
 #
 # Only the properties step runs if Waydroid is already initialized and
 # --force isn't given, so this is also the way to switch --software/--hardware.
 set -euo pipefail
 
-system_type=VANILLA force=0 render=hardware density=320
+WAYDROID_DENSITY=320 WAYDROID_MESA_DEBUG=
+# shellcheck source=/dev/null
+[ -r /usr/lib/fap/waydroid.conf ] && . /usr/lib/fap/waydroid.conf
+system_type=VANILLA force=0 render=hardware density=$WAYDROID_DENSITY
 while [ $# -gt 0 ]; do
     case $1 in
         --gapps) system_type=GAPPS ;;
@@ -26,7 +33,7 @@ while [ $# -gt 0 ]; do
         --software) render=software ;;
         --hardware) render=hardware ;;
         --density) density=${2:?--density needs a value}; shift ;;
-        -h|--help) sed -n '2,17p' "$0"; exit 0 ;;
+        -h|--help) sed -n '2,21p' "$0"; exit 0 ;;
         *) echo "unknown option: $1" >&2; exit 2 ;;
     esac
     shift
@@ -77,18 +84,23 @@ fi
 #    them into waydroid_base.prop (tools/helpers/lxc.py make_base_props).
 #    debug.mesa.*: Mesa on Android reads options from properties
 #    (src/util/os_misc.c os_get_android_option: FD_MESA_DEBUG ->
-#    debug.mesa.fd.mesa.debug). UBWC must stay off on SM6115, as on the host
-#    (/etc/environment FD_MESA_DEBUG=noubwc); TU_DEBUG is the Vulkan driver's.
-python3 - "$cfg" "$render" "$density" <<'EOF'
+#    debug.mesa.fd.mesa.debug); TU_DEBUG is the Vulkan driver's. The value
+#    is the device's (WAYDROID_MESA_DEBUG; N100: noubwc, as FD_MESA_DEBUG on
+#    the host).
+python3 - "$cfg" "$render" "$density" "$WAYDROID_MESA_DEBUG" <<'EOF'
 import configparser, sys
-path, render, density = sys.argv[1:]
+path, render, density, mesa_debug = sys.argv[1:]
 cfg = configparser.ConfigParser()
 cfg.read(path)
 if "properties" not in cfg:
     cfg["properties"] = {}
 p = cfg["properties"]
-p["debug.mesa.fd.mesa.debug"] = "noubwc"
-p["debug.mesa.tu.debug"] = "noubwc"
+if mesa_debug:
+    p["debug.mesa.fd.mesa.debug"] = mesa_debug
+    p["debug.mesa.tu.debug"] = mesa_debug
+else:
+    p.pop("debug.mesa.fd.mesa.debug", None)
+    p.pop("debug.mesa.tu.debug", None)
 p["ro.sf.lcd_density"] = density
 if render == "software":
     p["ro.hardware.gralloc"] = "default"
