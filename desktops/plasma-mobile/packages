@@ -42,6 +42,10 @@ plasma-dialer
 plasma-discover
 plasma-discover-flatpak
 flatpak
+# Flatpak hands the host's CA certificates to apps over p11-kit's server
+# (flatpak-session-helper); a weak dependency, so list it. Without it Fedora's
+# Firefox Flatpak fails every site with SEC_ERROR_UNKNOWN_ISSUER (2026-11-20).
+p11-kit-server
 fedora-flathub-remote
 
 # Shell applets and services.
