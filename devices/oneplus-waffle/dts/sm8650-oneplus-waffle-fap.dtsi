@@ -65,8 +65,9 @@
  * USB: device mode, high speed only. The board DT runs dwc3 as OTG with
  * role switching from pmic-glink (ADSP), which first light doesn't start;
  * peripheral mode needs no role source. Only the eUSB2 PHY (+ PM8550B
- * repeater, both built in) is used: the QMP USB3/DP combo PHY is a module
- * in our kernel (Fedora has TYPEC=m) and would hold dwc3 back. USB 2.0 is
+ * repeater, both built in) is used: the QMP USB3/DP combo PHY stays
+ * out of dwc3's phys (no USB3 at first light); it is built in only as the
+ * DP clock provider dispcc needs (build-env/waffle.config). USB 2.0 is
  * plenty for a shell and the netroot.
  */
 &usb_1 {
