@@ -1,0 +1,53 @@
+#!/bin/sh
+# /init of the tiny RAM-boot initramfs (boot/android-bootimg/make-ramboot.sh).
+# Static busybox only. Loads the device's drivers, brings up a USB serial
+# (CDC-ACM) gadget with a root shell, and keeps a shell on the screen too.
+# Development only: unauthenticated root shells.
+
+export PATH=/bin
+mkdir -p /proc /sys /dev /tmp /run
+mount -t proc proc /proc
+mount -t sysfs sysfs /sys
+mount -t devtmpfs devtmpfs /dev
+mount -t debugfs debugfs /sys/kernel/debug 2>/dev/null
+mount -t configfs configfs /sys/kernel/config 2>/dev/null
+echo "fap-init: starting" > /dev/kmsg
+
+# Modules in dependency order (generated at build time).
+while read -r ko; do
+    insmod "$ko" 2>/dev/null || echo "fap-init: insmod $ko failed" > /dev/kmsg
+done < /etc/modules.order
+
+# USB serial gadget once the device controller shows up.
+i=0
+while [ -z "$(ls /sys/class/udc 2>/dev/null)" ] && [ $i -lt 30 ]; do sleep 1; i=$((i + 1)); done
+udc=$(ls /sys/class/udc 2>/dev/null | head -n 1)
+if [ -n "$udc" ]; then
+    G=/sys/kernel/config/usb_gadget/fap
+    mkdir -p $G/strings/0x409 $G/configs/c.1/strings/0x409 $G/functions/acm.usb0
+    echo 0x1d6b > $G/idVendor
+    echo 0x0104 > $G/idProduct
+    echo fedora-atomic-phone > $G/strings/0x409/manufacturer
+    echo "ramboot debug shell" > $G/strings/0x409/product
+    echo ACM > $G/configs/c.1/strings/0x409/configuration
+    ln -s $G/functions/acm.usb0 $G/configs/c.1/
+    echo "$udc" > $G/UDC
+    echo "fap-init: USB serial gadget up on $udc" > /dev/kmsg
+    ( while :; do setsid sh -c 'exec sh </dev/ttyGS0 >/dev/ttyGS0 2>&1'; sleep 1; done ) &
+else
+    echo "fap-init: no USB device controller after 30 s" > /dev/kmsg
+    # Show what's waiting for what, on the screen (a photo is enough to debug).
+    if [ -r /sys/kernel/debug/devices_deferred ]; then
+        while read -r line; do
+            echo "fap-init: deferred: $line" > /dev/kmsg
+        done < /sys/kernel/debug/devices_deferred
+    fi
+    # USB-related kernel messages last, so they end up on screen.
+    dmesg | grep -iE "dwc3|usb|udc|qusb|phy" | grep -v fap-init | tail -n 12 | while read -r line; do
+        echo "fap-init: usb: $line" > /dev/kmsg
+    done
+fi
+
+# A shell on the screen as well (no keyboard on a phone, but output shows).
+dmesg | tail -n 20
+exec setsid cttyhack sh

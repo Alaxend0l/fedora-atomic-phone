@@ -4,6 +4,10 @@ Living document: update the "Where things stand" and "Next steps" sections
 when you stop. Newest log entries at the top.
 
 ## Where things stand (2026-11-20, end of day 1)
+- **🎉 First Linux boot on the N100 (16:22):** Fedora 45 kernel 7.3.4 + mainline
+  billie2 DT, RAM-booted with `make-ramboot.sh` (tiny busybox initramfs).
+  UFS (all LUNs, 108 partitions), USB device mode (serial shell on the Mac),
+  8 CPUs, 3.6 GB RAM, simpledrm framebuffer. Nothing written to storage.
 - **Framework:** scaffold, layered Containerfile, device format + validator,
   pluggable boot methods, flash guards. No image has been *built* yet
   (`just build`), none flashed.
@@ -19,12 +23,11 @@ when you stop. Newest log entries at the top.
   verified), slot `a`, bootloader unlocked. Nothing of ours is installed.
 
 ## Next steps
-1. **First Linux boot via `android-bootimg`, from RAM:** Fedora kernel
-   (zboot → Image.gz) + initramfs + mainline billie2 DTB in a v2 boot image,
-   `fastboot boot` with dtbo_a erased (fresh session; ask; restore after).
-   Goal: kernel log over USB (gadget/netconsole) or on the framebuffer.
-   In parallel, U-Boot UFS/PMIC support for SM6115 is upstream work
-   (boot/uboot-android/README.md, "what doesn't").
+1. **Next on the RAM-boot loop:** read the partitions (read-only), check what
+   else probes (PMIC, power key, battery, thermal, Wi‑Fi firmware needs),
+   USB networking (NCM) + SSH-able userspace, then boot a real Fedora rootfs
+   (e.g. from a microSD card or an NBD export) before deciding the ESP/root
+   layout. U-Boot UFS/PMIC support for SM6115 stays upstream work.
 2. Consider restoring stock OxygenOS (EU 10.5.2 MSM, needs Windows) for a day
    to tell whether the random resets are hardware or Ubuntu Touch.
 3. Decide the ESP partition (devices/oneplus-billie2/README.md); extract
@@ -50,6 +53,12 @@ when you stop. Newest log entries at the top.
 - In bootloader fastboot the N100 reports `product: bengal`; fastbootd says
   `billie2`.
 - Forced restart: **Power + Volume Up** ~15 s (Power alone does nothing).
+- Fedora's kernel `Image` needs 76.5 MB from 0x8000; ramdisk/DTB offsets must
+  sit above it (billie2: 0x06000000 / 0x05800000).
+- ABL won't start an image with a ~68 MB ramdisk; a 1.7 MB one works.
+- The billie2 DT uses the legacy nested dwc3 layout: needs `dwc3_qcom_legacy`.
+- The RPM link needs `qcom_apcs_ipc_mailbox` + `rpm_proc`; without them every
+  clock/regulator consumer (UFS, USB, SMMU) defers forever.
 - After a reboot Ubuntu Touch sometimes brings USB up as file transfer only
   (`05c6:0afe`) even with Developer Mode on; unplug and replug the cable to get
   ADB (`05c6:9039`).
@@ -76,6 +85,11 @@ when you stop. Newest log entries at the top.
 | 2026-11-20 | U-Boot + mainline DT variants v1 (+`__symbols__`), v2 (`/memory`, `/soc` renamed), v3 (both); stock dtbo; each from a fresh bootloader | no handoff for any |
 | 2026-11-20 | dtbo_a erased + U-Boot with `qcom-phone.config` | **U-Boot screen** (user photo): runs with the mainline DT; no button works |
 | 2026-11-20 | dtbo_a erased + U-Boot with `qcom-phone.config` + N100 `uboot.env` | **U-Boot USB fastboot** (`U-Boot 2027.01-rc2`, product `oneplus-billie2`); log read via `oem console`; UFS and SPMI not probed. dtbo_a restored, verified |
+| 2026-11-20 | Fedora kernel + 67.7 MB dracut initramfs (stock or high offsets) | no handoff: ABL refuses the big ramdisk |
+| 2026-11-20 | Fedora kernel, no ramdisk, ramdisk/dtb offsets above the 76.5 MB kernel | **Linux boots**, kernel log on screen, panics (no root fs) as expected |
+| 2026-11-20 | Fedora kernel + tiny busybox initramfs (1.7 MB) | boots; `/init` runs; USB not up; deferred list shows everything waiting on the RPM link |
+| 2026-11-20 | + `qcom_apcs_ipc_mailbox`, `rpm_proc` | RPM up: **UFS works** (sda–sdf); USB still missing |
+| 2026-11-20 | + `dwc3_qcom_legacy` (legacy nested DT layout) | **USB serial shell** (`/dev/cu.usbmodem101`); nothing deferred |
 | 2026-11-20 | **dtbo_a erased**, fresh session, `uboot.img` (mainline DT) | **ABL hands over**; U-Boot resets within seconds; phone returns to ABL fastboot |
 | 2026-11-20 | no-op dtbo, fresh session, variant v3 | no handoff. dtbo_a restored, hash verified |
 | 2026-11-20 | v2, v3 booted right after a failed boot in the same ABL session | `Load Error`, which turned out to be a session artifact (see Constraints) |
