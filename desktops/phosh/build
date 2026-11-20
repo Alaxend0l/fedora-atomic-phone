@@ -5,7 +5,7 @@ set -euxo pipefail
 
 # Replace GNOME Shell + GDM with Phosh and its greeter (phrog).
 dnf5 -y remove gnome-shell gdm
-dnf5 -y install phosh phrog squeekboard
+dnf5 -y install phosh phrog stevia
 systemctl enable --force phrog.service
 
 # Desktop-only apps that don't fit a phone. Firefox stays out of the image;
