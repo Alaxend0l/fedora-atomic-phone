@@ -4,6 +4,14 @@ Living document: update the "Where things stand" and "Next steps" sections
 when you stop. Newest log entries at the top.
 
 ## Where things stand (2026-11-20, end of day 1)
+- **Phone tooling (branch `tooling`, 2026-11-20):** `tools/fap-dev` wraps the
+  RAM-boot loop (fresh ABL session, `fastboot boot`, gadget/SSH wait, phone
+  discovery incl. IPv6 link-local, serve, clock, audit, getvar summary);
+  `tools/recon/` (android-recon, lp-parse + extract-from-super,
+  linux-hw-inventory); flash.sh gained a Tensor deny-list, per-device
+  `PROTECTED_PARTITIONS`, no relock, slot switches only with
+  `ALLOW_SET_ACTIVE=1`. Tested with fakes (`tools/tests/run.sh`), **not yet
+  against a phone**. See tools/README.md.
 - **Fedora 45 userspace runs on the N100** (RAM only): `make-ramboot.sh` with
   `RAMBOOT_CMDLINE=fap.netroot=http://172.16.42.2:8000/netroot.tar.gz`, the
   tarball from `make-netroot.sh` served by `python3 -m http.server --bind

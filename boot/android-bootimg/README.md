@@ -78,6 +78,10 @@ fastboot boot out/ramboot/ramboot.img
 python3 -m http.server --bind 172.16.42.2 --directory out/netroot 8000
 ssh root@172.16.42.1
 ```
+Or with the helper (tools/README.md): `tools/fap-dev serve out/netroot` in one
+terminal, `tools/fap-dev ramboot out/ramboot/ramboot.img` in another, then
+`tools/fap-dev ssh`.
+
 tiny-init downloads the tarball into a 2.5 GB tmpfs, moves /dev /proc /sys
 /run across and `switch_root`s to systemd. The USB gadget (serial + network)
 survives the switch. The rootfs (`netroot/Containerfile`) carries the booted

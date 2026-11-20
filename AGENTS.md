@@ -32,6 +32,7 @@ checkout, built images). Pocketblue reference clones:
 | boot/android-bootimg/README.md | the RAM-boot dev loop (`fastboot boot` + netroot over USB) |
 | docs/hardware/ | per-area bring-up plans for the N100's remaining hardware |
 | docs/waydroid.md | Android apps via Waydroid: kernel check, setup, test plan |
+| tools/README.md | every host tool: `fap-dev` (RAM-boot loop, ssh, audit), `flash.sh` guards, `recon/` (Android survey, `super` extraction, Linux inventory) |
 | kmod/, devices/*/kmod/ | out-of-tree modules (touch, battery, panel); each README has its lessons |
 
 ## Reproducing the current N100 state (all RAM-only, nothing written)
@@ -42,10 +43,14 @@ checkout, built images). Pocketblue reference clones:
    `<fw-dir>/ilitek/oneplus-billie2-ili9882n-txd.bin` (kmod/ili9882n-ts/README.md).
 4. `NETROOT_EXTRA_MODULES="<kmod-out> <kver>" NETROOT_EXTRA_FIRMWARE=<fw-dir> boot/android-bootimg/make-netroot.sh <netroot-dir>`
 5. `RAMBOOT_DTB=<out.dtb> RAMBOOT_CMDLINE="fap.netroot=http://172.16.42.2:8000/netroot.tar.gz" boot/android-bootimg/make-ramboot.sh devices/oneplus-billie2 <img-dir>`
-6. Serve: `python3 -m http.server --bind 172.16.42.2 8000` in `<netroot-dir>` (once the
-   USB network is up); phone in bootloader fastboot, fresh session
-   (`fastboot reboot bootloader` first), `fastboot boot <img-dir>/ramboot.img`;
-   `ssh root@172.16.42.1`. Modem/Wi‑Fi: `/usr/libexec/fap-modem-ram`.
+6. Phone in bootloader fastboot. Terminal 1: `tools/fap-dev serve <netroot-dir>`
+   (waits for the USB network, then serves on 172.16.42.2:8000). Terminal 2:
+   `tools/fap-dev ramboot <img-dir>/ramboot.img` (fresh ABL session,
+   `fastboot boot`, waits for the gadget and SSH). Then `tools/fap-dev clock`
+   (the RTC is unset), `tools/fap-dev ssh`. Modem/Wi‑Fi:
+   `tools/fap-dev ssh /usr/libexec/fap-modem-ram`. Check what the bootloader
+   left on: `tools/fap-dev audit`. By hand, without fap-dev: see
+   tools/README.md (same steps).
 Needs `dtbo_a` erased (it is, as of 2026-11-20; backup in UBports-N100/backup/).
 
 ## The installed system (since 2026-11-20)
@@ -65,8 +70,10 @@ ext4 root labelled `fap-root` (Fedora 45 + Plasma Mobile, user `phone`).
 **Safety (the phone is real hardware):**
 - Never write `modemst1/2`, `fsg`, `fsc`, `persist`, boot-chain partitions
   (`xbl`, `abl`, `tz`, `hyp`, `rpm`, `aop`, `vbmeta`, …) or firmware
-  partitions (`modem`, `dsp`, `bluetooth`). `tools/flash.sh` enforces this;
-  don't work around it.
+  partitions (`modem`, `dsp`, `bluetooth`). `tools/flash.sh` enforces this
+  (plus a Google Tensor list and a device's `PROTECTED_PARTITIONS`, refuses
+  relocking and, without `ALLOW_SET_ACTIVE=1`, slot switches); don't work
+  around it.
 - Never relock the bootloader. Never automate EDL writes.
 - Prefer `fastboot boot` (RAM only) over flashing. Before any write, have a
   verified backup and a tested restore command, and ask the user.
@@ -94,7 +101,10 @@ ext4 root labelled `fap-root` (Fedora 45 + Plasma Mobile, user `phone`).
 - Override `just` variables *before* the recipe: `just DEVICE=x check`.
 
 ## Phone access
-Done from the UBports-N100 repo's `tools/` (adb wrappers, root helper
-`psudo.sh` needs `PHONE_PIN` in the environment; ask the user for it, never
-commit it). Fastboot rules learned the hard way are in
+Our Linux on the phone (RAM boot or installed): `tools/fap-dev` (ssh, scp,
+ramboot, state, audit; read-only/RAM-only by design) and `tools/recon/`.
+Android/Ubuntu Touch on the N100: the UBports-N100 repo's `tools/` (adb
+wrappers, root helper `psudo.sh` needs `PHONE_PIN` in the environment; ask
+the user for it, never commit it). A new phone on Android:
+`tools/recon/android-recon.sh`, then `tools/fap-dev state` in the bootloader. Fastboot rules learned the hard way are in
 boot/uboot-android/README.md ("Testing without flashing").
