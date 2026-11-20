@@ -1,0 +1,14 @@
+# SPDX-License-Identifier: AGPL-3.0-or-later
+[Unit]
+Description=Use the module tree that belongs to the running kernel
+DefaultDependencies=no
+After=local-fs-pre.target
+Before=systemd-udevd.service systemd-modules-load.service sysinit.target
+ConditionPathIsDirectory=/usr/lib/modules/.fap-spare
+
+[Service]
+Type=oneshot
+ExecStart=/usr/libexec/fap-modules-guard
+
+[Install]
+WantedBy=sysinit.target

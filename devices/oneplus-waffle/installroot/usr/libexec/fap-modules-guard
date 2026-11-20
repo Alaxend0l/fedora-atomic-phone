@@ -1,0 +1,28 @@
+#!/bin/sh
+# SPDX-License-Identifier: AGPL-3.0-or-later
+# Two kernels with the same release string share /usr/lib/modules/<release>
+# (e.g. the flashed boot_b kernel and a candidate RAM-booted with
+# `fastboot boot`). Each module tree carries .fap-kver (the `uname -v` of the
+# kernel it belongs to, or "*" = any other kernel); the spare tree lives in
+# /usr/lib/modules/.fap-spare/<release>. Early at boot, swap the trees if the
+# active one doesn't belong to the running kernel. Never touches anything
+# when there is no spare tree.
+set -u
+r=$(uname -r); v=$(uname -v)
+act=/usr/lib/modules/$r
+spare=/usr/lib/modules/.fap-spare/$r
+[ -d "$spare" ] || exit 0
+matches() {   # matches <tree>: does it belong to the running kernel?
+    k=$(cat "$1/.fap-kver" 2>/dev/null) || return 1
+    [ "$k" = "$v" ] && return 0
+    [ "$k" = "*" ] && [ "$(cat "$2/.fap-kver" 2>/dev/null)" != "$v" ]
+}
+if matches "$act" "$spare"; then exit 0; fi
+if matches "$spare" "$act"; then
+    echo "fap-modules-guard: running '$v', swapping in the matching module tree" > /dev/kmsg
+    mv "$act" "$act.swap" && mv "$spare" "$act" && mv "$act.swap" "$spare"
+    depmod -a "$r"
+    sync
+    exit 0
+fi
+echo "fap-modules-guard: no module tree matches '$v', leaving them as they are" > /dev/kmsg
