@@ -3,7 +3,7 @@
 
 | File | What |
 |---|---|
-| `sm8650-oneplus-waffle-fap.dtsi` | first-light trim: simple-framebuffer on the splash buffer until msm (MDSS + DSI0 + panel) takes over, USB peripheral (high speed), DSPs/DP/GPU/PCIe/audio/cameras/peripheral buses off |
+| `sm8650-oneplus-waffle-fap.dtsi` | first-light trim: simple-framebuffer on the splash buffer until msm (MDSS + DSI0 + panel) takes over, USB peripheral (high speed); v5/v6: DSPs, pmic-glink, PCIe Wi-Fi, touch, WCD9395 audio on; DP/GPU/speaker amps/cameras/other peripheral buses off |
 | `sm8650-oneplus-waffle-fap.dts` | plain variant: full memory map, debug shell |
 | `sm8650-oneplus-waffle-fap-netroot.dts` | netroot variant: full 16 GB map, `fap.netroot=` in bootargs |
 

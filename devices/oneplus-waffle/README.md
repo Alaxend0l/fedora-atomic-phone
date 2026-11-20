@@ -29,7 +29,7 @@ unlocked (orange), 16 GB RAM (ddr_info; verify). **Anti-rollback fuse is
 | Touch | Synaptics S3910 (SPI4) | out of tree (DaDDevil) | untested |
 | USB | DWC3 + SNPS eUSB2 + PM8550B repeater + QMP combo | upstream | untested |
 | Wi‑Fi/BT | WCN7850 (PCIe0, UART14) | upstream (ath12k) + fallback patch | untested |
-| Audio | WCD9395 + 2× TFA9874 | partly upstream | untested |
+| Audio | WCD9395 (headphone path, AMIC1-5) + 2× TFA9874 speaker amps | WCD9395/LPASS/AudioReach upstream; TFA9874 no driver | v6: WCD path built, untested; speakers blocked |
 | Charging | ADSP (pmic-glink, OnePlus battmgr messages) | out-of-tree changes | untested |
 | Modem | SM8650 MPSS | upstream PAS | untested |
 | Other | haptics (PM8550B), alert slider, IR, NFC SN220, fingerprint | mostly not | untested |
@@ -122,6 +122,52 @@ bootloader fastboot (not fastbootd), then one
 `tools/fap-dev ramboot ~/Develop/fap-build/waffle/ramboot/waffle-uniloader-v4.img --no-ssh`.
 Rollback: it's RAM only. Hold Power (+ Vol Up) to restart; LineageOS boots
 from the untouched slot a.
+
+## Audio (v6, RAM boot + netroot)
+**Test at low volume first.** Speaker amplifiers (smart amps with a boost
+converter) can be damaged by wrong gains or boost settings; we never set
+those ourselves.
+- On: the board DT's `qcom,sm8650-sndcard` "OnePlus 12" with its two WCD9395
+  links (RX_CODEC_DMA_RX_0 → RX macro → SoundWire RX → HPH; AMIC1-5 →
+  SoundWire TX → TX macro → TX_CODEC_DMA_TX_3), AudioReach on the ADSP.
+  Drivers are modules (arm64 defconfig has them; listed in
+  `build-env/waffle.config`), loaded by udev in the netroot.
+- Topology: Fedora qcom-firmware's generic AudioReach file (what
+  `SM8650-QRD-tplg.bin` links to), installed as
+  `qcom/sm8650/OnePlus 12-tplg.bin.xz`. No ACDB/calibration needed for it.
+- UCM: [ucm/](ucm/) (based on alsa-ucm-conf's SM8650-QRD; HP PA at -9 dB).
+- **Speakers / earpiece: blocked.** Two NXP TFA9874 on `i2c_hub_7` (0x34
+  bottom, 0x35 top; the top one is most likely the earpiece/second
+  speaker). No TFA9874 driver exists in the kernel (tfa989x: 9890/95/97) and
+  they need OnePlus's tuning container (`tfa98xx.cnt`-style, vendor/odm in
+  `super`, not backed up; not in `modem_a` or `dsp_a`). The board DT's
+  SECONDARY_MI2S link to a `max98357a` placeholder is deleted and
+  `i2c_hub_7` stays off, so the amps are never touched. The generic
+  topology also has no SECONDARY_MI2S back end.
+- **USB-C analog headset: not yet.** Needs `i2c3` (wcd939x-usbss switch),
+  pmic-glink altmode and a codec ↔ usbss graph link the board DT lacks; and
+  the USB port is the RAM boot's only link.
+- Physical mic mapping (which AMIC is bottom/top/back) unknown.
+
+## Known issues (v5/v6 live tests, 2026-11-20)
+- **Wi‑Fi after a warm reboot from our Linux:** ath12k works (joined a
+  network, HTTPS OK) only when the previous boot was LineageOS. After
+  `systemctl reboot --reboot-argument=bootloader` + `fastboot boot` the
+  WCN7850 firmware sits in its secondary bootloader ("Current EE: SECONDARY
+  BOOTLOADER", qcom_mhi_qrtr probe -107, no wlp1s0). ath12k's own
+  `.shutdown` already does the MHI power-down; what is missing is the WCN
+  power sequencer dropping WLAN_EN (GPIO 16) and its rails: neither
+  `pci-pwrctrl-pwrseq` nor `pwrseq-qcom-wcn` has a shutdown hook, and the
+  GPIO belongs to the kernel, so userspace can't do it. Fix = a kernel patch
+  (pwrctrl `.shutdown` → `pwrseq_disable`), not done yet. Workaround: boot
+  LineageOS once (or a full power-off, Power + Vol Up) before testing Wi‑Fi.
+  **Don't** `echo 1 > /sys/bus/pci/devices/*/remove` + rescan: it hung the
+  kernel.
+- Modem: v5's `fap-modem-ram` asked for `qcom_rmtfs_mem`, but the module is
+  `rmtfs_mem`; v6 builds it in (`CONFIG_QCOM_RMTFS_MEM=y`, reserved memory
+  `rmtfs@d7c00000`, client-id 1 from sm8650.dtsi).
+- USB network: the host lost its DHCP lease after boot; v6 runs dnsmasq on
+  usb0 (`fap-usb-dhcp.service`). Clock: v6 enables chronyd.
 
 ## Partitions
 | Partition | Size | Plan |

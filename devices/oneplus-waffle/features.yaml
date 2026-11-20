@@ -38,10 +38,10 @@ features:
     tethering:         {title: "Hotspot / USB tethering", status: untested, notes: "", evidence: ""}
     nfc:               {title: "NFC", status: untested, notes: "", evidence: ""}
   audio:
-    speaker:           {title: "Loudspeaker", status: untested, notes: "", evidence: ""}
-    earpiece:          {title: "Earpiece", status: untested, notes: "", evidence: ""}
-    headphones:        {title: "Headphone jack / USB-C audio", status: untested, notes: "", evidence: ""}
-    microphone:        {title: "Microphones", status: untested, notes: "", evidence: ""}
+    speaker:           {title: "Loudspeaker", status: broken, notes: "2x TFA9874 (i2c_hub_7): no driver, needs OnePlus tuning container from vendor; kept off", evidence: "devices/oneplus-waffle/README.md"}
+    earpiece:          {title: "Earpiece", status: broken, notes: "most likely the top TFA9874 (stereo); blocked with the speakers", evidence: "devices/oneplus-waffle/README.md"}
+    headphones:        {title: "Headphone jack / USB-C audio", status: untested, notes: "v6: WCD9395 HPH path on; USB-C analog switch (wcd939x-usbss, i2c3) still off", evidence: ""}
+    microphone:        {title: "Microphones", status: untested, notes: "v6: WCD9395 AMIC1/3/4/5 via SoundWire TX, UCM Mic1/3/4/5", evidence: ""}
   power:
     battery:           {title: "Battery level", status: untested, notes: "", evidence: ""}
     charging:          {title: "Charging and charge status", status: untested, notes: "", evidence: ""}

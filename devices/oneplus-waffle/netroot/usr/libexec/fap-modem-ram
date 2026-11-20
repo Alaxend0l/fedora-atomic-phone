@@ -27,7 +27,10 @@ cp /usr/lib/fap-efs/modem_fs1 /usr/lib/fap-efs/modem_fs2 /usr/lib/fap-efs/modem_
    /usr/lib/fap-efs/modem_fsc /run/fap-efs/
 echo "EFS copies: $(ls /run/fap-efs | tr '\n' ' ')"
 
-modprobe -a qrtr qrtr-smd qcom_pd_mapper qcom_rmtfs_mem
+# rmtfs_mem is built in as of v6 (the module is rmtfs_mem.ko, not
+# qcom_rmtfs_mem: v5 failed here), so only check for its device.
+modprobe -a qrtr qrtr-smd qcom_pd_mapper
+[ -e /dev/qcom_rmtfs_mem1 ] || { echo "no /dev/qcom_rmtfs_mem1 (rmtfs_mem, reserved-memory rmtfs@d7c00000)" >&2; exit 1; }
 
 systemctl stop fap-rmtfs.service fap-tqftpserv.service 2>/dev/null || true
 systemctl reset-failed fap-rmtfs.service fap-tqftpserv.service 2>/dev/null || true
