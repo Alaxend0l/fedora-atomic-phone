@@ -1,0 +1,52 @@
+# SPDX-License-Identifier: AGPL-3.0-or-later
+# Images we pin (tools/update/lock.py, docs/updates.md). One lockfile per
+# target: lock/<target>.rpms.lock.yaml (+ .versionlock.toml, .images.env).
+#
+#   base          image the build starts FROM (its digest and rpm -qa are
+#                 recorded; for bootc images the Justfile's BASE_IMAGE)
+#   kernel_image  image /usr/lib/modules is copied from (netroot's
+#                 KERNEL_IMAGE); its kernel* packages are recorded
+#   sources       files whose `dnf5 install/remove` commands make up the
+#                 image, in build order (lock.py extracts them)
+#   device, desktop  instead of sources, for bootc images (see below)
+#
+# A new device or desktop: add a target here (the base must match the
+# Justfile's BASE_IMAGE choice for that desktop; the target must be named
+# <device>-<desktop>, which is what `just PINNED=1 build` looks for), run
+# `tools/update/lock.py --target <name>`, commit lock/.
+targets:
+  netroot:
+    description: RAM-boot development root (boot/android-bootimg/make-netroot.sh)
+    base: registry.fedoraproject.org/fedora:45
+    kernel_image: quay.io/fedora/fedora-silverblue:45
+    sources:
+      - boot/android-bootimg/netroot/Containerfile
+
+  installroot:
+    description: installed N100 development root, netroot + Plasma Mobile (make-installroot.sh)
+    base: registry.fedoraproject.org/fedora:45
+    kernel_image: quay.io/fedora/fedora-silverblue:45
+    sources:
+      - boot/android-bootimg/netroot/Containerfile
+      - boot/android-bootimg/installroot/Containerfile
+
+  # bootc images (Containerfile): sources are derived like the Justfile
+  # does: base/build, desktops/<desktop>/build, boot/<BOOT_METHOD from
+  # device.env>/build, devices/<device>/build (those that exist).
+  oneplus-billie2-tty:
+    description: bootc image, just DEVICE=oneplus-billie2 DESKTOP=tty build
+    base: quay.io/fedora-ostree-desktops/base-atomic:45
+    device: oneplus-billie2
+    desktop: tty
+
+  oneplus-billie2-phosh:
+    description: bootc image, just DEVICE=oneplus-billie2 DESKTOP=phosh build
+    base: quay.io/fedora/fedora-silverblue:45
+    device: oneplus-billie2
+    desktop: phosh
+
+  oneplus-billie2-plasma-mobile:
+    description: bootc image, just DEVICE=oneplus-billie2 DESKTOP=plasma-mobile build
+    base: quay.io/fedora/fedora-kinoite:45
+    device: oneplus-billie2
+    desktop: plasma-mobile

@@ -1,0 +1,117 @@
+# SPDX-License-Identifier: AGPL-3.0-or-later
+# Packages our workarounds and drivers depend on. When one changes in an
+# update PR, check-updates.py marks it "watched", review.py digs deeper
+# (Bugzilla, upstream issue trackers filtered by `keywords`) and asks the
+# local LLM about it, and the PR lists what to test (`test`).
+#
+#   id        short name
+#   match     fnmatch globs on binary OR source package names
+#   why       what of ours depends on it
+#   recipe    docs/porting-cookbook.md anchor(s) (the workaround's recipe)
+#   test      what to check on a phone before merging
+#   keywords  upstream issue search terms (lower case)
+#   upstream  issue trackers: gitlab (project path on gitlab.freedesktop.org),
+#             kde (bugs.kde.org product), github (owner/repo)
+watched:
+  - id: mesa
+    match: [mesa, "mesa-*", libdrm, "libdrm-*"]
+    why: Adreno 610 (freedreno) rendering; FD_MESA_DEBUG=noubwc works around UBWC tile garbage on SM6115
+    recipe: ["#gpu-renders-tile-garbage-ubwc"]
+    test:
+      - Plasma Mobile renders without tile garbage (noubwc still set)
+      - try once without FD_MESA_DEBUG=noubwc (has the UBWC fix landed?)
+      - Waydroid apps render (debug.mesa properties)
+    keywords: [freedreno, a610, adreno 610, sm6115, ubwc, a6xx]
+    upstream:
+      gitlab: [mesa/mesa]
+
+  - id: kernel
+    match: [kernel, "kernel-*"]
+    why: our kmods (panel, touch, battery) and board DT build against it; interconnect votes and the USB pipe-clock DT fix assume its drivers
+    recipe:
+      - "#gpu-slow-no-interconnect-votes-in-the-mainline-dt"
+      - "#usb-only-works-after-fastboot-hs-only-pipe-clock"
+      - "#the-clk_ignore_unused-audit"
+    test:
+      - CI kmods + dtbs jobs green against this kernel (the kernel guard)
+      - RAM-boot (fastboot boot) the new kernel; display, touch, USB gadget after a normal boot
+      - fap-dev audit: no new unclaimed clocks / deferred devices
+      - Waydroid starts (Rust binder)
+    keywords: [sm6115, sm4250, qcm2290, sm8650, dwc3-qcom, ath10k, binder, msm drm]
+    upstream: {}
+
+  - id: plasma
+    match: [sddm, "sddm-*", plasma-login-manager, plasma-mobile, "plasma-mobile-*", "kwin*", plasma-workspace, plasma-setup]
+    why: autologin via SDDM (Plasma Login replaced), plasma-setup masked, KWin needs a logind session
+    recipe: ["#plasma-mobile-on-a-minimal-fedora-root"]
+    test:
+      - boots straight into Plasma Mobile (SDDM autologin, no setup wizard)
+      - rotation, on-screen keyboard, lock screen
+    keywords: [plasma mobile, plasma-mobile, kwin drm, sddm autologin, phone]
+    upstream:
+      kde: [plasma-mobile, kwin]
+
+  - id: pipewire
+    match: [pipewire, "pipewire-*", wireplumber, "wireplumber-*"]
+    why: no sound card on the N100 yet; a PipeWire null sink keeps apps from crashing
+    recipe: ["#apps-crash-with-no-sound-card-pipewire-null-sink"]
+    test:
+      - "pactl info: default sink is the null sink"
+      - VLC / a video plays (silently) without crashing
+    keywords: [null sink, null-audio-sink, no sound card]
+    upstream:
+      gitlab: [pipewire/pipewire]
+
+  - id: networkmanager
+    match: [NetworkManager, "NetworkManager-*", dnsmasq]
+    why: NetworkManager ignores the USB gadget; fap-usb-dhcp.service runs dnsmasq on usb0
+    recipe: ["#plasma-mobile-on-a-minimal-fedora-root"]
+    test:
+      - host gets a 172.16.42.x address on the USB network; fap-dev ssh works
+      - Wi-Fi connects via NetworkManager
+    keywords: [usb gadget, rndis, ncm, ath10k]
+    upstream: {}
+
+  - id: waydroid
+    match: [waydroid, "lxc", "lxc-*", python3-gbinder, "libgbinder*", "libglibutil*"]
+    why: Android apps; ordered after dev-binderfs.mount; Rust binder ENOSPC bug (waydroid#2422)
+    recipe: ["#waydroid-on-fedoras-rust-binder"]
+    test:
+      - waydroid session starts; an app opens
+      - no binder ENOSPC in dmesg after an hour
+    keywords: [binderfs, rust binder, enospc, fedora]
+    upstream:
+      github: [waydroid/waydroid]
+
+  - id: modem
+    match: [rmtfs, qrtr, "qrtr-*", tqftpserv, pd-mapper]
+    why: fap-modem-ram serves RAM copies of the EFS (rmtfs -r -o) and the modem's firmware dir via tqftpserv; startup retry logic
+    recipe:
+      - "#modem-without-writing-efs-ram-only-rmtfs-and-the-full-firmware-directory"
+      - "#modem-stalls-when-started-early-at-boot"
+    test:
+      - "fap-modem-ram: remoteproc running, wlan0 appears"
+      - rmtfs.service still masked; rmtfs flags (-r -o) still accepted
+    keywords: [rmtfs, tqftpserv, qrtr]
+    upstream:
+      github: [linux-msm/rmtfs, linux-msm/qrtr, linux-msm/tqftpserv]
+
+  - id: firmware
+    match: [linux-firmware, "linux-firmware-*", atheros-firmware, qcom-firmware]
+    why: ath10k (WCN3990) board-2.bin / calibration variant OnePlus_billie2; Adreno firmware (zap shader comes from the phone)
+    recipe: ["#wi-fi-board-data-and-mac-address"]
+    test:
+      - "dmesg | grep -i 'ath10k.*board': which board file loaded"
+      - GPU firmware loads (a630_sqe / a610 gmu), Plasma renders accelerated
+    keywords: [wcn3990, ath10k, board-2.bin, a610]
+    upstream: {}
+
+  - id: systemd
+    match: [systemd, "systemd-*"]
+    why: systemd-pam gives KWin a logind session; our units (fap-*), USB gadget via configfs
+    recipe: ["#plasma-mobile-on-a-minimal-fedora-root"]
+    test:
+      - graphical session comes up (logind seat, DRM access)
+      - fap-usb-gadget, fap-modem-ram, fap-boot-state units start
+    keywords: [logind, pam_systemd, seat]
+    upstream: {}

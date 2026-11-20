@@ -1,0 +1,17 @@
+# SPDX-License-Identifier: AGPL-3.0-or-later
+# Fedora's updates archive: every update that ever reached stable. Only
+# installed for pinned builds (docs/updates.md), because Fedora's `updates`
+# repo keeps just the newest build of each package, so a locked version
+# that has since been superseded can only come from here. Same content as
+# fedora-repos-archive's [updates-archive]; own id so both can coexist.
+[fap-updates-archive]
+name=Fedora $releasever - $basearch - Updates Archive (fap pinned build)
+baseurl=https://fedoraproject-updates-archive.fedoraproject.org/fedora/$releasever/$basearch/
+enabled=1
+metadata_expire=6h
+type=rpm
+gpgcheck=1
+repo_gpgcheck=0
+gpgkey=file:///usr/share/pki/rpm-gpg/RPM-GPG-KEY-fedora-$releasever-$basearch
+skip_if_unavailable=False
+cost=10000

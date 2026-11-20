@@ -6,12 +6,18 @@
 #
 # Build args:
 #   KERNEL_IMAGE  image whose /usr/lib/modules matches the kernel being booted
+#   FEDORA_IMAGE  the Fedora userspace image
+# Both are set by digest for a pinned build (FAP_PINNED=1 make-netroot.sh).
 
 ARG KERNEL_IMAGE=quay.io/fedora/fedora-silverblue:45
+ARG FEDORA_IMAGE=registry.fedoraproject.org/fedora:45
 FROM ${KERNEL_IMAGE} AS kernel
 
-FROM registry.fedoraproject.org/fedora:45
+FROM ${FEDORA_IMAGE}
 
+# Pinned builds: pin/ holds dnf5's versionlock for lock/netroot and the
+# updates-archive repo (tools/update/pin-context.sh); empty otherwise.
+COPY pin/ /
 RUN dnf5 -y install --setopt=install_weak_deps=False \
         systemd systemd-udev dbus-broker kmod openssh-server iproute iputils procps-ng \
         util-linux less pciutils usbutils i2c-tools dtc evtest lm_sensors \
@@ -39,3 +45,6 @@ RUN systemctl mask rmtfs.service
 RUN systemctl enable sshd.service serial-getty@ttyGS0.service \
     && systemctl set-default multi-user.target \
     && echo n100-dev > /etc/hostname
+
+# The versionlock was for this build only.
+RUN rm -f /etc/dnf/versionlock.toml /etc/yum.repos.d/fap-updates-archive.repo

@@ -1,0 +1,21 @@
+{
+ "_comment": "SPDX-License-Identifier: AGPL-3.0-or-later. Recorded bugs.kde.org REST /rest/bug?product=plasma-mobile on 2026-11-20, trimmed to the fields review.py reads; user names replaced.",
+ "bugs": [
+  {
+   "status": "ASSIGNED",
+   "last_change_time": "2024-10-10T06:54:15Z",
+   "id": 492884,
+   "resolution": "",
+   "severity": "normal",
+   "summary": "Missing sddm greeter theme"
+  },
+  {
+   "summary": "The app launcher button does not respect animation speed settings",
+   "id": 493237,
+   "severity": "normal",
+   "resolution": "",
+   "status": "CONFIRMED",
+   "last_change_time": "2024-10-30T06:09:03Z"
+  }
+ ]
+}

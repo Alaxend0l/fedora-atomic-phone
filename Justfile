@@ -21,6 +21,14 @@ BASE_IMAGE := env("FAP_BASE_IMAGE", if DESKTOP == "plasma-mobile" {
 
 IMAGE := REGISTRY / "fap-" + DEVICE + "-" + DESKTOP + ":" + FEDORA
 
+# PINNED=1: build exactly the package versions and base image digest in
+# lock/<device>-<desktop>.* (tools/update/, docs/updates.md). Default: newest.
+PINNED := env("FAP_PINNED", "")
+LOCK := DEVICE + "-" + DESKTOP
+BUILD_BASE := if PINNED == "" { BASE_IMAGE } else {
+        shell('. lock/"$1".images.env && echo "$BASE_IMAGE"', LOCK)
+    }
+
 # Read from the device's device.env, so devices can't disagree with the build.
 BOOT_METHOD := shell('. devices/"$1"/device.env 2>/dev/null && echo "$BOOT_METHOD"', DEVICE)
 
@@ -36,7 +44,8 @@ check:
 build: check
     podman build \
         --platform linux/arm64 \
-        --build-arg BASE_IMAGE={{BASE_IMAGE}} \
+        --build-arg BASE_IMAGE={{BUILD_BASE}} \
+        --build-arg FAP_LOCK={{ if PINNED == "" { "" } else { LOCK } }} \
         --build-arg DEVICE={{DEVICE}} \
         --build-arg DESKTOP={{DESKTOP}} \
         --build-arg BOOT_METHOD={{BOOT_METHOD}} \
@@ -54,8 +63,17 @@ uboot SRC:
 flash:
     tools/flash.sh devices/{{DEVICE}} output
 
+# Pin: regenerate lock/ and show what changed (podman; docs/updates.md).
+update-check *ARGS:
+    tools/update/check-updates.py {{ARGS}}
+
+# Review an update PR with the local LLM and comment on it (docs/updates.md).
+update-review PR *ARGS:
+    tools/update/review-pr.sh {{PR}} {{ARGS}}
+
 # Print the resolved settings.
 info:
     @echo "device={{DEVICE}} desktop={{DESKTOP}} fedora={{FEDORA}} boot={{BOOT_METHOD}}"
-    @echo "base={{BASE_IMAGE}}"
+    @echo "base={{BUILD_BASE}}"
+    @echo "pinned={{ if PINNED == "" { "no (newest packages)" } else { "lock/" + LOCK } }}"
     @echo "image={{IMAGE}}"

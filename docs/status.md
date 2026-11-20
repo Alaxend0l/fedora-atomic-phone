@@ -5,6 +5,15 @@ Living document: update the "Where things stand" and "Next steps" sections
 when you stop. Newest log entries at the top.
 
 ## Where things stand (2026-11-20, end of day 1)
+- **Update pipeline (branch `update-bot`, 2026-11-20):** `lock/` pins every
+  image (netroot, installroot, billie2 tty + plasma-mobile) to exact NEVRAs
+  and base-image digests; pinned builds are opt-in (`just PINNED=1 build`,
+  `FAP_PINNED=1 make-netroot.sh`); weekly `update` workflow opens a PR with
+  the diff; `tools/update/review-pr.sh` reviews it with a local Ollama model.
+  Pinned netroot build verified on the Mac; the GitHub side and a real
+  Ollama model are untested. **Found:** the phosh desktop no longer resolves
+  on Fedora 45 (`squeekboard` is gone; `stevia` replaces it). See
+  docs/updates.md.
 - **Phone tooling (branch `tooling`, 2026-11-20):** `tools/fap-dev` wraps the
   RAM-boot loop (fresh ABL session, `fastboot boot`, gadget/SSH wait, phone
   discovery incl. IPv6 link-local, serve, clock, audit, getvar summary);

@@ -27,6 +27,7 @@ checkout, built images). Pocketblue reference clones:
 | docs/features.md, docs/devices.md | per-device `features.yaml`/`firmware.yaml` format; generated support matrix (`tools/support-matrix.py`) |
 | .github/workflows/ci.yml | lint, tests, SPDX, DTBs + kmods vs. newest Fedora kernel (scripts in tools/ci/) |
 | docs/roadmap.md | milestones + porting-tooling plan |
+| docs/updates.md | package pinning (`lock/`, `just PINNED=1 build`), weekly update PRs, local-LLM risk review (`tools/update/`) |
 | docs/re-tooling.md | ranked reverse-engineering tool ideas |
 | docs/decisions/ | why things are the way they are |
 | devices/oneplus-billie2/README.md | N100 hardware, partitions, recovery |

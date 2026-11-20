@@ -1,0 +1,14 @@
+{
+ "_comment": "SPDX-License-Identifier: AGPL-3.0-or-later. Recorded Red Hat Bugzilla REST /rest/bug?component=mesa&version=45 on 2026-11-20, trimmed to the fields review.py reads; user names replaced.",
+ "bugs": [
+  {
+   "severity": "medium",
+   "status": "CLOSED",
+   "resolution": "RAWHIDE",
+   "id": 2510680,
+   "data_category": "Public",
+   "summary": "libvulkan_broadcom.so crashes (SIGSEGV) in v3d42_cmd_buffer_emit_gl_shader_state on Raspberry Pi 4",
+   "last_change_time": "2026-08-07T10:50:55Z"
+  }
+ ]
+}

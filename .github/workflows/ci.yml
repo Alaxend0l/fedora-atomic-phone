@@ -33,7 +33,7 @@ jobs:
           printf '%s\n' "${files[@]}"
           shellcheck -S warning "${files[@]}"
       - name: Python syntax
-        run: python3 -m py_compile tools/*.py tools/tests/*.py
+        run: python3 -m py_compile tools/*.py tools/update/*.py tools/tests/*.py
       - name: Python tests
         run: python3 -m unittest discover -v -s tools/tests
       - name: new-device.sh tests

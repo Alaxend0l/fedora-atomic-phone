@@ -41,10 +41,20 @@ if [ -n "${NETROOT_EXTRA_FIRMWARE:-}" ]; then
     echo "extra firmware: $(cd "$NETROOT_EXTRA_FIRMWARE" && find . -type f | tr '\n' ' ')"
 fi
 
+# FAP_PINNED=1: exact package versions and image digests from lock/netroot.*
+# (docs/updates.md). Default: newest Fedora packages.
+mkdir -p "$ctx/pin"
+build_args=()
+if [ -n "${FAP_PINNED:-}" ]; then
+    # Command substitution, not < <(…): a failure must stop the build.
+    pins=$("$here/../../tools/update/pin-context.sh" netroot "$ctx/pin")
+    while IFS= read -r a; do build_args+=(--build-arg "$a"); done <<< "$pins"
+fi
+
 # NETROOT_IMAGE: image tag (default localhost/fap-netroot:latest, which
 # installroot/Containerfile builds FROM; use another tag for other devices).
 tag=${NETROOT_IMAGE:-localhost/fap-netroot:latest}
-podman build -t "$tag" "$ctx"
+podman build ${build_args[@]+"${build_args[@]}"} -t "$tag" "$ctx"
 
 # Export the filesystem (not the image layers) as one tarball.
 cid=$(podman create "$tag" /bin/true)

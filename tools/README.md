@@ -28,6 +28,7 @@ subagents not to run these tools.
 | `dt-modules.py` | which kernel modules drive a DT's enabled nodes | – |
 | `make-disk.sh` | bootc image → flashable disk images | – |
 | `serial-shell.py` | run commands on the ramboot USB serial shell (no pyserial) | as you type |
+| [`update/`](#update-package-pinning-and-update-review) | lockfiles (`lock.py`), weekly update diff (`check-updates.py`), local-LLM risk review of update PRs (`review.py`, `review-pr.sh`) | – |
 | `tests/run.sh` | tests for the tools above, with fakes (no phone) | – |
 
 ## fap-dev: the dev loop
@@ -132,8 +133,22 @@ remoteprocs, firmware-load messages; summary.md pulls out the porting-relevant
 parts. The collector (`linux-hw-collect.sh`) also runs on the phone by hand:
 `sh linux-hw-collect.sh > inv.tar`.
 
+## update: package pinning and update review
+Full description: [docs/updates.md](../docs/updates.md). Needs podman (lock,
+changelogs) and PyYAML (`uv run --with pyyaml …` works too).
+```sh
+tools/update/lock.py --list-steps            # which dnf steps each image has
+tools/update/lock.py --target netroot        # re-lock one image into lock/
+just update-check                            # re-lock into a temp dir, show the diff
+just update-check --write --changelogs       # update lock/ in place, with changelogs
+just PINNED=1 DESKTOP=tty build              # build exactly lock/oneplus-billie2-tty
+FAP_PINNED=1 boot/android-bootimg/make-netroot.sh <out>   # pinned netroot
+just update-review <pr> --dry-run            # local-LLM review of an update PR, printed
+```
+
 ## Tests
-`tools/tests/run.sh` runs everything (bash tests + `test_lp_parse.py`).
+`tools/tests/run.sh` runs everything (bash tests + `test_lp_parse.py` +
+`test_update.py`; CI runs the Python ones via `unittest discover`).
 Inside the tests `adb`, `fastboot`, `ssh`, `scp` and `telnet` on `PATH` are
 shims that fail, so a test can't reach a connected phone; the tools are
 pointed at fakes through `FASTBOOT`, `ADB`, `SSH`, `SCP`, `FAP_DEV`,

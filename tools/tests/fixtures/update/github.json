@@ -1,0 +1,19 @@
+{
+ "_comment": "SPDX-License-Identifier: AGPL-3.0-or-later. Recorded api.github.com /search/issues?q=repo:waydroid/waydroid binder on 2026-11-20, trimmed to the fields review.py reads; user names replaced.",
+ "items": [
+  {
+   "number": 2422,
+   "title": "[BUG] rust_binder ENOSPC for large transactions on linux-zen 7.2.2 (CONFIG_ANDROID_BINDER_IPC_RUST=y)",
+   "state": "open",
+   "html_url": "https://github.com/waydroid/waydroid/issues/2422",
+   "updated_at": "2026-10-13T22:39:37Z"
+  },
+  {
+   "number": 1561,
+   "title": "[BUG] WSL binder node \"binder\" not found",
+   "state": "open",
+   "html_url": "https://github.com/waydroid/waydroid/issues/1561",
+   "updated_at": "2026-05-17T20:47:16Z"
+  }
+ ]
+}

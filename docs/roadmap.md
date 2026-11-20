@@ -30,7 +30,10 @@ nothing extra.
        bump `FAP_FEDORA`, rebuild, test, publish; keep the previous release
        available as a fallback.
 6. [ ] **Kernel guard:** per-device test before publishing a new kernel, and
-       a way to pin/hold a kernel for one device.
+       a way to pin/hold a kernel for one device. Stage 1 (compile: kmods +
+       DTBs vs. the newest Fedora kernel) runs in ci.yml, also on update PRs.
+       Holding: a lockfile pins the kernel today ([updates.md](updates.md));
+       per-device holds are still open.
 7. [ ] **Out-of-tree pieces rebuilt per kernel** (panel module, DT additions):
        automate in CI, e.g. kmod RPMs in COPR. Long term: **upstream them to
        mainline Linux**, the biggest maintenance win.
@@ -41,6 +44,12 @@ nothing extra.
 11. [ ] **People/process:** each device names `DEVICE_MAINTAINER` and a
         status; no active maintainer → status "unmaintained". Keep
         docs/status.md, decision records and release notes current.
+12. [x] **Package pinning + update PRs** ([updates.md](updates.md)): `lock/`
+        per image (NEVRAs + base digests), opt-in pinned builds
+        (`just PINNED=1 build`), weekly `update` workflow opening a PR with
+        the diff and the watched-package test list, local-LLM risk review
+        (`tools/update/review-pr.sh`). Open: enable on GitHub, flip pinned
+        builds to the default, verify a pinned bootc build.
 
 ## Porting tooling
 More ideas, ranked per subsystem: [re-tooling.md](re-tooling.md).

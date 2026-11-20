@@ -12,6 +12,10 @@ on:
       desktop:
         description: desktop folder under desktops/
         default: tty
+      pinned:
+        description: build exactly lock/<device>-<desktop> (docs/updates.md)
+        type: boolean
+        default: false
 
 jobs:
   build:
@@ -23,4 +27,4 @@ jobs:
       - name: Validate device
         run: just DEVICE=${{ inputs.device }} DESKTOP=${{ inputs.desktop }} check
       - name: Build image
-        run: just DEVICE=${{ inputs.device }} DESKTOP=${{ inputs.desktop }} build
+        run: just PINNED=${{ inputs.pinned && '1' || '' }} DEVICE=${{ inputs.device }} DESKTOP=${{ inputs.desktop }} build
