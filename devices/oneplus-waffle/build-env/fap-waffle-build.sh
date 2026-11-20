@@ -5,10 +5,14 @@
 #
 #   devices/oneplus-waffle/build-env/fap-waffle-build.sh <command>...
 #
-#   kernel        fetch + configure + build Image and modules (KERNEL_TREE)
-#   config-check  only configure (olddefconfig + fragment check); with
-#                 KERNEL_TREE=fedora this is the "does our fragment work on
-#                 Fedora's own 7.3.4 tree" check
+#   kernel        fetch + configure + build Image and modules (KERNEL_TREE).
+#                 Default config is SLIM: arm64 defconfig, other SoC
+#                 platforms off, + our fragments (first light; quick).
+#   kernel --full Fedora's whole aarch64 config + our fragments (what a
+#                 packaged kernel would use; hours in a small podman VM)
+#   config-check  only configure (olddefconfig + fragment check); takes
+#                 --full too. KERNEL_TREE=fedora config-check --full is the
+#                 "does our fragment work on Fedora's own 7.3.4 tree" check
 #   dtb           our first-light DTBs (dts/*.dts, built in the waffle tree)
 #   initramfs     static busybox + boot/android-bootimg/tiny-init + modules
 #   images        uniLoader per variant, wrapped in boot images (ramboot/)
@@ -30,7 +34,7 @@
 #                  the first-light kernel (board DT + panel/touch drivers);
 #                  fedora: Fedora's kernel-7.3.4-300.fc45 src.rpm (tier 2, the
 #                  long-term path; no waffle board DT in it, so kernel only)
-#   JOBS           parallel jobs (default 5; the podman VM has 2 GiB, no swap)
+#   JOBS           parallel jobs (default: nproc in the container)
 #   STOCK_BACKUP   host dir with the phone's partition backup; only
 #                  vendor_boot_a.img is read (read-only mount) for the
 #                  header-v2 fallback image. Optional.
@@ -78,7 +82,7 @@ if [[ -z ${FAP_WAFFLE_INNER:-} ]]; then
   [[ -n ${NETROOT_GENERIC:-} ]] && extra+=(-v "$(cd "$(dirname "$NETROOT_GENERIC")" && pwd)/$(basename "$NETROOT_GENERIC"):/netroot-generic.tar.gz:ro")
   tty=(); [[ -t 0 && -t 1 ]] && tty=(-it)
   exec podman run --rm ${tty[@]+"${tty[@]}"} -v "$VOLUME:/work" -v "$REPO:/repo:ro" -v "$OUT:/out" \
-    ${extra[@]+"${extra[@]}"} -e FAP_WAFFLE_INNER=1 -e JOBS="${JOBS:-5}" \
+    ${extra[@]+"${extra[@]}"} -e FAP_WAFFLE_INNER=1 -e JOBS="${JOBS:-}" \
     -e KERNEL_TREE="${KERNEL_TREE:-waffle}" \
     "$IMAGE" bash /repo/devices/oneplus-waffle/build-env/fap-waffle-build.sh "$@"
 fi
@@ -87,6 +91,7 @@ fi
 say() { printf '\n==> %s\n' "$*"; }
 die() { printf 'error: %s\n' "$*" >&2; exit 1; }
 DEV=/repo/devices/oneplus-waffle
+JOBS=${JOBS:-$(nproc)}
 S=/work/stage
 mkdir -p "$S" /work/src
 case $KERNEL_TREE in
@@ -94,7 +99,14 @@ case $KERNEL_TREE in
   fedora) K=/work/linux ;;
   *) die "KERNEL_TREE must be waffle or fedora" ;;
 esac
-KO=/work/out-$KERNEL_TREE
+# --full anywhere on the command line selects Fedora's whole config.
+CONFIG_MODE=slim
+args=()
+for a in "$@"; do
+  if [[ $a == --full ]]; then CONFIG_MODE=full; else args+=("$a"); fi
+done
+set -- ${args[@]+"${args[@]}"}
+KO=/work/out-$KERNEL_TREE-$CONFIG_MODE
 MK=(make -s ARCH=arm64 O="$KO")
 
 fetch_srpm() {   # Fedora's src.rpm: config for both trees, source for 'fedora'
@@ -132,19 +144,27 @@ fetch_tree() {
 }
 
 kconfig() {
-  say "Config: Fedora aarch64 + kernels/qcom-sm8650/fap.config$([[ $KERNEL_TREE == waffle ]] && echo ' + waffle.config') + build.config"
+  local base="arm64 defconfig"; [[ $CONFIG_MODE == full ]] && base="Fedora kernel-aarch64-fedora.config"
+  say "Config ($CONFIG_MODE): $base + kernels/qcom-sm8650/fap.config$([[ $KERNEL_TREE == waffle ]] && echo ' + waffle.config') + build.config"
   mkdir -p "$KO"
   local frags=(/repo/kernels/qcom-sm8650/fap.config)
   [[ $KERNEL_TREE == waffle ]] && frags+=("$DEV/build-env/waffle.config")
-  cp /work/src/srpm/kernel-aarch64-fedora.config "$KO/.config"
+  if [[ $CONFIG_MODE == full ]]; then
+    cp /work/src/srpm/kernel-aarch64-fedora.config "$KO/.config"
+  else
+    (cd "$K" && make -s ARCH=arm64 O="$KO" defconfig >/dev/null)
+  fi
   (cd "$K" && scripts/kconfig/merge_config.sh -m -O "$KO" "$KO/.config" "${frags[@]}" \
     "$DEV/build-env/build.config" >/dev/null)
-  # Slim: other SoC families off. Only shortens the build and keeps the
+  # Other SoC platforms off (both modes): shortens the build and keeps the
   # Image small enough for uniLoader's layout (see UL_* above).
   local a
-  for a in $(sed -n 's/^\s*config \(ARCH_[A-Z0-9_]*\)\s*$/\1/p' "$K/arch/arm64/Kconfig.platforms"); do
-    [[ $a == ARCH_QCOM ]] || (cd "$K" && scripts/config --file "$KO/.config" --disable "$a")
+  local plats=()
+  for a in $(sed -nE 's/^\s*(menu)?config (ARCH_[A-Z0-9_]+)\s*$/\2/p' "$K/arch/arm64/Kconfig.platforms"); do
+    [[ $a == ARCH_QCOM ]] || plats+=(--disable "$a")
   done
+  (( ${#plats[@]} > 20 )) || die "found no platform list in Kconfig.platforms"
+  (cd "$K" && scripts/config --file "$KO/.config" "${plats[@]}")
   (cd "$K" && "${MK[@]}" olddefconfig)
   # Every fragment line must have survived (=m may have become =y).
   local f line sym want got bad=0
@@ -166,12 +186,17 @@ kconfig() {
   [[ $bad == 0 ]] || die "config fragment not applied (above)"
   echo "fragment check: ok"
   cp "$KO/.config" "$S/kernel-$KERNEL_TREE.config"
+  echo "$CONFIG_MODE" > "$S/kernel-config-mode-$KERNEL_TREE"
 }
 
-cmd_config_check() { fetch_srpm; fetch_tree; kconfig; }
+need_srpm() {   # Fedora's config (full mode) or Fedora's source tree
+  [[ $CONFIG_MODE == full || $KERNEL_TREE == fedora ]] && fetch_srpm || true
+}
+
+cmd_config_check() { need_srpm; fetch_tree; kconfig; }
 
 cmd_kernel() {
-  fetch_srpm; fetch_tree; kconfig
+  need_srpm; fetch_tree; kconfig
   say "Build Image + modules ($KERNEL_TREE, -j$JOBS)"
   (cd "$K" && "${MK[@]}" -j"$JOBS" Image modules)
   local kver; kver=$(cat "$KO/include/config/kernel.release")
@@ -318,12 +343,16 @@ cmd_images() {
   cp -r "$I"/ramboot "$I"/parts /out/
   {
     echo "kernel: $(cat "$S/kernel-source") ($kver)"
-    echo "kernel config: Fedora kernel-aarch64-fedora.config (kernel-7.3.4-300.fc45) + kernels/qcom-sm8650/fap.config + build-env/waffle.config + build-env/build.config"
+    if [[ $(cat "$S/kernel-config-mode-waffle") == full ]]; then
+      echo "kernel config (full): Fedora kernel-aarch64-fedora.config (kernel-7.3.4-300.fc45) + kernels/qcom-sm8650/fap.config + build-env/waffle.config + build-env/build.config, other SoC platforms off"
+    else
+      echo "kernel config (slim): arm64 defconfig, other SoC platforms off, + kernels/qcom-sm8650/fap.config + build-env/waffle.config + build-env/build.config"
+    fi
     echo "uniLoader: $UNILOADER_URL $UNILOADER_COMMIT waffle_defconfig (TEXT_BASE $UL_TEXT_BASE, PAYLOAD_ENTRY $UL_PAYLOAD_ENTRY, RAMDISK_ENTRY $UL_RAMDISK_ENTRY)"
     echo "compiler: $(gcc --version | head -1)"
     echo "busybox: $(rpm -q busybox)"
     echo "boot image: header v4, os_version $OS_VERSION, os_patch_level $OS_PATCH_LEVEL"
-    echo "repo: $(git -C /repo rev-parse --short HEAD 2>/dev/null || echo '?')"
+    echo "repo: $(git -c safe.directory='*' -C /repo rev-parse --short HEAD 2>/dev/null || echo '?')"
   } > /out/BUILDINFO
   (cd /out && find ramboot parts -type f | LC_ALL=C sort | xargs sha256sum > SHA256SUMS)
   cat /out/BUILDINFO
@@ -362,7 +391,7 @@ cmd_netroot() {
   (cd /out/netroot && sha256sum netroot.tar.gz > SHA256SUMS && ls -l)
 }
 
-[[ $# -ge 1 ]] || die "usage: fap-waffle-build.sh kernel|config-check|dtb|initramfs|images|netroot|all|shell"
+[[ $# -ge 1 ]] || die "usage: fap-waffle-build.sh [--full] kernel|config-check|dtb|initramfs|images|netroot|all|shell"
 for c in "$@"; do
   case $c in
     kernel) cmd_kernel ;;

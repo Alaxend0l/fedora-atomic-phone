@@ -126,7 +126,7 @@ From [devices/oneplus-waffle/features.yaml](../devices/oneplus-waffle/features.y
 
 | Feature | Status | Notes | Evidence |
 |---|---|---|---|
-| RAM boot (fastboot boot) dev loop | untested | first-light images built (uniLoader in a header v4 boot.img, fap-build/waffle/README.md); not booted |  |
+| RAM boot (fastboot boot) dev loop | untested | stock boot_a RAM-boots (2026-11-20, USB 2.0 cable only); our uniLoader images built, not booted |  |
 | Boot from internal storage | untested | nothing written; RAM boots only until first light works |  |
 | USB networking / serial (gadget) | untested | DT forces dwc3 peripheral + high speed (eUSB2 only); gadget built into the kernel |  |
 | CPU frequency scaling | untested |  |  |

@@ -9,7 +9,7 @@ Legend: [x] done · [~] partly / workaround · [ ] not started
 - [x] Read-only backup of all partitions except userdata/super (144 entries)
 - [x] Stock boot layout read from the backup (README.md "Boot chain")
 - [x] Kernel (waffle-voice + Fedora config + fap.config), first-light DT, initramfs, uniLoader images built
-- [ ] **P1** `fastboot boot` the stock boot_a.img once (proves RAM boot on this ABL)
+- [x] **P1** `fastboot boot` the stock boot_a.img once (works, 2026-11-20; USB 2.0 cable needed, USB 3 crashes ABL fastboot)
 - [ ] **P1** `fastboot boot ramboot/waffle-uniloader-v4.img`: uniLoader log on screen, kernel log, USB gadget
 - [ ] **P1** Crash logs: ramoops at 0x85000000, read from the next RAM boot
 - [ ] **P1** netroot variant, `ssh root@172.16.42.1`

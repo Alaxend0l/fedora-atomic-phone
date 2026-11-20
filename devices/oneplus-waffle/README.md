@@ -52,6 +52,12 @@ XBL → UEFI → ABL. Header **v4** everywhere:
 - `vbmeta_a`: flags 3 (verification disabled), chains boot (RIL 4), dtbo
   (3), recovery (1), vbmeta_system (2), vbmeta_vendor (5).
 
+Verified on the unit (2026-11-20): `fastboot boot` of the stock `boot_a.img`
+(192 MiB) RAM-boots LineageOS; product `pineapple`, max-download-size
+768 MiB, unlocked, slot a, version-bootloader empty. **ABL's fastboot
+crashes into crashdump (05c6:900e) on a USB 3 / Thunderbolt link: use a
+USB 2.0 cable for fastboot.**
+
 So ABL builds its DT from vendor_boot + dtbo **from flash**, and is expected
 to do the same for a `fastboot boot` of a v4 boot.img (AOSP semantics; not
 yet observed). A plain mainline DTB therefore can't reach the kernel without
@@ -78,10 +84,12 @@ Images (from `build-env/fap-waffle-build.sh images`, in
 
 ## Kernel and DT
 - Kernel: DaDDevil/linux `waffle-voice` @ `9359fc74` (v7.4-rc3 + the
-  OnePlus 12 board DT and drivers) with Fedora's aarch64 config +
+  OnePlus 12 board DT and drivers), **slim** config for first light (arm64
+  defconfig, non-Qualcomm platforms off) +
   `kernels/qcom-sm8650/fap.config` (+ `build-env/waffle.config`,
-  `build-env/build.config`). Fedora's own 7.3.4 tree with the same fragment
-  is the long-term path ([kernels/qcom-sm8650/README.md](../../kernels/qcom-sm8650/README.md)).
+  `build-env/build.config`). `kernel --full` uses Fedora's whole aarch64
+  config instead; Fedora's own 7.3.4 tree with the same fragment is the
+  long-term path ([kernels/qcom-sm8650/README.md](../../kernels/qcom-sm8650/README.md)).
 - DT: [dts/](dts/) has **our** first-light wrapper, which `#include`s
   DaDDevil's `sm8650-oneplus-waffle.dts` from the pinned tree at build time.
   **His DTS has no licence line.** It is never copied into this repository
@@ -109,8 +117,8 @@ case-sensitive volume `waffle-build`, outputs in `~/Develop/fap-build/waffle/`.
 
 ## First RAM boot (proposed; nothing is written)
 Exact commands, sha256s and stop conditions:
-`~/Develop/fap-build/waffle/README.md`. In short: bootloader fastboot
-(not fastbootd), then
+`~/Develop/fap-build/waffle/README.md`. In short: **USB 2.0 cable**,
+bootloader fastboot (not fastbootd), then one
 `tools/fap-dev ramboot ~/Develop/fap-build/waffle/ramboot/waffle-uniloader-v4.img --no-ssh`.
 Rollback: it's RAM only. Hold Power (+ Vol Up) to restart; LineageOS boots
 from the untouched slot a.

@@ -5,6 +5,16 @@ Living document: update the "Where things stand" and "Next steps" sections
 when you stop. Newest log entries at the top.
 
 ## Where things stand (2026-11-20, end of day 1)
+- **OnePlus 12 (`oneplus-waffle`, branch `oneplus12-build`, 2026-11-20):**
+  first-light RAM-boot images built, **not booted yet**: uniLoader (board
+  oneplus-waffle) as the kernel of a stock-shaped header v4 boot.img,
+  carrying DaDDevil/linux `waffle-voice` (slim config + 
+  `kernels/qcom-sm8650/fap.config`), our trimmed DT wrapper and tiny-init.
+  Stock layout read from the unit's backup (devices/oneplus-waffle/README.md).
+  Build: `devices/oneplus-waffle/build-env/fap-waffle-build.sh all`;
+  outputs + proposed commands: `~/Develop/fap-build/waffle/README.md`.
+  Stock `boot_a` RAM-boots (verified); fastboot needs a USB 2.0 cable.
+  DaDDevil's board DTS has no licence: never commit it.
 - **Phone tooling (branch `tooling`, 2026-11-20):** `tools/fap-dev` wraps the
   RAM-boot loop (fresh ABL session, `fastboot boot`, gadget/SSH wait, phone
   discovery incl. IPv6 link-local, serve, clock, audit, getvar summary);
@@ -99,6 +109,7 @@ when you stop. Newest log entries at the top.
 ## Experiment log
 | Date | Experiment | Result |
 |---|---|---|
+| 2026-11-20 | OnePlus 12: `fastboot boot` of the stock boot_a.img (backup) | LineageOS boots from RAM; product `pineapple`, max-download-size 768 MiB; **USB 3/Thunderbolt link crashes ABL fastboot (05c6:900e), USB 2.0 works** |
 | 2026-11-20 | **Waydroid (branch `waydroid`, untested)**: installroot layer `dnf5 install waydroid` + `fap-waydroid-init` + binderfs ordering drop-in + OTA channels; see docs/waydroid.md | `podman build` of the installroot OK; nothing run on the phone. Kernel needs nothing: Fedora 7.3.4 has Rust binder + binderfs built in (`CONFIG_ANDROID_BINDER_IPC_RUST=y`), PSI=y, memfd. Waydroid's vendor image has Mesa 26.0.8 freedreno (FD610); UBWC off via `debug.mesa.fd.mesa.debug=noubwc` |
 | 2026-11-20 | RAM-boot `uboot.img` (stock dtbo, from fastbootd) | `Unrecognized command boot`: fastbootd can't `boot` |
 | 2026-11-20 | RAM-boot `uboot.img` (stock dtbo, bootloader fastboot) | `Booting OKAY`, logo, ABL fastboot stays |

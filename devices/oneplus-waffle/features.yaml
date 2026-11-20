@@ -15,7 +15,7 @@ device: "oneplus-waffle"
 updated: "2026-11-20"
 features:
   core:
-    ram-boot:          {title: "RAM boot (fastboot boot) dev loop", status: untested, notes: "first-light images built (uniLoader in a header v4 boot.img, fap-build/waffle/README.md); not booted", evidence: ""}
+    ram-boot:          {title: "RAM boot (fastboot boot) dev loop", status: untested, notes: "stock boot_a RAM-boots (2026-11-20, USB 2.0 cable only); our uniLoader images built, not booted", evidence: ""}
     boot-storage:      {title: "Boot from internal storage", status: untested, notes: "nothing written; RAM boots only until first light works", evidence: ""}
     usb-gadget:        {title: "USB networking / serial (gadget)", status: untested, notes: "DT forces dwc3 peripheral + high speed (eUSB2 only); gadget built into the kernel", evidence: ""}
     cpufreq:           {title: "CPU frequency scaling", status: untested, notes: "", evidence: ""}
