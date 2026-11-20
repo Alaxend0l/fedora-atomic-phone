@@ -317,3 +317,13 @@
 &usb {
 	qcom,select-utmi-as-pipe-clk;
 };
+
+/*
+ * Vibrator: PMI632 haptics at 0x5700 (vendor DT), mainline pm8xxx-vibrator.
+ * The driver maps force-feedback strength linearly to motor voltage up to
+ * 3.544 V; the vendor drove it at 3.0 V (≈ strength 0xBB00, 73 %). Keep
+ * userspace haptics at or below that (docs/hardware/n100-sensors-misc.md).
+ */
+&pmi632_vib {
+	status = "okay";
+};

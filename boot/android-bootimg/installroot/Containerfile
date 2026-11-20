@@ -12,6 +12,9 @@ RUN dnf5 -y install --setopt=install_weak_deps=True @kde-mobile-environment \
 
 COPY rootfs/ /
 
+# /usr/local/share/applications/systemsettings.desktop hides the desktop
+# System Settings (Plasma Mobile has its own); /etc/skel disables the Discover
+# notifier autostart for new users.
 # plasma-setup (KDE's first-run wizard) would replace our autologin with its
 # own user; Plasma Mobile doesn't need it.
 RUN useradd -m -G wheel,video,audio,input phone \
