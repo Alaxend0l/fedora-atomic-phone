@@ -37,7 +37,7 @@ volumes inside `super` (10 GiB).
 | Partition | Size | Plan |
 |---|---|---|
 | `boot_a`, `boot_b` | 96 MiB each | U-Boot image |
-| `dtbo_a`, `dtbo_b` | 24 MiB each | **must stay valid**: ABL refuses to boot with dtbo erased, and applies the QRD overlay (board-id 0x1000b) to any DT. Plan: a minimal no-op dtbo (boot/uboot-android/README.md) |
+| `dtbo_a`, `dtbo_b` | 24 MiB each | **erased**: ABL applies the stock QRD overlay (board-id 0x1000b) to any DT, which blocks a mainline DT; with dtbo erased ABL hands over (tested 2026-11-20). A no-op dtbo did *not* work |
 | `userdata` | 44.8 GiB | root filesystem |
 | ESP | 64–256 MiB | **open**, see below |
 

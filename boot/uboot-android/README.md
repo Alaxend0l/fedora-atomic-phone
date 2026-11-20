@@ -136,7 +136,14 @@ Ubuntu Touch boots. So the stock overlay wasn't the only blocker.
    (compiled from source with `-@`; decompiling a DTB loses labels), with
    `/memory` and `/soc` renamed from `/memory@80000000` and `/soc@0`, and both.
    None hands over with the stock dtbo.
-8. **Retest dtbo erased from a fresh session**, and no-op dtbo + variant v3.
+8. **dtbo erased, fresh session (done 2026-11-20): ABL hands over** to U-Boot
+   with the mainline DT (fastboot gone within 3 s). U-Boot then resets the
+   phone within seconds; the phone comes back in ABL fastboot (likely because
+   the normal boot fails without dtbo). No-op dtbo + variant v3 from a fresh
+   session: no handoff. So: **erase dtbo**; the no-op dtbo isn't the way.
+9. **Why U-Boot resets** (next): build with `qcom-phone.config`; get output on
+   the framebuffer or a USB gadget; check whether a watchdog left running by
+   ABL bites (hypothesis).
 
 ### Session artifact: `Load Error` after a failed boot
 After a `fastboot boot` that ABL accepts but doesn't start, the next

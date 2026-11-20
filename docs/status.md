@@ -10,17 +10,17 @@ when you stop. Newest log entries at the top.
 - **N100 kernel:** Fedora 45's kernel (7.3.4) has every SM6115 driver needed
   to mount root on UFS and ships `sm4250-oneplus-billie2.dtb`. No custom kernel
   needed for a first boot.
-- **N100 boot:** U-Boot builds and **runs** when ABL gets a DT it accepts
-  (stock DTB table). ABL rejects the mainline billie2 DT (whatever kernel).
+- **N100 boot:** with `dtbo` erased, ABL hands over to U-Boot with the
+  **mainline** DT. U-Boot then resets the phone within seconds (cause unknown).
+  With the stock dtbo, ABL never starts a mainline DT; a no-op dtbo doesn't help.
   Stock `boot_a` RAM-boots fine, so `fastboot boot` works on this phone.
 - **Phone state:** Ubuntu Touch 24.04 build 697, stock `dtbo_a` (hash
   verified), slot `a`, bootloader unlocked. Nothing of ours is installed.
 
 ## Next steps
-1. Retest from a **fresh bootloader session** each (writes dtbo_a: ask):
-   (a) dtbo erased + `uboot.img`; (b) no-op dtbo + variant v3. DT variants
-   (v1 +`__symbols__`, v2 renamed `/memory` `/soc`, v3 both) alone didn't help
-   with the stock dtbo. Then `qcom-phone.config`.
+1. Find why U-Boot resets: rebuild with `qcom-phone.config`, RAM-boot with
+   dtbo_a erased (fresh session; ask, restore after). Look for output on the
+   screen or a U-Boot USB gadget; consider a running watchdog.
 2. If U-Boot still won't start: try header v0 with appended DTB; check the
    Image header; or fall back to `BOOT_METHOD=android-bootimg` (kernel +
    initramfs directly, same dtbo constraint applies).
@@ -70,5 +70,7 @@ when you stop. Newest log entries at the top.
 | 2026-11-20 | swap B: U-Boot + **stock** DTB section, stock dtbo | **ABL hands over** (fastboot gone in <3 s); U-Boot resets the phone almost at once (user: "restarted right after the OnePlus logo"); Ubuntu Touch then boots normally. First proof U-Boot runs. |
 | 2026-11-20 | swap A: **stock kernel** + mainline DTB, stock dtbo | no handoff: ABL rejects the mainline DT itself |
 | 2026-11-20 | U-Boot + mainline DT variants v1 (+`__symbols__`), v2 (`/memory`, `/soc` renamed), v3 (both); stock dtbo; each from a fresh bootloader | no handoff for any |
+| 2026-11-20 | **dtbo_a erased**, fresh session, `uboot.img` (mainline DT) | **ABL hands over**; U-Boot resets within seconds; phone returns to ABL fastboot |
+| 2026-11-20 | no-op dtbo, fresh session, variant v3 | no handoff. dtbo_a restored, hash verified |
 | 2026-11-20 | v2, v3 booted right after a failed boot in the same ABL session | `Load Error`, which turned out to be a session artifact (see Constraints) |
 | 2026-11-20 | same vbmeta + `dtbo_a` erased + `uboot.img` | `Load Error` again: ABL needs a loadable dtbo regardless of AVB flags. vbmeta_a and dtbo_a restored, both hashes verified |
