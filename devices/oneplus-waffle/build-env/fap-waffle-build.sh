@@ -45,6 +45,10 @@
 #   STOCK_BACKUP   host dir with the phone's partition backup; only
 #                  vendor_boot_a.img is read (read-only mount) for the
 #                  header-v2 fallback image. Optional.
+#   FAP_OFFLINE    1 (default): kernel/config-check/dtb/initramfs/images/all/
+#                  bisect run with --network=none (sources must already be in
+#                  the volume, at the pinned commits); 0 allows the network
+#                  (first fetch). netroot/shell always get the network.
 #   NETROOT_GENERIC  host path of a generic netroot.tar.gz (netroot command)
 #   PHONE_BACKUP   host dir with this unit's partition dumps (netroot command,
 #                  optional, read-only mount): modem_a.img (DSP/modem firmware)
@@ -97,6 +101,12 @@ if [[ -z ${FAP_WAFFLE_INNER:-} ]]; then
   fi
   [[ -n ${NETROOT_GENERIC:-} ]] && extra+=(-v "$(cd "$(dirname "$NETROOT_GENERIC")" && pwd)/$(basename "$NETROOT_GENERIC"):/netroot-generic.tar.gz:ro")
   tty=(); [[ -t 0 && -t 1 ]] && tty=(-it)
+  net=(--network=none)
+  for c in "$@"; do
+    case $c in kernel|config-check|dtb|initramfs|images|all|bisect|--full|--daddevil) ;; *) net=() ;; esac
+  done
+  [[ ${FAP_OFFLINE:-1} == 0 ]] && net=()
+  extra+=(${net[@]+"${net[@]}"})
   exec podman run --rm ${tty[@]+"${tty[@]}"} -v "$VOLUME:/work" -v "$REPO:/repo:ro" -v "$OUT:/out" \
     ${extra[@]+"${extra[@]}"} -e FAP_WAFFLE_INNER=1 -e JOBS="${JOBS:-}" \
     -e KERNEL_TREE="${KERNEL_TREE:-waffle}" \
