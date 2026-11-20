@@ -1,0 +1,18 @@
+# SPDX-License-Identifier: AGPL-3.0-or-later
+# OnePlus 12 netroot: RAM copies of this unit's EFS (modemst1/2, fsg, fsc,
+# baked into the local-only netroot at /usr/lib/fap-efs) into /run/fap-efs,
+# which fap-rmtfs serves read-only. The phone's EFS partitions are never
+# opened. Without the copies (a generic root) this and the modem units are
+# skipped.
+[Unit]
+Description=EFS RAM copies for the modem (read-only rmtfs)
+ConditionPathExists=/usr/lib/fap-efs/modem_fs1
+DefaultDependencies=no
+After=local-fs.target
+Before=fap-rmtfs.service
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+ExecStart=/usr/bin/install -d -m 700 /run/fap-efs
+ExecStart=/usr/bin/cp /usr/lib/fap-efs/modem_fs1 /usr/lib/fap-efs/modem_fs2 /usr/lib/fap-efs/modem_fsg /usr/lib/fap-efs/modem_fsc /run/fap-efs/

@@ -1,0 +1,24 @@
+# SPDX-License-Identifier: AGPL-3.0-or-later
+# Starts the modem at boot (was: fap-modem-ram by hand). Order:
+#   systemd-modules-load (qrtr, qrtr-smd, qcom_pd_mapper: modules-load.d)
+#   -> fap-efs-ram (RAM copies) + fap-tqftpserv
+#   -> rmtfs -r (read-only: modem writes stay in rmtfs's memory) -o /run/fap-efs
+#      -s (starts the modem remoteproc once ready, stops it when rmtfs exits)
+#   -> ModemManager (drop-in: After=fap-rmtfs.service).
+# Fedora's rmtfs.service (raw partitions, writable) stays masked.
+[Unit]
+Description=Modem EFS server, read-only on RAM copies; starts the modem
+ConditionPathExists=/usr/lib/fap-efs/modem_fs1
+Requires=fap-efs-ram.service
+Wants=fap-tqftpserv.service
+After=fap-efs-ram.service fap-tqftpserv.service systemd-modules-load.service systemd-udevd.service
+
+[Service]
+# /dev/qcom_rmtfs_mem1: rmtfs_mem is built in, but give udev time.
+ExecStartPre=/usr/bin/udevadm wait --timeout=30 /dev/qcom_rmtfs_mem1
+ExecStart=/usr/bin/stdbuf -oL -eL /usr/bin/rmtfs -r -o /run/fap-efs -s -v
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target
