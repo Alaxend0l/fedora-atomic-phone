@@ -9,6 +9,9 @@ kver=$(ls /usr/lib/modules | sort -V | tail -1)
 dtb="/usr/lib/modules/$kver/dtb/$KERNEL_DTB"
 [ -f "$dtb" ] || { echo "kernel $kver has no $KERNEL_DTB" >&2; exit 1; }
 
+# Rebuild the initramfs so our dracut config (rootfs/usr/lib/dracut/...) applies.
+dracut --force --kver "$kver" "/usr/lib/modules/$kver/initramfs.img"
+
 # Qualcomm userspace for the remote processors (modem, DSPs). All four are in
 # Fedora. Services get enabled once firmware extraction exists.
 dnf5 -y install qrtr rmtfs pd-mapper tqftpserv
