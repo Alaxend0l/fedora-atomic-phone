@@ -1,0 +1,14 @@
+# SPDX-License-Identifier: AGPL-3.0-or-later
+[Unit]
+Description=Restore the last known time (the RTC reads 1970)
+DefaultDependencies=no
+After=local-fs.target
+Before=sysinit.target time-set.target chronyd.service
+Wants=time-set.target
+
+[Service]
+Type=oneshot
+ExecStart=/usr/libexec/fap-clock restore
+
+[Install]
+WantedBy=sysinit.target

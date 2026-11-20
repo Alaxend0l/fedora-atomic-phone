@@ -1,0 +1,16 @@
+# SPDX-License-Identifier: AGPL-3.0-or-later
+[Unit]
+Description=Save the current time for the next boot
+DefaultDependencies=no
+After=local-fs.target
+Before=shutdown.target
+Conflicts=shutdown.target
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+ExecStart=/usr/libexec/fap-clock save
+ExecStop=/usr/libexec/fap-clock save
+
+[Install]
+WantedBy=multi-user.target
