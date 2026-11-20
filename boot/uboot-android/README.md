@@ -56,4 +56,24 @@ select it. Hence Fedora 44 + `openssl-devel-engine`.
 
 ## Testing without flashing
 `fastboot boot out/uboot.img` boots the image once from RAM without writing
-anything, if ABL allows it on this phone. That's the first experiment.
+anything.
+
+Must be the **bootloader's** fastboot (`fastboot getvar is-userspace` → `no`).
+Android's userspace fastbootd answers `Unrecognized command boot`. From
+fastbootd: `fastboot reboot bootloader`. On Ubuntu Touch, `adb reboot
+bootloader` is refused for the normal user; use
+`sudo systemctl reboot --reboot-argument=bootloader`.
+
+### N100 results (2026-11-20)
+| Image | Result |
+|---|---|
+| our `uboot.img` (above) | ABL: `Booting OKAY`, screen stays on the OnePlus logo, ABL fastboot still answers afterwards → ABL most likely never jumped to U-Boot |
+| stock/UBports `boot_a` (backup) | boots Ubuntu Touch from RAM in ~30 s → `fastboot boot` works on this phone |
+
+So something in our image makes ABL refuse it. Candidates, cheapest test first:
+1. `os_version`/`os_patch_level` unset in our header (stock: 10.0.0 / 2020-10).
+2. ABL applies the `dtbo` partition's overlays (written for the vendor DT) to
+   our mainline DT and aborts on failure. Pocketblue erases `dtbo` before
+   flashing U-Boot; testing this needs `dtbo` erased (a write; backup exists).
+3. DT selection: the stock image carries a 4.8 MB DTB table; ours one 60 KB DT
+   without `qcom,pmic-id`.

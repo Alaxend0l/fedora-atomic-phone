@@ -12,6 +12,7 @@
 - [x] Pluggable boot methods: uboot-android, android-bootimg, lk2nd (planned)
 
 ## Porting tooling
+More ideas, ranked per subsystem: [re-tooling.md](re-tooling.md).
 What slows ports down is per-device bring-up (device tree, panel, touch,
 firmware), not the distro layer. These make that loop fast and the dangerous
 things impossible. Top three first.
@@ -60,7 +61,7 @@ serious.
 Each step is reversible via fastboot or EDL.
 1. [x] Check Fedora's kernel config for SM6115 drivers: all present in 7.3.4 (fc45), incl. the billie2 DTB (kernels/qcom-sm6115)
 2. [x] Build U-Boot (`just uboot`, boot/uboot-android/): uboot.img built 2026-11-20
-2b. [ ] `fastboot boot uboot.img` (RAM only) shows U-Boot on screen
+2b. [ ] `fastboot boot uboot.img` (RAM only) shows U-Boot on screen. Tried 2026-11-20: ABL accepts but doesn't start it; stock boot_a RAM-boots fine. See boot/uboot-android/README.md
 3. [ ] Decide the ESP partition; extract `vendor` firmware first if it's `super`
 4. [ ] First flash: Fedora tty image boots to the framebuffer console
 5. [ ] SSH over USB; pstore collects crash logs
