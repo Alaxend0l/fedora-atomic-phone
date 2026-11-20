@@ -18,15 +18,22 @@ when the DAPM path is complete and the "Amp Enable" switch (default off)
 is set. Register/bitfield layout from NXP's GPL tfa98xx driver
 (tfa9874_tfafieldnames.h).
 
-Open points (no datasheet): the TDMNBCK encoding (16 << n bit clocks per
-frame is inferred from the vendor's 2 x 32 bit setting n = 2) and the
-direction of the TDMSPKG/AMPGAIN scales; both are left at the vendor's
-values and logged.
+Interface: standard I2S, 2 x 32-bit slots, 64 bit clocks per frame
+(TDMNBCK 2, TDMSLOTS 1, TDMSLLN 31, TDMSSIZE 31), as the vendor's
+tfa98xx.cnt and the chip's power-on defaults; the BE has to run S32_LE
+(machine-driver change in the next patch). 2 x 16 bit (32 fs) is still
+accepted for comparison but is not known-good: the first test (v8,
+-40 dBFS, bottom amp) ran with TDMERR + TDM LUT error and no sound.
+Status flags: OTDS/UVDS/OVDS are "OK" flags (1 = no alarm, NXP's
+flag_otpok/flag_uvpok/flag_ovpok); v8 printed them as alarms.
+
+Open point (no datasheet): the direction of the TDMSPKG/AMPGAIN scales;
+left at the vendor's values.
 
 Upstream-Status: Pending [not submitted; needs a DT binding, review by
   someone with the TFA9874 datasheet, and the protection story]
-Tested: not yet (built only; test procedure in fap-build/waffle/hw/HW.md,
-  minimum level, only after the user's approval)
+Tested: v8 (2 x 16 bit): amp operating, TDMERR/TDM LUT error, silent.
+  v9 (2 x 32 bit): not yet.
 
 ---
 diff --git a/sound/soc/codecs/Kconfig b/sound/soc/codecs/Kconfig
@@ -74,7 +81,7 @@ new file mode 100644
 index 000000000..fc046854c
 --- /dev/null
 +++ b/sound/soc/codecs/tfa9874.c
-@@ -0,0 +1,421 @@
+@@ -0,0 +1,463 @@
 +// SPDX-License-Identifier: GPL-2.0-only
 +/*
 + * NXP/Goodix TFA9874 (TFA2 family) mono class-D speaker amplifier, driven
@@ -128,23 +135,37 @@ index 000000000..fc046854c
 +#define TFA9874_REVISION		0x03
 +#define TFA9874_CLK_CTRL		0x04
 +#define  TFA9874_CLK_CTRL_REFCKEXT	GENMASK(1, 0)
++/*
++ * Status flags. OTDS, UVDS (and OVDS in STATUS3) are "OK" flags: 1 means
++ * no alarm (NXP names them flag_otpok/flag_uvpok/flag_ovpok, and the
++ * vendor driver reports an error when they read 0). OCDS, NOCLK and
++ * TDMERR are alarms (1 = error). The sticky ones clear on read.
++ */
 +#define TFA9874_STATUS0			0x10
-+#define  TFA9874_STATUS0_OTDS		BIT(2)	/* over-temperature */
-+#define  TFA9874_STATUS0_OCDS		BIT(3)	/* over-current */
-+#define  TFA9874_STATUS0_UVDS		BIT(4)	/* under-voltage */
++#define  TFA9874_STATUS0_OTPOK		BIT(2)	/* 0: over-temperature */
++#define  TFA9874_STATUS0_OCDS		BIT(3)	/* 1: over-current */
++#define  TFA9874_STATUS0_UVPOK		BIT(4)	/* 0: under-voltage */
 +#define  TFA9874_STATUS0_TDMERR		BIT(6)
 +#define  TFA9874_STATUS0_NOCLK		BIT(7)
 +#define TFA9874_STATUS1			0x11
 +#define  TFA9874_STATUS1_PLLS		BIT(6)
 +#define  TFA9874_STATUS1_CLKS		BIT(7)
++#define  TFA9874_STATUS1_TDMLUTER	BIT(8)	/* TDM setting not in the LUT */
++#define  TFA9874_STATUS1_TDMSTAT	GENMASK(11, 9)
 +#define  TFA9874_STATUS1_AMPS		BIT(14)
 +#define TFA9874_STATUS3			0x13
++#define  TFA9874_STATUS3_OVPOK		BIT(8)	/* 0: over-voltage */
++#define  TFA9874_STATUS3_CLIPS		BIT(9)
++#define  TFA9874_STATUS3_MANOPER	BIT(15)	/* operating state */
 +#define TFA9874_STATUS4			0x14
++#define  TFA9874_STATUS4_CLKOOR		BIT(2)	/* clock out of range */
 +#define  TFA9874_STATUS4_MANSTATE	GENMASK(6, 3)
 +#define TFA9874_TDM_CFG0		0x20
 +#define  TFA9874_TDM_CFG0_NBCK		GENMASK(15, 12)
 +#define TFA9874_TDM_CFG1		0x21
++#define  TFA9874_TDM_CFG1_SLOTS		GENMASK(3, 0)	/* slots - 1 */
 +#define  TFA9874_TDM_CFG1_SLLN		GENMASK(8, 4)
++#define  TFA9874_TDM_CFG1_BRMG		GENMASK(13, 9)
 +#define TFA9874_TDM_CFG2		0x22
 +#define  TFA9874_TDM_CFG2_SSIZE		GENMASK(6, 2)
 +#define TFA9874_TDM_CFG3		0x23
@@ -214,15 +235,23 @@ index 000000000..fc046854c
 +	regmap_read(tfa->regmap, TFA9874_STATUS1, &s1);
 +	regmap_read(tfa->regmap, TFA9874_STATUS3, &s3);
 +	regmap_read(tfa->regmap, TFA9874_STATUS4, &s4);
-+	dev_info(tfa->dev, "%s: status %04x %04x %04x %04x (manstate %lu%s%s%s%s%s%s%s)\n",
++	dev_info(tfa->dev,
++		 "%s: status %04x %04x %04x %04x (manstate %lu, tdmstat %lu%s%s%s%s%s%s%s%s%s%s%s%s%s)\n",
 +		 when, s0, s1, s3, s4, FIELD_GET(TFA9874_STATUS4_MANSTATE, s4),
++		 FIELD_GET(TFA9874_STATUS1_TDMSTAT, s1),
++		 s1 & TFA9874_STATUS1_PLLS ? ", pll" : "",
 +		 s1 & TFA9874_STATUS1_CLKS ? ", clocks" : "",
 +		 s1 & TFA9874_STATUS1_AMPS ? ", amp on" : "",
++		 s3 & TFA9874_STATUS3_MANOPER ? ", operating" : "",
 +		 s0 & TFA9874_STATUS0_NOCLK ? ", NOCLK" : "",
 +		 s0 & TFA9874_STATUS0_TDMERR ? ", TDMERR" : "",
-+		 s0 & TFA9874_STATUS0_OTDS ? ", OVERTEMP" : "",
++		 s1 & TFA9874_STATUS1_TDMLUTER ? ", TDMLUTERR" : "",
++		 s4 & TFA9874_STATUS4_CLKOOR ? ", CLKOOR" : "",
++		 s3 & TFA9874_STATUS3_CLIPS ? ", CLIP" : "",
++		 !(s0 & TFA9874_STATUS0_OTPOK) ? ", OVERTEMP" : "",
 +		 s0 & TFA9874_STATUS0_OCDS ? ", OVERCURRENT" : "",
-+		 s0 & TFA9874_STATUS0_UVDS ? ", UNDERVOLTAGE" : "");
++		 !(s0 & TFA9874_STATUS0_UVPOK) ? ", UNDERVOLTAGE" : "",
++		 !(s3 & TFA9874_STATUS3_OVPOK) ? ", OVERVOLTAGE" : "");
 +}
 +
 +static int tfa9874_amp_event(struct snd_soc_dapm_widget *w,
@@ -235,6 +264,8 @@ index 000000000..fc046854c
 +
 +	switch (event) {
 +	case SND_SOC_DAPM_POST_PMU:
++		/* Clear-on-read: drop flags latched before this stream. */
++		tfa9874_log_status(tfa, "pre");
 +		/* Never the boost converter (see the top of the file). */
 +		regmap_clear_bits(tfa->regmap, TFA9874_SYS_CTRL0,
 +				  TFA9874_SYS_CTRL0_DCA);
@@ -313,6 +344,7 @@ index 000000000..fc046854c
 +{
 +	struct tfa9874 *tfa = snd_soc_component_get_drvdata(dai->component);
 +	unsigned int width = params_physical_width(params);
++	unsigned int sample = params_width(params);
 +	unsigned int nbck, i;
 +	int ret;
 +
@@ -323,8 +355,14 @@ index 000000000..fc046854c
 +		return -EINVAL;
 +
 +	/*
-+	 * Two I2S slots of 16 or 32 bits. NBCK counts bit clocks per frame
-+	 * as 16 << n (the vendor configuration for 2 x 32 bit is n = 2).
++	 * Standard I2S, two slots. The configuration Android uses on this
++	 * board (tfa98xx.cnt) and the chip's power-on default is 2 x 32-bit
++	 * slots, 64 bit clocks per frame: TDMNBCK 2, TDMSLOTS 1 (= 2 slots),
++	 * TDMSLLN 31, TDMSSIZE 31 (vendor; POR 23). That is what the BE
++	 * should send (S32_LE). 2 x 16 bit (32 fs, TDMNBCK 1 assuming the
++	 * 16 << n encoding) is NOT a known-good setting: on the first test it
++	 * ran with TDMERR and TDM LUT error and no sound. Kept only for
++	 * comparison and logged as such.
 +	 */
 +	if (params_channels(params) != 2 || (width != 16 && width != 32)) {
 +		dev_err(tfa->dev, "unsupported format: %u ch, %u bit\n",
@@ -332,6 +370,8 @@ index 000000000..fc046854c
 +		return -EINVAL;
 +	}
 +	nbck = width == 16 ? 1 : 2;
++	if (width == 16)
++		dev_warn(tfa->dev, "2 x 16 bit (32 fs) is not a known-good TDM setting\n");
 +
 +	ret = regmap_update_bits(tfa->regmap, TFA9874_SYS_CTRL2,
 +				 TFA9874_SYS_CTRL2_AUDFS,
@@ -340,15 +380,24 @@ index 000000000..fc046854c
 +					TFA9874_TDM_CFG0_NBCK,
 +					FIELD_PREP(TFA9874_TDM_CFG0_NBCK, nbck));
 +	ret = ret ?: regmap_update_bits(tfa->regmap, TFA9874_TDM_CFG1,
-+					TFA9874_TDM_CFG1_SLLN,
++					TFA9874_TDM_CFG1_SLOTS | TFA9874_TDM_CFG1_SLLN |
++					TFA9874_TDM_CFG1_BRMG,
++					FIELD_PREP(TFA9874_TDM_CFG1_SLOTS, 1) |
 +					FIELD_PREP(TFA9874_TDM_CFG1_SLLN, width - 1));
 +	ret = ret ?: regmap_update_bits(tfa->regmap, TFA9874_TDM_CFG2,
 +					TFA9874_TDM_CFG2_SSIZE,
 +					FIELD_PREP(TFA9874_TDM_CFG2_SSIZE, width - 1));
-+	if (ret)
++	if (ret) {
 +		dev_err(tfa->dev, "failed to configure the interface: %d\n", ret);
-+	else
-+		dev_info(tfa->dev, "%u Hz, 2 x %u bit\n", params_rate(params), width);
++	} else {
++		unsigned int c0 = 0, c1 = 0, c2 = 0;
++
++		regmap_read(tfa->regmap, TFA9874_TDM_CFG0, &c0);
++		regmap_read(tfa->regmap, TFA9874_TDM_CFG1, &c1);
++		regmap_read(tfa->regmap, TFA9874_TDM_CFG2, &c2);
++		dev_info(tfa->dev, "%u Hz, 2 x %u bit slots (%u-bit samples), tdm %04x %04x %04x\n",
++			 params_rate(params), width, sample, c0, c1, c2);
++	}
 +
 +	return ret;
 +}
