@@ -37,12 +37,27 @@ done
 echo "EFS copies: $(ls /run/fap-efs | tr '\n' ' ')"
 
 modprobe -a qrtr qrtr-smd qcom_pd_mapper 2>/dev/null || true
-# stdbuf: both log with printf, which systemd would otherwise block-buffer.
-systemd-run --unit fap-tqftpserv --collect stdbuf -oL -eL /usr/bin/tqftpserv
-# -s starts the modem once rmtfs is ready, and stops it when rmtfs exits.
-systemd-run --unit fap-rmtfs --collect stdbuf -oL -eL /usr/bin/rmtfs -r -o /run/fap-efs -s -v
-for i in $(seq 1 30); do
-    [ "$(cat "$rproc/state")" = running ] && break
-    sleep 1
+
+# Started very early at boot the modem sometimes never contacts rmtfs or
+# tqftpserv and its watchdog fires ("DOG detects stalled initialization");
+# restarting the services later works. So: start, wait for Wi-Fi (wlan0, which
+# needs the modem's WLAN firmware), retry up to 3 times.
+start_services() {
+    systemctl stop fap-rmtfs.service fap-tqftpserv.service 2>/dev/null || true
+    systemctl reset-failed fap-rmtfs.service fap-tqftpserv.service 2>/dev/null || true
+    # stdbuf: both log with printf, which systemd would otherwise block-buffer.
+    systemd-run --unit fap-tqftpserv --collect stdbuf -oL -eL /usr/bin/tqftpserv
+    # -s starts the modem once rmtfs is ready, and stops it when rmtfs exits.
+    systemd-run --unit fap-rmtfs --collect stdbuf -oL -eL /usr/bin/rmtfs -r -o /run/fap-efs -s -v
+}
+
+for attempt in 1 2 3; do
+    start_services
+    for i in $(seq 1 60); do
+        [ -e /sys/class/net/wlan0 ] && break 2
+        sleep 1
+    done
+    echo "attempt $attempt: no wlan0 after 60 s (modem $(cat "$rproc/state")), restarting"
+    sleep 5
 done
-echo "modem: $(cat "$rproc/state")"
+echo "modem: $(cat "$rproc/state"), wlan0: $([ -e /sys/class/net/wlan0 ] && echo present || echo missing)"

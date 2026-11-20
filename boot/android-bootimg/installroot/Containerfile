@@ -18,7 +18,7 @@ RUN useradd -m -G wheel,video,audio,input phone \
     && echo 'phone:147147' | chpasswd \
     && systemctl mask getty@tty1.service plasma-setup.service \
     && systemctl enable --force sddm.service \
-    && systemctl enable NetworkManager.service fap-modem-ram.service chronyd.service fap-usb-dhcp.service \
+    && systemctl enable NetworkManager.service fap-modem-ram.service chronyd.service fap-usb-dhcp.service fap-boot-state.service \
     && systemctl set-default graphical.target \
     && echo n100 > /etc/hostname \
     && echo 'LABEL=fap-root / ext4 defaults,noatime 0 1' > /etc/fstab \

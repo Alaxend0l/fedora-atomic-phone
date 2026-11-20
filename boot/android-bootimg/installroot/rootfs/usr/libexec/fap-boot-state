@@ -1,0 +1,31 @@
+#!/bin/bash
+# Record clock/frequency/bus state once per boot, to compare boots started in
+# different ways (normal boot vs fastboot boot): /var/log/fap-boot-state/.
+d=/var/log/fap-boot-state; mkdir -p "$d"
+f="$d/$(date -u +%Y%m%dT%H%M%S)-$(tr -d - < /proc/sys/kernel/random/boot_id | cut -c1-8).txt"
+mount -t debugfs debugfs /sys/kernel/debug 2>/dev/null
+{
+    echo "== cmdline"; cat /proc/cmdline
+    echo "== uptime"; cat /proc/uptime
+    echo "== cpufreq"
+    for p in /sys/devices/system/cpu/cpufreq/policy*; do
+        echo "$p gov=$(cat $p/scaling_governor) cur=$(cat $p/scaling_cur_freq) min=$(cat $p/scaling_min_freq) max=$(cat $p/scaling_max_freq) hwmax=$(cat $p/cpuinfo_max_freq)"
+    done
+    echo "== devfreq"
+    for p in /sys/class/devfreq/*; do
+        echo "$p gov=$(cat $p/governor) cur=$(cat $p/cur_freq) min=$(cat $p/min_freq) max=$(cat $p/max_freq)"
+    done
+    echo "== thermal"
+    for z in /sys/class/thermal/thermal_zone*; do echo "$(cat $z/type) $(cat $z/temp)"; done
+    echo "== clk_summary (enabled, rate)"
+    awk 'NR>3 && $2>0 {print $1, $2, $5}' /sys/kernel/debug/clk/clk_summary 2>/dev/null | head -400
+    echo "== interconnect summary"
+    cat /sys/kernel/debug/interconnect/interconnect_summary 2>/dev/null | head -200
+    echo "== regulators"
+    cat /sys/kernel/debug/regulator/regulator_summary 2>/dev/null | head -200
+    echo "== usb"
+    ls /sys/class/udc 2>&1; dmesg | grep -iE "dwc3|udc|qusb|usb" | tail -20
+    echo "== dmesg errors"
+    dmesg --level=err,warn | tail -60
+} > "$f" 2>&1
+echo "wrote $f"
