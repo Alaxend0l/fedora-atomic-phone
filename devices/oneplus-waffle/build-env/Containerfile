@@ -1,0 +1,44 @@
+# SPDX-License-Identifier: AGPL-3.0-or-later
+# localhost/fap-waffle-build: Fedora 45 (arm64 on Apple Silicon, native) with
+# what devices/oneplus-waffle/build-env/fap-waffle-build.sh needs: the kernel
+# toolchain (Fedora 45's gcc, as Fedora builds its kernel), rpm2cpio to
+# unpack Fedora's kernel src.rpm, dtc/libfdt, static busybox for the
+# initramfs, and AOSP's mkbootimg/unpack_bootimg, mkdtboimg and avbtool pinned
+# to fixed commits and checked by sha256 (the same pins as devices/google-shiba
+# on the pixel8-research branch).
+#
+#   podman build -t localhost/fap-waffle-build -f Containerfile .
+#   (fap-waffle-build.sh does this when the image is missing)
+FROM registry.fedoraproject.org/fedora:45
+
+RUN dnf -y install --setopt=install_weak_deps=False \
+      gcc make bc flex bison perl diffutils openssl openssl-devel elfutils-libelf-devel \
+      dwarves rpm cpio dtc libfdt git-core python3 lz4 xz gzip zstd kmod findutils which \
+      file rsync busybox curl patch \
+    && dnf clean all
+
+# AOSP tools at fixed commits.
+ARG MKBOOTIMG_COMMIT=4a27dd13adf9846e12d585d6fe99a375ebb58396
+ARG LIBUFDT_COMMIT=70c20864187df19f3e7d358ca8436f77d61a3f39
+ARG AVB_COMMIT=ba2dec4b035b0a3b61c5f8f8a74d86bcd450b1ee
+RUN set -e; G=https://android.googlesource.com/platform; \
+    get() { mkdir -p "$(dirname "/opt/aosp/$1")"; \
+            curl -sfL "$2?format=TEXT" | base64 -d > "/opt/aosp/$1"; \
+            echo "$3  /opt/aosp/$1" | sha256sum -c -; }; \
+    get mkbootimg/mkbootimg.py $G/system/tools/mkbootimg/+/$MKBOOTIMG_COMMIT/mkbootimg.py \
+        37d84b3d162e0bc62e36c1f4e1c63c85ea0caa9f29be023eb2f8efe006ad948c; \
+    get mkbootimg/gki/generate_gki_certificate.py $G/system/tools/mkbootimg/+/$MKBOOTIMG_COMMIT/gki/generate_gki_certificate.py \
+        1bb1feec68a13da18d581aa2c631798f86f6bc10b55d587b2dd31446a0f8a203; \
+    get mkbootimg/unpack_bootimg.py $G/system/tools/mkbootimg/+/$MKBOOTIMG_COMMIT/unpack_bootimg.py \
+        06b54dd9a07c5281778e29e234e76f6e3faee8bf0c904a5ef88fdee30eeed12e; \
+    get libufdt/mkdtboimg.py $G/system/libufdt/+/$LIBUFDT_COMMIT/utils/src/mkdtboimg.py \
+        81656c0e344ad2c9e7bdc6775015b38dec2bc2965d482e903fdb4dbd293110a6; \
+    get avb/avbtool.py $G/external/avb/+/$AVB_COMMIT/avbtool.py \
+        1aa6f2b462aa67aa3fdf488bee83ab517de8ad9d8228c7b45c35267ab2cf6781; \
+    printf '#!/bin/sh\nexec python3 /opt/aosp/%s "$@"\n' mkbootimg/mkbootimg.py > /usr/local/bin/mkbootimg; \
+    printf '#!/bin/sh\nexec python3 /opt/aosp/%s "$@"\n' mkbootimg/unpack_bootimg.py > /usr/local/bin/unpack_bootimg; \
+    printf '#!/bin/sh\nexec python3 /opt/aosp/%s "$@"\n' libufdt/mkdtboimg.py > /usr/local/bin/mkdtboimg; \
+    printf '#!/bin/sh\nexec python3 /opt/aosp/%s "$@"\n' avb/avbtool.py > /usr/local/bin/avbtool; \
+    chmod 755 /usr/local/bin/*
+
+WORKDIR /work
