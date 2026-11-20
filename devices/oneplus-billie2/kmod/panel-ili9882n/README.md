@@ -11,7 +11,7 @@ No regulator handling: the LCDB rails have no mainline driver and the
 bootloader leaves them on. The 90 Hz mode isn't exposed yet (vendor timings
 are the 60 Hz mode with a long VFP).
 
-Build for a Fedora kernel: `./build.sh 7.3.4-300.fc45.aarch64 <outdir>`.
+Build: `tools/build-kmod.sh devices/oneplus-billie2/kmod/panel-ili9882n <kver> <outdir>`.
 Tested 2026-11-20 on the N100 (Fedora 45 kernel 7.3.4): panel probes, MSM DRM
 drives it, backlight works.
 

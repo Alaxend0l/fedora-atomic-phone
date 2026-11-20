@@ -22,6 +22,8 @@
 #include "pmi632.dtsi"
 #include <dt-bindings/input/input.h>
 #include <dt-bindings/gpio/gpio.h>
+#include <dt-bindings/interrupt-controller/irq.h>
+#include <dt-bindings/iio/qcom,spmi-vadc.h>
 
 / {
 	gpio-keys {
@@ -79,7 +81,7 @@
 	vdda-supply = <&vreg_l18a>;
 	status = "okay";
 
-	panel@0 {
+	panel: panel@0 {
 		compatible = "oneplus,billie2-ili9882n";
 		reg = <0>;
 
@@ -124,4 +126,144 @@
 	qcom,calibration-variant = "OnePlus_billie2";
 
 	status = "okay";
+};
+
+/*
+ * Battery: Desay 5000 mAh (vendor profile
+ * 4797575_Huaqin_QL1839_Desay_5000mAH_PMI632, batt-id 30 kOhm; this unit's
+ * bat_id ADC reads ~30 kOhm). The other supplier's profile (Coslight, 19 kOhm)
+ * has an almost identical curve. OCV table: the vendor's pc-temp-v1-lut, 25 C
+ * column. Max voltage from qcom,max-voltage-uv; min is a conservative guess.
+ *
+ * kmod/adc-ocv-battery reads it (read-only, no charger control) until a
+ * PMI632 QGauge driver exists.
+ */
+/ {
+	battery: battery {
+		compatible = "simple-battery";
+		device-chemistry = "lithium-ion-polymer";
+		charge-full-design-microamp-hours = <5000000>;
+		voltage-max-design-microvolt = <4435000>;
+		voltage-min-design-microvolt = <3400000>;
+		ocv-capacity-celsius = <25>;
+		ocv-capacity-table-0 = <4433300 100>,
+					<4415400 98>,
+					<4397000 96>,
+					<4378000 94>,
+					<4357500 92>,
+					<4335400 90>,
+					<4311800 88>,
+					<4286900 86>,
+					<4261800 84>,
+					<4237200 82>,
+					<4212800 80>,
+					<4188600 78>,
+					<4164400 76>,
+					<4140800 74>,
+					<4118400 72>,
+					<4096800 70>,
+					<4075600 68>,
+					<4055000 66>,
+					<4035100 64>,
+					<4016600 62>,
+					<3997600 60>,
+					<3973400 58>,
+					<3944200 56>,
+					<3921200 54>,
+					<3904900 52>,
+					<3891500 50>,
+					<3879800 48>,
+					<3869700 46>,
+					<3860200 44>,
+					<3850900 42>,
+					<3842400 40>,
+					<3834700 38>,
+					<3827700 36>,
+					<3821200 34>,
+					<3815200 32>,
+					<3809500 30>,
+					<3804400 28>,
+					<3799700 26>,
+					<3793200 24>,
+					<3784100 22>,
+					<3773400 20>,
+					<3761600 18>,
+					<3748000 16>,
+					<3731800 14>,
+					<3717300 12>,
+					<3707700 10>,
+					<3705600 9>,
+					<3703500 8>,
+					<3701900 7>,
+					<3696900 6>,
+					<3671900 5>,
+					<3627600 4>,
+					<3568300 3>,
+					<3486800 2>,
+					<3359300 1>,
+					<3000000 0>;
+	};
+
+	adc-battery {
+		compatible = "fap,adc-ocv-battery";
+		io-channels = <&pmi632_adc ADC5_VBAT_SNS>,
+			      <&pmi632_adc ADC5_USB_IN_V_16>;
+		io-channel-names = "vbat", "usbin";
+		monitored-battery = <&battery>;
+	};
+};
+
+/*
+ * Touch: ILI9882N (TDDI, touch side) on QUP SE0 SPI, CS0, 10 MHz (vendor
+ * spi clock), reset TLMM 71, interrupt TLMM 80 falling edge; pins as the
+ * vendor ts_int_active/ts_reset_active states. Firmware is host-downloaded
+ * by kmod/ili9882n-ts each time the panel powers on (panel follower);
+ * this unit's panel vendor is TXD.
+ * The vendor DT also declares a Novatek NT36525B at CS1 for other panels;
+ * not this unit, not described here.
+ */
+&gpi_dma0 {
+	status = "okay";
+};
+
+&qupv3_id_0 {
+	status = "okay";
+};
+
+&spi0 {
+	status = "okay";
+
+	touchscreen@0 {
+		compatible = "ilitek,ili9882n-ts";
+		reg = <0>;
+		spi-max-frequency = <10000000>;
+
+		interrupts-extended = <&tlmm 80 IRQ_TYPE_EDGE_FALLING>;
+		reset-gpios = <&tlmm 71 GPIO_ACTIVE_LOW>;
+
+		firmware-name = "ilitek/oneplus-billie2-ili9882n-txd.bin";
+		/* Upload after the panel powers on (DRM panel follower). */
+		panel = <&panel>;
+		touchscreen-size-x = <2048>;
+		touchscreen-size-y = <2048>;
+
+		pinctrl-0 = <&ts_int_default &ts_reset_default>;
+		pinctrl-names = "default";
+	};
+};
+
+&tlmm {
+	ts_int_default: ts-int-default-state {
+		pins = "gpio80";
+		function = "gpio";
+		drive-strength = <8>;
+		bias-pull-up;
+	};
+
+	ts_reset_default: ts-reset-default-state {
+		pins = "gpio71";
+		function = "gpio";
+		drive-strength = <8>;
+		bias-pull-up;
+	};
 };

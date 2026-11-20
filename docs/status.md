@@ -32,9 +32,9 @@ when you stop. Newest log entries at the top.
    microSD-based root, then the real bootc install.
 2. **Mainline DT gaps for billie2:** PMIC + keys done in our DT
    (`devices/oneplus-billie2/dts/`, built with `tools/build-dtb.sh`, used via
-   `RAMBOOT_DTB=`). Display done (MSM DRM + our panel module, LCDB not driven). Modem +
-   Wi‑Fi done (RAM-only helper). Still missing: LCDB regulator driver, GPU
-   (Adreno 610), battery percentage, touch, audio; Wi‑Fi board data and MAC. DT work, ideally
+   `RAMBOOT_DTB=`). Display, modem + Wi‑Fi, touch and battery percentage done. Next per
+   docs/hardware/: GPU (DT-only), USB OTG, vibrator, Bluetooth, audio,
+   charger driver, cameras, sensors; Wi‑Fi board data and MAC. DT work, ideally
    upstream. U-Boot UFS/PMIC support for SM6115 is upstream work too.
 3. Consider restoring stock OxygenOS (EU 10.5.2 MSM, needs Windows) for a day
    to tell whether the random resets are hardware or Ubuntu Touch.
@@ -110,6 +110,8 @@ when you stop. Newest log entries at the top.
 | 2026-11-20 | netroot + our DT (`devices/oneplus-billie2/dts/…-fap.dts`: PM6125 + PMI632 + keys) | systemd `running` (D-Bus fixed); **all three buttons verified with evtest**; PMIC ADC5 (battery 4.009 V, USB in 5.13 V, bat_id, charger/die/XO temps), temp-alarm, GPIO, RTC (`rtc-pm8xxx`, unset) |
 | 2026-11-20 | display: lmdpdg ILI9882N panel module (`devices/oneplus-billie2/kmod/panel-ili9882n`) + MDSS/DSI nodes, no supply handling (LCDB left on by the bootloader) | **MSM DRM drives the panel**: `card1-DSI-1` connected 720×1600, DPU rev 0x60030000, console on msmdrmfb; DCS backlight 345/2047, stepped 100→1000→345 (panel readback 90/884/305) |
 | 2026-11-20 | modem + Wi‑Fi: DT `remoteproc_mpss` + `wifi`; `fap-modem-ram` (firmware from `modem_a` read-only, EFS read into RAM, `rmtfs -r -o`) | modem up (first try crashed: "DOG detects stalled initialization" because only `modem.*` was served; serving all of `image/` incl. `modem_pr/` fixed it). ath10k WCN3990 up, WLAN.HL.3.2.4; scan 2.4+5 GHz; **joined a WPA2 hotspot, DHCP, ping, HTTPS 200**. Board data: linux-firmware generic (board_id 0xff); MAC random |
+| 2026-11-20 | battery: `kmod/adc-ocv-battery` + `simple-battery` (vendor Desay OCV table, 25 °C) | `/sys/class/power_supply/battery`: capacity 65 %, Charging (USB in), 4.05 V. Read-only, no charger control |
+| 2026-11-20 | touch: `kmod/ili9882n-ts` (our SPI driver, protocol from the OnePlus GPL kernel) + spi0/QUP/GPI nodes | **works from cold boot**, 10-finger MT (1–3 fingers tested), full screen range. Key: upload after the panel is on (DRM panel follower + 200 ms), no touch reset; see kmod/ili9882n-ts/README.md |
 | 2026-11-20 | **dtbo_a erased**, fresh session, `uboot.img` (mainline DT) | **ABL hands over**; U-Boot resets within seconds; phone returns to ABL fastboot |
 | 2026-11-20 | no-op dtbo, fresh session, variant v3 | no handoff. dtbo_a restored, hash verified |
 | 2026-11-20 | v2, v3 booted right after a failed boot in the same ABL session | `Load Error`, which turned out to be a session artifact (see Constraints) |

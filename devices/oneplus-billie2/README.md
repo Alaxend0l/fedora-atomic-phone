@@ -11,8 +11,10 @@ all three keys (verified). PMIC ADC5 reads battery voltage (`vbat_sns`, e.g.
 module (`kmod/panel-ili9882n`), DCS backlight. Modem + Wi‑Fi: the
 modem boots from the phone's own `modem_a` firmware and ath10k brings up the
 WCN3990 (connects, DHCP, HTTPS), via `fap-modem-ram` with EFS served from
-RAM copies. Still missing: LCDB driver (panel power-off), GPU, battery
-percentage, touch, audio; Wi‑Fi board data (uses linux-firmware's generic
+RAM copies. Touch: our `kmod/ili9882n-ts` (works from cold
+boot). Battery: `kmod/adc-ocv-battery` (capacity from the vendor OCV table,
+read-only). Plans for everything else: docs/hardware/. Still missing: LCDB
+driver (panel power-off), GPU, audio, cameras, sensors, charger control; Wi‑Fi board data (uses linux-firmware's generic
 board_id 0xff entry; vendor ships 35 `bdwlan.*` variants) and a stable MAC. `dt-modules.txt` maps every enabled DT node to its
 module (tools/dt-modules.py). Nothing installed on storage.
 

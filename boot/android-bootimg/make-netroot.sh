@@ -31,6 +31,15 @@ if [ -n "${NETROOT_EXTRA_MODULES:-}" ]; then
     echo "extra modules for $mkver: $(cd "$mdir" && ls *.ko | tr '\n' ' ')"
 fi
 
+# NETROOT_EXTRA_FIRMWARE=<dir>: files to install under /usr/lib/firmware
+# (keeping the directory layout), e.g. firmware extracted from the phone
+# that may not be redistributed. Never commit those files.
+if [ -n "${NETROOT_EXTRA_FIRMWARE:-}" ]; then
+    mkdir -p "$ctx/rootfs/usr/lib/firmware"
+    cp -R "$NETROOT_EXTRA_FIRMWARE"/. "$ctx/rootfs/usr/lib/firmware/"
+    echo "extra firmware: $(cd "$NETROOT_EXTRA_FIRMWARE" && find . -type f | tr '\n' ' ')"
+fi
+
 podman build -t localhost/fap-netroot:latest "$ctx"
 
 # Export the filesystem (not the image layers) as one tarball.
