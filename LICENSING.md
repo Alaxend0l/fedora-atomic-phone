@@ -1,3 +1,4 @@
+<!-- SPDX-License-Identifier: AGPL-3.0-or-later -->
 # Licensing
 
 Unless a file says otherwise, everything in this repository (scripts, tools,
