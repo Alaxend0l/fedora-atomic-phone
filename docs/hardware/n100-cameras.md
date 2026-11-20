@@ -1,3 +1,4 @@
+<!-- SPDX-License-Identifier: AGPL-3.0-or-later -->
 # N100 (billie2) cameras and flash LED
 
 Status: **research only, nothing tested on mainline** (2026-11-20).

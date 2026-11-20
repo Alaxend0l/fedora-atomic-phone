@@ -1,3 +1,4 @@
+<!-- SPDX-License-Identifier: AGPL-3.0-or-later -->
 # N100: GPU (Adreno 610), video codec (Venus), display leftovers
 
 Bring-up plan for the OnePlus Nord N100 (`oneplus-billie2`, SM4250/SM6115

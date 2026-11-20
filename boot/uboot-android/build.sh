@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# SPDX-License-Identifier: AGPL-3.0-or-later
 # Build U-Boot as an Android boot image, so the phone's own bootloader (ABL)
 # loads it from the boot partition. U-Boot then provides EFI, and the rest of
 # the boot is the normal Fedora path (GRUB from the ESP).

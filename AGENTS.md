@@ -1,3 +1,4 @@
+<!-- SPDX-License-Identifier: AGPL-3.0-or-later -->
 # Notes for agents working in this repo
 
 Read this first, then [docs/status.md](docs/status.md) (where things stand,

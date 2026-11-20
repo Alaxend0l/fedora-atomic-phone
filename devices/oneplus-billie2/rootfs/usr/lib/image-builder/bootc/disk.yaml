@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: AGPL-3.0-or-later
 # Partition layout for image-builder (read from inside the bootc image).
 # Two partitions: an EFI system partition and the root filesystem. They're
 # split into separate images by tools/make-disk.sh and flashed into existing

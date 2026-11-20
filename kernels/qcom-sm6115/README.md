@@ -1,3 +1,4 @@
+<!-- SPDX-License-Identifier: AGPL-3.0-or-later -->
 # Kernel: Qualcomm SM6115 family (SM6115, SM4250, QRB4210)
 
 Devices: `oneplus-billie2`.

@@ -1,3 +1,4 @@
+<!-- SPDX-License-Identifier: AGPL-3.0-or-later -->
 # fedora-atomic-phone
 
 Fedora Atomic (bootc) images for phones, built so that adding a new phone means

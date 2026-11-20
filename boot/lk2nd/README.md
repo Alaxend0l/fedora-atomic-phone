@@ -1,3 +1,4 @@
+<!-- SPDX-License-Identifier: AGPL-3.0-or-later -->
 # Boot method: `lk2nd` (planned)
 
 [lk2nd](https://github.com/msm8916-mainline/lk2nd) is a bootloader for older

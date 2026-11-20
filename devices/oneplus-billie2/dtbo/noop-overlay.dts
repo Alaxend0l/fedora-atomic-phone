@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: (GPL-2.0+ OR BSD-3-Clause)
 // A device-tree overlay that changes nothing, for this phone's dtbo partition.
 //
 // ABL on the N100 refuses to boot with dtbo erased, and otherwise applies the

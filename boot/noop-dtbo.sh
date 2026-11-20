@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# SPDX-License-Identifier: AGPL-3.0-or-later
 # Build a dtbo partition image holding one no-op overlay, for phones whose
 # bootloader insists on a valid dtbo but whose stock overlays break mainline
 # device trees. Runs in a Fedora container (needs only podman).

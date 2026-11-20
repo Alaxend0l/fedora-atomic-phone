@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: AGPL-3.0-or-later
 # Entry points. Override any variable on the command line:
 #   just DEVICE=oneplus-billie2 DESKTOP=phosh build
 # or put them in a .env file (git-ignored).

@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: AGPL-3.0-or-later
 # Builds one bootable image for one (device, desktop) pair.
 #
 # Each stage runs a folder's `build` script inside the image being built:

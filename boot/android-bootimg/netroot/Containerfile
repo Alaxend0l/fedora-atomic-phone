@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: AGPL-3.0-or-later
 # A small Fedora root filesystem for network-booting a phone into RAM
 # (boot/android-bootimg/make-netroot.sh, tiny-init's fap.netroot=). Not a
 # product image: a development userspace to explore hardware with systemd,

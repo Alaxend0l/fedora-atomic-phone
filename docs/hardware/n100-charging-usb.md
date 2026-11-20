@@ -1,3 +1,4 @@
+<!-- SPDX-License-Identifier: AGPL-3.0-or-later -->
 # N100 charging, fuel gauge and USB-C: bring-up plan
 
 Status: **research only, nothing here has been run on the phone** (2026-11-20).

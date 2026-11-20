@@ -1,3 +1,4 @@
+<!-- SPDX-License-Identifier: AGPL-3.0-or-later -->
 # Boot method: `android-bootimg`
 
 The Linux kernel, device tree and initramfs go straight into the `boot`

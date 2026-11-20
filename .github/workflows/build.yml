@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: AGPL-3.0-or-later
 # Build one image on demand. Manual trigger only while the repo is private
 # (Actions minutes) and nothing boots yet. Status: untested.
 name: build

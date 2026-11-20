@@ -1,3 +1,4 @@
+<!-- SPDX-License-Identifier: AGPL-3.0-or-later -->
 # Reverse-engineering tooling: ideas, ranked
 
 Brainstormed 2026-11-20 by four research passes (firmware/remoteprocs, audio,

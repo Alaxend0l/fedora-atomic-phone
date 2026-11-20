@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# SPDX-License-Identifier: AGPL-3.0-or-later
 # Build the development root filesystem that tiny-init can download into RAM
 # (kernel argument fap.netroot=http://172.16.42.2:8000/netroot.tar.gz).
 #

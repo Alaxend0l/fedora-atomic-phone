@@ -1,3 +1,4 @@
+<!-- SPDX-License-Identifier: AGPL-3.0-or-later -->
 # OnePlus Nord N100 (`oneplus-billie2`)
 
 Status: **boots from RAM** (2026-11-20): Fedora 45 kernel 7.3.4 with the

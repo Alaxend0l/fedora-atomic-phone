@@ -1,3 +1,4 @@
+<!-- SPDX-License-Identifier: AGPL-3.0-or-later -->
 # Development environment
 
 Images are aarch64. Build on aarch64 to avoid emulation.

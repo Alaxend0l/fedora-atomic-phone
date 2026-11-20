@@ -1,3 +1,4 @@
+<!-- SPDX-License-Identifier: AGPL-3.0-or-later -->
 # Boot methods
 
 Each device picks one with `BOOT_METHOD` in its `device.env`. Each method is a

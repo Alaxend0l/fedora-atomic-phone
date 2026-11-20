@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# SPDX-License-Identifier: AGPL-3.0-or-later
 # Build the development install root (netroot + Plasma Mobile) as a tarball.
 #   boot/android-bootimg/installroot/make-installroot.sh <outdir>
 # Needs localhost/fap-netroot:latest (make-netroot.sh) first. Writes

@@ -1,3 +1,4 @@
+<!-- SPDX-License-Identifier: AGPL-3.0-or-later -->
 # N100 sensors and small peripherals
 
 Hardware area: sensors (accel/gyro, ALS/proximity, compass, SAR, hall),

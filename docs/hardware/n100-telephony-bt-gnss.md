@@ -1,3 +1,4 @@
+<!-- SPDX-License-Identifier: AGPL-3.0-or-later -->
 # N100: telephony, Bluetooth, GNSS (and the Wi‑Fi/BT MAC question)
 
 Research notes, 2026-11-20. Nothing here has been run on the phone. Marks:

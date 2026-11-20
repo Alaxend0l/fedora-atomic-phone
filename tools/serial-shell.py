@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# SPDX-License-Identifier: AGPL-3.0-or-later
 """Run commands on a phone's USB serial debug shell (the ramboot initramfs's
 CDC-ACM gadget, see boot/android-bootimg/tiny-init) and print the output.
 

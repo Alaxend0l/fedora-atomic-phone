@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# SPDX-License-Identifier: AGPL-3.0-or-later
 # Flash a built image onto a phone in fastboot mode, following the device's
 # device.env. Runs on the host (macOS or Linux) with `fastboot` installed.
 #

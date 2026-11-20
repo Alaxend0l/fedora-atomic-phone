@@ -1,3 +1,4 @@
+<!-- SPDX-License-Identifier: AGPL-3.0-or-later -->
 # Waydroid (Android apps) on the N100
 
 Status: **branch `waydroid`, untested on the phone.** Researched and built

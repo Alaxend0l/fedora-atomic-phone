@@ -1,3 +1,4 @@
+<!-- SPDX-License-Identifier: AGPL-3.0-or-later -->
 # 0001: Own framework, Pocketblue as reference
 
 Date: 2026-11-20. Status: accepted.
