@@ -13,7 +13,7 @@ still on slot a, but its data was given up for Fedora (owner's choice):
 
 | What | Where |
 |---|---|
-| Fedora kernel (uniLoader boot image; Rust binder + USB fix) | `boot_b` (sha256 `d01416bd…`, `fap-build/waffle/install-waydroid-net/boot_b/`; before: `c30a7be6…` `install-waydroid/`, `f870e95f…` `install/`; module backups in `/root/modules-*` on the phone) |
+| Fedora kernel (uniLoader boot image; **full Fedora config** since 2026-11-21) | `boot_b` (sha256 `d01416bd…`, `fap-build/waffle/install-waydroid-net/boot_b/`; before: `c30a7be6…` `install-waydroid/`, `f870e95f…` `install/`; module backups in `/root/modules-*` on the phone) |
 | Fedora root (ext4, label `fap-root`, 8 GiB) | logical partition `fap_root` in `super` (raw sha256 `cd29c50f…`) |
 | Fedora `/home` + Waydroid images (`/home/.waydroid-images`) | ext4 `fap-home` on the former **userdata** (`/dev/sda14`, 447 GiB), fstab `nofail` |
 | LineageOS 23.2 (rooted: Magisk + KernelSU) | slot a system unchanged; **its userdata is gone** |
@@ -81,11 +81,13 @@ EFS/IMEI copies and OEM firmware; never commit or upload):
 `~/Develop/fap-build/waffle/{bisect,plasma-netroot-gpu,hw,power,tel,install}/`.
 
 ## Next steps, in order
-0. **Full-config kernel: built, not booted.** `fap-waffle-build.sh --full`
-   took 17 min (16 GiB VM); image_size 65 MiB (< 78 MiB uniLoader limit);
-   output `~/Develop/fap-build/waffle/install-full/` (modules 99 MB). Test by
-   installing its modules (keep a backup) and `fastboot boot` its
-   `ramboot/waffle-uniloader-v4-install.img` before flashing boot_b.
+0. **Done 2026-11-21: the installed kernel uses Fedora's full config**
+   (`--full`, 17 min build, image_size 65 of 78 MiB; boot_b sha `7feeffad…`).
+   Kernels sharing a release string share one module tree, so
+   `fap-modules-guard` (early boot) swaps in the tree whose `.fap-kver` matches
+   `uname -v`; `devices/oneplus-waffle/try-kernel.sh` RAM-tests a candidate
+   with a 9-point feature check (oneplus12-dualboot e0d7956). Slim kernel
+   rollback: flash `install-waydroid-net/boot_b/fap-boot_b.img`.
 1. **Merge** `oneplus12-dualboot` (install + USB fix + Rust binder) with
    `-power` and `-tel`, rebuild, and update the installed system (boot_b +
    modules, as done on 2026-11-20 for Waydroid).
