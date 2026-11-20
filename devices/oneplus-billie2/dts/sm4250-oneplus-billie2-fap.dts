@@ -267,3 +267,16 @@
 		bias-pull-up;
 	};
 };
+
+/*
+ * GPU: Adreno 610. The zap shader is the phone's own OnePlus-signed
+ * a610_zap.mdt/.b00-.b02 from vendor_a:/firmware (not redistributable;
+ * extracted at install time); a630_sqe.fw comes from Fedora's qcom-firmware.
+ */
+&gpu {
+	status = "okay";
+};
+
+&gpu_zap_shader {
+	firmware-name = "qcom/sm6115/OnePlus/billie2/a610_zap.mdt";
+};

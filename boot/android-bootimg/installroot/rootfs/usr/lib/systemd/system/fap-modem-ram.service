@@ -1,0 +1,12 @@
+[Unit]
+Description=Start the modem (and Wi-Fi) with EFS served from RAM copies
+Before=NetworkManager.service
+After=local-fs.target systemd-udev-settle.service
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+ExecStart=/usr/libexec/fap-modem-ram
+
+[Install]
+WantedBy=multi-user.target

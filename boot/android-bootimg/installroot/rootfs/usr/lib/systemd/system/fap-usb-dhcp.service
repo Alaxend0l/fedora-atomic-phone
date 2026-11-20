@@ -1,0 +1,13 @@
+# NetworkManager leaves USB gadget interfaces unmanaged by design, so the host
+# side of the USB network (set up by tiny-init: phone 172.16.42.1) gets its
+# address from this dnsmasq instead. No DNS, no gateway: USB is for SSH.
+[Unit]
+Description=DHCP for the host on the USB gadget network
+After=network-pre.target
+
+[Service]
+ExecStart=/usr/sbin/dnsmasq --no-daemon --port=0 --interface=usb0 --bind-dynamic --dhcp-range=172.16.42.2,172.16.42.2,255.255.255.0,12h --dhcp-option=3 --dhcp-option=6 --dhcp-leasefile=/run/fap-usb-dhcp.leases
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target

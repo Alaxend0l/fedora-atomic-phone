@@ -64,6 +64,35 @@ else
     done
 fi
 
+# Installed root (kernel argument fap.root=LABEL=<label> or a device path):
+# mount it read-write and switch to its systemd. The USB gadget carries over.
+root=$(sed -n 's/.*fap\.root=\([^ ]*\).*/\1/p' /proc/cmdline)
+if [ -n "$root" ]; then
+    dev=
+    i=0
+    while [ $i -lt 30 ]; do
+        case "$root" in
+            /dev/*) [ -b "$root" ] && dev=$root ;;
+            *) dev=$(findfs "$root" 2>/dev/null) ;;
+        esac
+        [ -n "$dev" ] && break
+        sleep 1; i=$((i + 1))
+    done
+    mkdir -p /newroot
+    if [ -n "$dev" ] && mount -t ext4 -o rw,noatime "$dev" /newroot \
+            && [ -x /newroot/usr/lib/systemd/systemd ]; then
+        echo "fap-init: root $root ($dev), switching to systemd" > /dev/kmsg
+        killall telnetd udhcpd 2>/dev/null
+        for m in /dev /proc /sys /run; do
+            mkdir -p /newroot$m
+            mount --move $m /newroot$m
+        done
+        exec switch_root /newroot /usr/lib/systemd/systemd
+    fi
+    echo "fap-init: root $root not usable (device: ${dev:-none}), staying here" > /dev/kmsg
+    umount /newroot 2>/dev/null
+fi
+
 # Network root (kernel argument fap.netroot=http://...tar.gz): download a root
 # filesystem into RAM over the USB network and switch to its systemd. The
 # gadget and its network address carry over. Nothing touches the phone's
