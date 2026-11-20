@@ -1,0 +1,48 @@
+#!/bin/bash
+# Start the modem (and with it Wi-Fi) with nothing written to the phone's
+# storage. Development helper for the RAM-booted netroot.
+#
+#   fap-modem-ram [slot]     slot defaults to a
+#
+# - Firmware: the modem_<slot> partition's image/ directory (mounted
+#   read-only) is bind-mounted at /run/fap-firmware/<dir of the remoteproc's
+#   firmware-name>, and the kernel's firmware search path is pointed at
+#   /run/fap-firmware (tqftpserv follows it). The whole directory, because the
+#   modem fetches more over TFTP (e.g. modem_pr/ configs).
+# - EFS: modemst1/modemst2/fsg/fsc are *read* into /run/fap-efs, and rmtfs
+#   serves those copies with -r (writes stay in rmtfs's memory). The
+#   partitions themselves are never opened for writing. Fedora's
+#   rmtfs.service (which uses the partitions) is masked in this image.
+set -euo pipefail
+slot=${1:-a}
+
+rproc=
+for r in /sys/class/remoteproc/remoteproc*; do
+    case "$(cat "$r/firmware")" in */modem.mdt|*/modem.mbn) rproc=$r ;; esac
+done
+[ -n "$rproc" ] || { echo "no modem remoteproc (DT remoteproc_mpss disabled?)" >&2; exit 1; }
+fwname=$(cat "$rproc/firmware")
+fwdir=/run/fap-firmware/$(dirname "$fwname")
+echo "modem: $rproc ($(cat "$rproc/state")), firmware $fwname"
+
+mkdir -p /run/fap-modem "$fwdir"
+mountpoint -q /run/fap-modem || mount -o ro "/dev/disk/by-partlabel/modem_$slot" /run/fap-modem
+mountpoint -q "$fwdir" || mount --bind /run/fap-modem/image "$fwdir"
+echo -n /run/fap-firmware > /sys/module/firmware_class/parameters/path
+
+mkdir -p /run/fap-efs
+for p in modemst1:modem_fs1 modemst2:modem_fs2 fsg:modem_fsg fsc:modem_fsc; do
+    dd if="/dev/disk/by-partlabel/${p%%:*}" of="/run/fap-efs/${p##*:}" bs=1M status=none
+done
+echo "EFS copies: $(ls /run/fap-efs | tr '\n' ' ')"
+
+modprobe -a qrtr qrtr-smd qcom_pd_mapper 2>/dev/null || true
+# stdbuf: both log with printf, which systemd would otherwise block-buffer.
+systemd-run --unit fap-tqftpserv --collect stdbuf -oL -eL /usr/bin/tqftpserv
+# -s starts the modem once rmtfs is ready, and stops it when rmtfs exits.
+systemd-run --unit fap-rmtfs --collect stdbuf -oL -eL /usr/bin/rmtfs -r -o /run/fap-efs -s -v
+for i in $(seq 1 30); do
+    [ "$(cat "$rproc/state")" = running ] && break
+    sleep 1
+done
+echo "modem: $(cat "$rproc/state")"

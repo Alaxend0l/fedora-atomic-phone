@@ -32,9 +32,9 @@ when you stop. Newest log entries at the top.
    microSD-based root, then the real bootc install.
 2. **Mainline DT gaps for billie2:** PMIC + keys done in our DT
    (`devices/oneplus-billie2/dts/`, built with `tools/build-dtb.sh`, used via
-   `RAMBOOT_DTB=`). Display done (MSM DRM + our panel module, LCDB not driven).
-   Still missing: LCDB regulator driver, GPU (Adreno 610), battery
-   percentage, touch, Wi‑Fi, audio. DT work, ideally
+   `RAMBOOT_DTB=`). Display done (MSM DRM + our panel module, LCDB not driven). Modem +
+   Wi‑Fi done (RAM-only helper). Still missing: LCDB regulator driver, GPU
+   (Adreno 610), battery percentage, touch, audio; Wi‑Fi board data and MAC. DT work, ideally
    upstream. U-Boot UFS/PMIC support for SM6115 is upstream work too.
 3. Consider restoring stock OxygenOS (EU 10.5.2 MSM, needs Windows) for a day
    to tell whether the random resets are hardware or Ubuntu Touch.
@@ -63,6 +63,10 @@ when you stop. Newest log entries at the top.
 - systemd-logind powers the phone off on KEY_POWER by default; for tests,
   `HandlePowerKey=ignore` in /run/systemd/logind.conf.d/.
 - Without D-Bus, `systemctl reboot` fails; use `reboot -f`.
+- The RTC is unset (1970): RPM signatures then fail as "not live yet" (looks
+  like `BAD`). Set the clock first: `date -u -s <time from the host>`.
+- Modem/Wi‑Fi: run `/usr/libexec/fap-modem-ram` in the netroot. Never enable
+  Fedora's `rmtfs.service` (it serves the real modemst/fsg partitions; masked).
 - Forced restart: **Power + Volume Up** ~15 s (Power alone does nothing).
 - Fedora's kernel `Image` needs 76.5 MB from 0x8000; ramdisk/DTB offsets must
   sit above it (billie2: 0x06000000 / 0x05800000).
@@ -105,6 +109,7 @@ when you stop. Newest log entries at the top.
 | 2026-11-20 | **netroot**: tiny-init downloads a 278 MB Fedora 45 rootfs (make-netroot.sh) over USB HTTP into tmpfs, `switch_root` to systemd | **Fedora 45 userspace on the N100**, SSH as root over USB (key auth) ~35 s after boot; udev loads 66 modules; only `a7c0000.pinctrl` (LPASS, audio) deferred; logind failed (no D-Bus in the rootfs, fixed for next build) |
 | 2026-11-20 | netroot + our DT (`devices/oneplus-billie2/dts/…-fap.dts`: PM6125 + PMI632 + keys) | systemd `running` (D-Bus fixed); **all three buttons verified with evtest**; PMIC ADC5 (battery 4.009 V, USB in 5.13 V, bat_id, charger/die/XO temps), temp-alarm, GPIO, RTC (`rtc-pm8xxx`, unset) |
 | 2026-11-20 | display: lmdpdg ILI9882N panel module (`devices/oneplus-billie2/kmod/panel-ili9882n`) + MDSS/DSI nodes, no supply handling (LCDB left on by the bootloader) | **MSM DRM drives the panel**: `card1-DSI-1` connected 720×1600, DPU rev 0x60030000, console on msmdrmfb; DCS backlight 345/2047, stepped 100→1000→345 (panel readback 90/884/305) |
+| 2026-11-20 | modem + Wi‑Fi: DT `remoteproc_mpss` + `wifi`; `fap-modem-ram` (firmware from `modem_a` read-only, EFS read into RAM, `rmtfs -r -o`) | modem up (first try crashed: "DOG detects stalled initialization" because only `modem.*` was served; serving all of `image/` incl. `modem_pr/` fixed it). ath10k WCN3990 up, WLAN.HL.3.2.4; scan 2.4+5 GHz; **joined a WPA2 hotspot, DHCP, ping, HTTPS 200**. Board data: linux-firmware generic (board_id 0xff); MAC random |
 | 2026-11-20 | **dtbo_a erased**, fresh session, `uboot.img` (mainline DT) | **ABL hands over**; U-Boot resets within seconds; phone returns to ABL fastboot |
 | 2026-11-20 | no-op dtbo, fresh session, variant v3 | no handoff. dtbo_a restored, hash verified |
 | 2026-11-20 | v2, v3 booted right after a failed boot in the same ABL session | `Load Error`, which turned out to be a session artifact (see Constraints) |

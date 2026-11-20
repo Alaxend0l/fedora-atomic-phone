@@ -15,6 +15,7 @@ RUN dnf5 -y install --setopt=install_weak_deps=False \
         systemd systemd-udev dbus-broker kmod openssh-server iproute iputils procps-ng \
         util-linux less pciutils usbutils i2c-tools dtc evtest lm_sensors \
         linux-firmware-whence \
+        qrtr rmtfs tqftpserv atheros-firmware iw wpa_supplicant dhcpcd \
     && dnf5 clean all
 
 # Kernel modules matching the booted kernel exactly (not the fedora:45 repos'
@@ -28,6 +29,11 @@ RUN find /usr/lib/modules -maxdepth 2 \( -name 'initramfs*.img' -o -name vmlinuz
 # (make-netroot.sh NETROOT_EXTRA_MODULES), hence depmod afterwards.
 COPY rootfs/ /
 RUN depmod -a "$(ls /usr/lib/modules | sort -V | tail -1)"
+
+# rmtfs.service serves the modem's EFS from the raw partitions (modemst1/2,
+# fsg), which the modem then writes. Never here: fap-modem-ram serves RAM
+# copies read-only instead.
+RUN systemctl mask rmtfs.service
 
 RUN systemctl enable sshd.service serial-getty@ttyGS0.service \
     && systemctl set-default multi-user.target \

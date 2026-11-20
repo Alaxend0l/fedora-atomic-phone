@@ -101,3 +101,27 @@
 &mdss_dsi0_phy {
 	status = "okay";
 };
+
+/*
+ * Modem (MPSS) and Wi-Fi (WCN3990 via ath10k_snoc). The Wi-Fi firmware
+ * (wlanmdsp.mbn) runs on the modem, so Wi-Fi needs the modem up, which needs
+ * rmtfs (EFS), tqftpserv and the kernel PD mapper. Firmware comes from the
+ * phone's own modem_a partition at run time (not redistributable); see
+ * fap-modem-ram in the netroot. Supplies match the vendor icnss node
+ * (L8A cx-mx, L16A xo, L17A rfa, L23A ch0), same as the Fxtec Pro1X.
+ */
+&remoteproc_mpss {
+	firmware-name = "qcom/sm6115/OnePlus/billie2/modem.mdt";
+	status = "okay";
+};
+
+&wifi {
+	vdd-0.8-cx-mx-supply = <&vreg_l8a>;
+	vdd-1.8-xo-supply = <&vreg_l16a>;
+	vdd-1.3-rfa-supply = <&vreg_l17a>;
+	vdd-3.3-ch0-supply = <&vreg_l23a>;
+
+	qcom,calibration-variant = "OnePlus_billie2";
+
+	status = "okay";
+};

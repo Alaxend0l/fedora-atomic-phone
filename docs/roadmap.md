@@ -99,6 +99,14 @@ cleanly (`rmmod` was risky on the N100). Use the RAM-boot loop for anything
 serious.
 
 ## OnePlus Nord N100 (`oneplus-billie2`)
+- [ ] Wi‑Fi board data: pick the right vendor `bdwlan.*` (board_id reads
+      0xff), pack a `board-2.bin` entry for variant `OnePlus_billie2`.
+- [ ] Stable Wi‑Fi MAC (DT `local-mac-address` from the vendor-programmed
+      value; the random-MAC bug UT had).
+- [ ] Modem/Wi‑Fi startup as proper units for the real image (firmware from
+      the modem partition, EFS policy: RAM-only vs real partitions, decided
+      with the user).
+- [ ] Clock at boot (RTC unset; timesyncd once Wi‑Fi is up).
 Each step is reversible via fastboot or EDL.
 1. [x] Check Fedora's kernel config for SM6115 drivers: all present in 7.3.4 (fc45), incl. the billie2 DTB (kernels/qcom-sm6115)
 2. [x] Build U-Boot (`just uboot`, boot/uboot-android/): uboot.img built 2026-11-20
