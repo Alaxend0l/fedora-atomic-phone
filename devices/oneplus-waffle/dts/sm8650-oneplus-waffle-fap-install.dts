@@ -17,8 +17,14 @@
 /* Branch oneplus12-speakers: speaker test (RAM boot). */
 #include "sm8650-oneplus-waffle-fap-speakers.dtsi"
 
+/*
+ * Boot flags (2026-11-21, suspend tests): no clk/pd/regulator_ignore_unused
+ * (no regressions without them); fw_devlink.sync_state=timeout with a 30 s
+ * deferred-probe timeout forces sync_state on providers whose consumers
+ * never bind (GPU GMU), so their boot-time votes drop and DDR can sleep.
+ */
 / {
 	chosen {
-		bootargs = "console=tty0 loglevel=4 fbcon=font:TER16x32 clk_ignore_unused pd_ignore_unused regulator_ignore_unused nokaslr androidboot.slot_suffix=_b fap.slot=b fap.root=lp:fap_root fap.menu=3 panic=5 oops=panic";
+		bootargs = "console=tty0 loglevel=4 fbcon=font:TER16x32 nokaslr androidboot.slot_suffix=_b fap.slot=b fap.root=lp:fap_root fap.menu=3 panic=5 oops=panic fw_devlink.sync_state=timeout deferred_probe_timeout=30";
 	};
 };

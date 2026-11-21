@@ -212,3 +212,19 @@
 	pmsg-size = <0x100000>;
 	ecc-size = <16>;
 };
+
+/*
+ * Qualcomm crypto engine (QCE) off: our kernel has no driver for it
+ * (CONFIG_CRYPTO_DEV_QCOM_QCE unset; the CPUs' ARMv8 crypto extensions are
+ * faster anyway), and its never-bound device link kept two interconnect
+ * providers from ever running sync_state, which blocks SoC sleep
+ * (2026-11-21, OnePlus12/log/2026-11-21-suspend-tests.md). The UFS inline
+ * crypto engine (ice) is a different block and stays on.
+ */
+&crypto {
+	status = "disabled";
+};
+
+&cryptobam {
+	status = "disabled";
+};
