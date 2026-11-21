@@ -2,3 +2,10 @@
 # Dual-boot install: the root is the logical partition fap_root in super,
 # mapped by tiny-init's fap-lpmap and mounted rw before systemd starts.
 LABEL=fap-root  /  ext4  rw,noatime  0 0
+# /home: Fedora's home on the former userdata partition (ext4 label fap-home).
+# Was only on the phone (added during the 2026-11-20 install); recorded here.
+LABEL=fap-home  /home  ext4  rw,noatime,nofail,x-systemd.device-timeout=10s  0 2
+# System Flatpak data lives on /home (fap_root is 8 GiB; Flatpaks were 3.5 GB of
+# it). nofail: without /home the phone still boots, system Flatpaks are missing.
+# Existing installs: move-flatpak-to-home.sh.
+/home/.var-lib-flatpak  /var/lib/flatpak  none  bind,nofail,x-systemd.requires-mounts-for=/home  0 0

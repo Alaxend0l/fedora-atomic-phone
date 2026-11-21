@@ -237,6 +237,18 @@ the Plasma settings.
 | `dtbo_a/b` | 24 MiB | untouched (`DTBO_MODE=stock`) |
 | `userdata` | rest | later (Android data) |
 
+
+### Space on the root partition
+
+`fap_root` is 8 GiB inside `super`; growing it means a `super` metadata write
+(see INSTALL.md) and eats the free space LineageOS OTAs need. Move bulky data to
+`/home` (fap-home, ~447 GiB) instead. On 2026-11-21 root was 7.4 of 7.8 GiB used,
+3.5 GB of it `/var/lib/flatpak` (Fedora runtimes, Firefox). New installs bind
+`/home/.var-lib-flatpak` over `/var/lib/flatpak` from `installroot/etc/fstab`;
+an installed phone migrates with `move-flatpak-to-home.sh` (check only by
+default; `--apply`, then `--remove-old` after checking apps; `--rollback`).
+Other candidates: the journal (`/var/log`, 352 MB: cap `SystemMaxUse`) and the
+module-tree backups in `/root` (~225 MB, rollback copies: owner's call).
 ## Recovery
 - Way back: RAM boots change nothing; LineageOS is on slot a. Beyond that:
   OPLUS-locked EDL with leaked VIP loaders (dossier `unbrick-tools.md`),
