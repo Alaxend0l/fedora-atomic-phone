@@ -214,3 +214,19 @@ crashes the modem or the phone.
 
 Later: XTRA (`mmcli --location-inject-assistance-data`, URLs from
 `--location-status`) and geoclue with the ModemManager source for apps.
+
+## Phone measurements, 2026-11-21 00:52 (installed system, read-only + one runtime session)
+- `qrtr-lookup`: service 16 "Location service (~ PDS v2)" registered.
+- `qmicli --loc-get-engine-lock` → **mt** (only network-initiated locked;
+  mobile-initiated allowed), `--loc-get-operation-mode` → **standalone**,
+  `--loc-get-nmea-types` → QMI error 94 NotSupported. So the engine-lock and
+  operation-mode theories are ruled out.
+- ModemManager location capabilities: only `3gpp-lac-ci` (no gps-nmea/gps-raw);
+  modem state `failed / sim-missing`, so MM never sets up GNSS without a SIM.
+- `qmicli --loc-start --client-no-release-cid` → QMI error 46 GeneralError again;
+  `--loc-follow-nmea` → "could not register location tracking events:
+  QMI protocol error (48) InvalidArgument" (event mask not accepted by this
+  modem firmware). Next: register a minimal event mask first (position report
+  + NMEA only, via libqmi API or a newer qmicli), then start with an explicit
+  session id/fix-recurrence; check whether a NAV-VM mapping of the rmtfs
+  region is required (see Topic A, don't add blindly).
