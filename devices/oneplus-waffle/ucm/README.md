@@ -9,6 +9,8 @@ board DT's `model`). It includes alsa-ucm-conf's `codecs/wcd939x` and
 `fap-waffle-build.sh netroot` installs both. Licence BSD-3-Clause, as
 alsa-ucm-conf, so it can go upstream there.
 
-Devices: Headphones (WCD9395 HPH; not routed to the USB-C port yet), Mic1,
-Mic3, Mic4, Mic5 (WCD9395 AMIC1/3/4/5, mapping to physical mics unknown).
-No speaker/earpiece (TFA9874 amplifiers, no driver).
+Devices: Speaker (earpiece 0x34 = left, bottom loudspeaker 0x35 = right,
+TFA9874 via SECONDARY_MI2S; capped at -12 dB with the DSP stream volume),
+Headphones (WCD9395 HPH; not routed to the USB-C port yet), Mic1, Mic3,
+Mic4, Mic5 (WCD9395 AMIC1/3/4/5, mapping to physical mics unknown; the
+capture PCM is 2 channels only).
