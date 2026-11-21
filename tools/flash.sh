@@ -37,6 +37,13 @@ PROTECTED_TENSOR="abl bl1 bl2 bl31 gcf gsa gsa_bl1 ldfw pbl tzsw bootloader radi
 PROTECTED="$PROTECTED_IDENTITY $PROTECTED_BOOTCHAIN $PROTECTED_FIRMWARE $PROTECTED_TENSOR ${PROTECTED_PARTITIONS:-}"
 
 die() { echo "flash: $*" >&2; exit 1; }
+
+# Devices installed by hand (dual boot, partitions chosen per unit) set
+# FLASH_PLAN="manual" in device.env: the generic plan below would write the
+# wrong partitions there (on oneplus-waffle: boot on both slots, then
+# userdata). Checked before any fastboot call.
+[ "${FLASH_PLAN:-auto}" = "auto" ] || die "$dev sets FLASH_PLAN=\"$FLASH_PLAN\": install it by hand as its INSTALL.md describes; this script refuses"
+
 guard() {
     local p
     # Globs in the lists are wanted here; no word splitting happens in case.

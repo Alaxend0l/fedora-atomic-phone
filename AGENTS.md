@@ -1,4 +1,10 @@
 <!-- SPDX-License-Identifier: AGPL-3.0-or-later -->
+
+> **Agents (opencode, the local model, any automation): read
+> `docs/agent-tasks/safety-audit.md` ("Hard rules") before anything else, and
+> take tasks only from `docs/agent-tasks/port-status-and-briefs.md` in risk
+> class S0 unless the owner says otherwise. When unsure whether something can
+> write to the phone's storage or boot chain: it can; stop and ask.
 # Notes for agents working in this repo
 
 Read this first, then [docs/status.md](docs/status.md) (where things stand,
