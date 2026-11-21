@@ -1,0 +1,48 @@
+#!/bin/bash
+# SPDX-License-Identifier: AGPL-3.0-or-later
+# v8: play a short 1 kHz tone on ONE TFA9874 speaker amplifier at a low,
+# fixed level. Run only after the user approved this test (HW.md, speakers).
+#
+#   FAP_SPEAKER_APPROVED=yes fap-hw-speaker-test bot|top [40|30]
+#
+# bot = 0x34 (bottom speaker, I2S left slot), top = 0x35 (top speaker /
+# earpiece, I2S right slot). Level = the tone file's level in dBFS (default
+# -40). The amplifier runs without boost at the vendor's gain (driver), the
+# stream is MultiMedia2 (hw:N,1) -> SECONDARY_MI2S_RX only, the tone lasts
+# 2 s with fades, aplay is killed after 5 s, and both amps are switched off
+# again on exit (also on Ctrl-C).
+set -euo pipefail
+
+[[ ${FAP_SPEAKER_APPROVED:-} == yes ]] ||
+  { echo "refusing: set FAP_SPEAKER_APPROVED=yes only after the user approved the speaker test" >&2; exit 2; }
+amp=${1:-}; lvl=${2:-40}
+case $amp in bot) pfx=SpkrBot side=left ;; top) pfx=SpkrTop side=right ;; *) echo "usage: $0 bot|top [40|30]" >&2; exit 2 ;; esac
+case $lvl in 40|30) ;; *) echo "level must be 40 or 30 (dBFS below full scale)" >&2; exit 2 ;; esac
+tone=/usr/share/fap-hw/tone-1k-${lvl}dBFS-$side.wav
+[[ -f $tone ]] || { echo "missing $tone" >&2; exit 1; }
+
+C=$(sed -n 's/^ *\([0-9]*\) \[.*\]: .* - OnePlus 12$/\1/p' /proc/asound/cards | head -1)
+[[ -n $C ]] || { echo "no 'OnePlus 12' sound card" >&2; exit 1; }
+ctl() { amixer -q -D "hw:$C" cset "name=$1" "$2"; }
+name() {   # name <pattern>: the one control whose name matches
+  local n; n=$(amixer -D "hw:$C" controls | sed -n "s/.*name='\(.*\)'.*/\1/p" | grep -E "$1" || true)
+  [[ $(grep -c . <<< "$n") == 1 && -n $n ]] || { echo "control matching /$1/: '${n//$'\n'/, }'" >&2; exit 1; }
+  echo "$n"
+}
+en_bot=$(name '^SpkrBot .*Switch$'); en_top=$(name '^SpkrTop .*Switch$')
+off() { ctl "$en_bot" off || true; ctl "$en_top" off || true
+        ctl 'SECONDARY_MI2S_RX Audio Mixer MultiMedia2' 0 || true; }
+trap off EXIT
+
+echo "== before"; dmesg | grep -i tfa9874 | tail -4 || true
+# v9: the BE runs 2 x 32 bit (TFA9874 vendor setting) unless this says 16.
+echo "SECONDARY_MI2S_RX width: $(cat /sys/module/snd_soc_sc8280xp/parameters/waffle_sec_mi2s_bits 2>/dev/null || echo '? (parameter missing: pre-v9 kernel)')"
+off
+ctl "$(name '^SpkrBot Amp Input$')" Left
+ctl "$(name '^SpkrTop Amp Input$')" Right
+ctl 'SECONDARY_MI2S_RX Audio Mixer MultiMedia2' 1
+[[ $amp == bot ]] && ctl "$en_bot" on || ctl "$en_top" on
+echo "== playing $tone on $pfx (hw:$C,1)"
+timeout 5 aplay -D "hw:$C,1" "$tone" || echo "aplay exit $?"
+sleep 1
+echo "== after"; dmesg | grep -iE 'tfa9874|mi2s|q6apm|graph|apm' | tail -16 || true

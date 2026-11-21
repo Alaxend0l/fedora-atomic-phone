@@ -221,6 +221,9 @@ fetch_tree() {
 PATCHES=/repo/kernels/qcom-sm8650/patches
 apply_patches() {
   git -C "$K" reset -q --hard "$WAFFLE_COMMIT"
+  # Files our patches add are untracked after the reset; the build is out
+  # of tree (O=), so nothing else in the source tree is untracked.
+  git -C "$K" clean -fdq
   local p
   while read -r p; do
     [[ -z $p || $p == \#* ]] && continue

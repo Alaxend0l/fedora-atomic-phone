@@ -1,0 +1,53 @@
+// SPDX-License-Identifier: (GPL-2.0+ OR BSD-3-Clause)
+/*
+ * OnePlus 12 (waffle): speakers only, part 1 of oneplus12-hw's
+ * sm8650-oneplus-waffle-fap-hw.dtsi (no headset/cameras, so a crash points
+ * at the speaker path). Included by the -install DT on branch
+ * oneplus12-speakers (RAM-boot tests; not flashed without the owner's OK).
+ *
+ * The two NXP TFA9874 on i2c_hub_7 behind LPASS SECONDARY_MI2S (I2S1,
+ * gpio121-124). Driver: our tfa9874 (kernels/qcom-sm8650/patches/0002-*):
+ * probe resets and reads the chip and leaves it powered down; no boost
+ * converter ever; the amplifier only runs while a stream plays AND its
+ * "Amp Enable" switch (default off) is set. Topology: the AudioReach
+ * file built by build-env/tplg-build.sh routes MultiMedia1/2/5 to
+ * SECONDARY_MI2S_RX through an MFC (16 -> 32 bit).
+ */
+
+&{/sound} {
+	pinctrl-0 = <&sec_mi2s_active>;
+	pinctrl-names = "default";
+
+	speaker-dai-link {
+		link-name = "Speaker Playback";
+
+		cpu {
+			sound-dai = <&q6apmbedai SECONDARY_MI2S_RX>;
+		};
+
+		codec {
+			sound-dai = <&speaker_amp_bot>, <&speaker_amp_top>;
+		};
+
+		platform {
+			sound-dai = <&q6apm>;
+		};
+	};
+};
+
+&i2c_hub_7 {
+	status = "okay";
+};
+
+/* vdd-supply (L15B 1.8 V) and reset-gpios (173/178, high = reset) as the board DT has them. */
+&speaker_amp_bot {
+	compatible = "nxp,tfa9874";
+	#sound-dai-cells = <0>;
+	sound-name-prefix = "SpkrBot";
+};
+
+&speaker_amp_top {
+	compatible = "nxp,tfa9874";
+	#sound-dai-cells = <0>;
+	sound-name-prefix = "SpkrTop";
+};

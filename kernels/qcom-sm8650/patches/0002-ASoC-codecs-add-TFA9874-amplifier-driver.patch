@@ -1,0 +1,547 @@
+SPDX-License-Identifier: GPL-2.0-only
+From: fedora-atomic-phone <noreply@fedora-atomic-phone.invalid>
+Subject: [PATCH] ASoC: codecs: add a conservative NXP TFA9874 amplifier driver
+
+The OnePlus 12 has two NXP TFA9874 (TFA2 family) amplifiers on
+i2c_hub_7 (0x34 bottom speaker, 0x35 top speaker/earpiece), fed by
+LPASS SECONDARY_MI2S. The TFA9874 has no on-chip DSP; Android runs the
+speaker protection on the ADSP from the amplifiers' sense data, and the
+vendor driver also writes hidden trim registers behind an MTP key.
+
+This driver uses the amplifier as a plain I2S amplifier and is
+deliberately conservative: the DC-DC boost is never enabled (output
+swing bounded by VBAT), the analog gain is fixed to the vendor's own
+tuning values (TDMSPKG 5, AMPGAIN 190, from the unit's tfa98xx.cnt),
+only documented user registers are writable through the regmap (no
+key/MTP/FAIM/hidden registers), and the amplifier leaves power-down only
+when the DAPM path is complete and the "Amp Enable" switch (default off)
+is set. Register/bitfield layout from NXP's GPL tfa98xx driver
+(tfa9874_tfafieldnames.h).
+
+Interface: standard I2S, 2 x 32-bit slots, 64 bit clocks per frame
+(TDMNBCK 2, TDMSLOTS 1, TDMSLLN 31, TDMSSIZE 31), as the vendor's
+tfa98xx.cnt and the chip's power-on defaults; the BE has to run S32_LE
+(machine-driver change in the next patch). 2 x 16 bit (32 fs) is still
+accepted for comparison but is not known-good: the first test (v8,
+-40 dBFS, bottom amp) ran with TDMERR + TDM LUT error and no sound.
+Status flags: OTDS/UVDS/OVDS are "OK" flags (1 = no alarm, NXP's
+flag_otpok/flag_uvpok/flag_ovpok); v8 printed them as alarms.
+
+Open point (no datasheet): the direction of the TDMSPKG/AMPGAIN scales;
+left at the vendor's values.
+
+Upstream-Status: Pending [not submitted; needs a DT binding, review by
+  someone with the TFA9874 datasheet, and the protection story]
+Tested: v8 (2 x 16 bit): amp operating, TDMERR/TDM LUT error, silent.
+  v9 (2 x 32 bit): not yet.
+
+---
+diff --git a/sound/soc/codecs/Kconfig b/sound/soc/codecs/Kconfig
+index ba59dabee..8204dce83 100644
+--- a/sound/soc/codecs/Kconfig
++++ b/sound/soc/codecs/Kconfig
+@@ -2335,6 +2335,15 @@ config SND_SOC_TFA989X
+ 	  Note that the driver currently bypasses the built-in "CoolFlux DSP"
+ 	  and does not support (hardware) volume control.
+ 
++config SND_SOC_TFA9874
++	tristate "NXP/Goodix TFA9874 (TFA2) amplifier"
++	depends on I2C
++	select REGMAP_I2C
++	help
++	  Enable support for the NXP (now Goodix) TFA9874 speaker amplifier
++	  as a plain I2S amplifier: no boost converter, fixed gain, no
++	  host-DSP speaker protection. For bring-up at low volume.
++
+ config SND_SOC_TLV320ADC3XXX
+ 	tristate "Texas Instruments TLV320ADC3001/3101 audio ADC"
+ 	depends on I2C
+diff --git a/sound/soc/codecs/Makefile b/sound/soc/codecs/Makefile
+index 3826f9e4f..42df0e64a 100644
+--- a/sound/soc/codecs/Makefile
++++ b/sound/soc/codecs/Makefile
+@@ -336,6 +336,7 @@ snd-soc-tas2781-i2c-y := tas2781-i2c.o
+ snd-soc-tas2783-sdw-y := tas2783-sdw.o
+ snd-soc-tfa9879-y := tfa9879.o
+ snd-soc-tfa989x-y := tfa989x.o
++snd-soc-tfa9874-y := tfa9874.o
+ snd-soc-tlv320adc3xxx-y := tlv320adc3xxx.o
+ snd-soc-tlv320aic23-y := tlv320aic23.o
+ snd-soc-tlv320aic23-i2c-y := tlv320aic23-i2c.o
+@@ -784,6 +785,7 @@ obj-$(CONFIG_SND_SOC_TDA7419)	+= snd-soc-tda7419.o
+ obj-$(CONFIG_SND_SOC_TAS2770) += snd-soc-tas2770.o
+ obj-$(CONFIG_SND_SOC_TFA9879)	+= snd-soc-tfa9879.o
+ obj-$(CONFIG_SND_SOC_TFA989X)	+= snd-soc-tfa989x.o
++obj-$(CONFIG_SND_SOC_TFA9874)	+= snd-soc-tfa9874.o
+ obj-$(CONFIG_SND_SOC_TLV320ADC3XXX)	+= snd-soc-tlv320adc3xxx.o
+ obj-$(CONFIG_SND_SOC_TLV320AIC23)	+= snd-soc-tlv320aic23.o
+ obj-$(CONFIG_SND_SOC_TLV320AIC23_I2C)	+= snd-soc-tlv320aic23-i2c.o
+diff --git a/sound/soc/codecs/tfa9874.c b/sound/soc/codecs/tfa9874.c
+new file mode 100644
+index 000000000..fc046854c
+--- /dev/null
++++ b/sound/soc/codecs/tfa9874.c
+@@ -0,0 +1,463 @@
++// SPDX-License-Identifier: GPL-2.0-only
++/*
++ * NXP/Goodix TFA9874 (TFA2 family) mono class-D speaker amplifier, driven
++ * as a plain I2S/TDM amplifier.
++ *
++ * Register and bitfield layout from NXP's GPL-2.0 tfa98xx driver
++ * (tfa9874_tfafieldnames.h, tfa_init.c: Copyright (C) 2014 NXP
++ * Semiconductors), as shipped in OnePlus's SM8650 kernel source.
++ *
++ * The TFA9874 has no CoolFlux DSP: on Android, speaker protection (the
++ * "SpeakerBoost" excursion/temperature model) runs on the host DSP and is
++ * fed with the amplifier's current/voltage sense data. That is not
++ * available here, so this driver is deliberately conservative:
++ *
++ *  - The DC-DC boost converter is never enabled (DCA = 0, "follower"
++ *    mode): the output swing is bounded by the battery voltage.
++ *  - The analog gain fields are fixed to the values of the vendor's own
++ *    tuning for this amplifier (TDMSPKG, AMPGAIN; INPLEV as in the vendor
++ *    "receiver" profile); they are not exposed as controls.
++ *  - The amplifier only leaves power-down when the DAPM path is complete
++ *    AND the "Amp Enable" switch (default off) is set by userspace.
++ *  - Only documented user registers are ever written: no key/unlock
++ *    sequence, no MTP/FAIM access, no hidden (trim) registers. The regmap
++ *    refuses writes to anything else.
++ *
++ * Without the hidden "optimal settings" the amplifier may sound worse than
++ * on Android (or, in the worst case, stay silent); it is meant for
++ * bring-up at low volume.
++ */
++
++#include <linux/bitfield.h>
++#include <linux/delay.h>
++#include <linux/gpio/consumer.h>
++#include <linux/i2c.h>
++#include <linux/module.h>
++#include <linux/regmap.h>
++#include <linux/regulator/consumer.h>
++#include <sound/pcm_params.h>
++#include <sound/soc.h>
++
++#define TFA9874_SYS_CTRL0		0x00
++#define  TFA9874_SYS_CTRL0_PWDN		BIT(0)	/* power down */
++#define  TFA9874_SYS_CTRL0_I2CR		BIT(1)	/* I2C register reset */
++#define  TFA9874_SYS_CTRL0_AMPE		BIT(3)	/* amplifier enable */
++#define  TFA9874_SYS_CTRL0_DCA		BIT(4)	/* DC-DC boost active */
++#define TFA9874_SYS_CTRL1		0x01
++#define  TFA9874_SYS_CTRL1_MANSCONF	BIT(2)	/* "I2C configured" */
++#define TFA9874_SYS_CTRL2		0x02
++#define  TFA9874_SYS_CTRL2_AUDFS	GENMASK(3, 0)
++#define  TFA9874_SYS_CTRL2_INPLEV	BIT(4)
++#define TFA9874_REVISION		0x03
++#define TFA9874_CLK_CTRL		0x04
++#define  TFA9874_CLK_CTRL_REFCKEXT	GENMASK(1, 0)
++/*
++ * Status flags. OTDS, UVDS (and OVDS in STATUS3) are "OK" flags: 1 means
++ * no alarm (NXP names them flag_otpok/flag_uvpok/flag_ovpok, and the
++ * vendor driver reports an error when they read 0). OCDS, NOCLK and
++ * TDMERR are alarms (1 = error). The sticky ones clear on read.
++ */
++#define TFA9874_STATUS0			0x10
++#define  TFA9874_STATUS0_OTPOK		BIT(2)	/* 0: over-temperature */
++#define  TFA9874_STATUS0_OCDS		BIT(3)	/* 1: over-current */
++#define  TFA9874_STATUS0_UVPOK		BIT(4)	/* 0: under-voltage */
++#define  TFA9874_STATUS0_TDMERR		BIT(6)
++#define  TFA9874_STATUS0_NOCLK		BIT(7)
++#define TFA9874_STATUS1			0x11
++#define  TFA9874_STATUS1_PLLS		BIT(6)
++#define  TFA9874_STATUS1_CLKS		BIT(7)
++#define  TFA9874_STATUS1_TDMLUTER	BIT(8)	/* TDM setting not in the LUT */
++#define  TFA9874_STATUS1_TDMSTAT	GENMASK(11, 9)
++#define  TFA9874_STATUS1_AMPS		BIT(14)
++#define TFA9874_STATUS3			0x13
++#define  TFA9874_STATUS3_OVPOK		BIT(8)	/* 0: over-voltage */
++#define  TFA9874_STATUS3_CLIPS		BIT(9)
++#define  TFA9874_STATUS3_MANOPER	BIT(15)	/* operating state */
++#define TFA9874_STATUS4			0x14
++#define  TFA9874_STATUS4_CLKOOR		BIT(2)	/* clock out of range */
++#define  TFA9874_STATUS4_MANSTATE	GENMASK(6, 3)
++#define TFA9874_TDM_CFG0		0x20
++#define  TFA9874_TDM_CFG0_NBCK		GENMASK(15, 12)
++#define TFA9874_TDM_CFG1		0x21
++#define  TFA9874_TDM_CFG1_SLOTS		GENMASK(3, 0)	/* slots - 1 */
++#define  TFA9874_TDM_CFG1_SLLN		GENMASK(8, 4)
++#define  TFA9874_TDM_CFG1_BRMG		GENMASK(13, 9)
++#define TFA9874_TDM_CFG2		0x22
++#define  TFA9874_TDM_CFG2_SSIZE		GENMASK(6, 2)
++#define TFA9874_TDM_CFG3		0x23
++#define  TFA9874_TDM_CFG3_SPKE		BIT(0)	/* sink 0: speaker */
++#define  TFA9874_TDM_CFG3_DCE		BIT(1)	/* sink 1: DC-DC feed-forward */
++#define  TFA9874_TDM_CFG3_CSE		BIT(3)	/* current sense out */
++#define  TFA9874_TDM_CFG3_VSE		BIT(4)	/* voltage sense out */
++#define TFA9874_TDM_CFG6		0x26
++#define  TFA9874_TDM_CFG6_SPKS		GENMASK(3, 0)
++#define  TFA9874_TDM_CFG6_DCS		GENMASK(7, 4)
++#define TFA9874_AMP_CFG			0x52
++#define  TFA9874_AMP_CFG_AMPGAIN	GENMASK(12, 5)
++#define TFA9874_GAIN			0x61
++#define  TFA9874_GAIN_TDMSPKG		GENMASK(9, 6)
++
++#define TFA9874_REV_LSB			0x74
++
++/* Vendor tuning values for this amplifier (OnePlus 12 tfa98xx.cnt). */
++#define TFA9874_VENDOR_TDMSPKG		5
++#define TFA9874_VENDOR_AMPGAIN		190
++
++struct tfa9874 {
++	struct regmap *regmap;
++	struct regulator *vdd;
++	struct gpio_desc *reset;
++	struct device *dev;
++	unsigned int rev;
++};
++
++static bool tfa9874_writeable_reg(struct device *dev, unsigned int reg)
++{
++	switch (reg) {
++	case TFA9874_SYS_CTRL0:
++	case TFA9874_SYS_CTRL1:
++	case TFA9874_SYS_CTRL2:
++	case TFA9874_CLK_CTRL:
++	case TFA9874_TDM_CFG0 ... TFA9874_TDM_CFG3:
++	case TFA9874_TDM_CFG6:
++	case TFA9874_AMP_CFG:
++	case TFA9874_GAIN:
++		return true;
++	default:
++		return false;
++	}
++}
++
++static bool tfa9874_readable_reg(struct device *dev, unsigned int reg)
++{
++	return reg <= 0x2f || reg == TFA9874_AMP_CFG || reg == TFA9874_GAIN;
++}
++
++static const struct regmap_config tfa9874_regmap = {
++	.reg_bits = 8,
++	.val_bits = 16,
++	.max_register = TFA9874_GAIN,
++	.writeable_reg = tfa9874_writeable_reg,
++	.readable_reg = tfa9874_readable_reg,
++	.volatile_reg = tfa9874_readable_reg,
++	.cache_type = REGCACHE_NONE,
++};
++
++static void tfa9874_log_status(struct tfa9874 *tfa, const char *when)
++{
++	unsigned int s0 = 0, s1 = 0, s3 = 0, s4 = 0;
++
++	regmap_read(tfa->regmap, TFA9874_STATUS0, &s0);
++	regmap_read(tfa->regmap, TFA9874_STATUS1, &s1);
++	regmap_read(tfa->regmap, TFA9874_STATUS3, &s3);
++	regmap_read(tfa->regmap, TFA9874_STATUS4, &s4);
++	dev_info(tfa->dev,
++		 "%s: status %04x %04x %04x %04x (manstate %lu, tdmstat %lu%s%s%s%s%s%s%s%s%s%s%s%s%s)\n",
++		 when, s0, s1, s3, s4, FIELD_GET(TFA9874_STATUS4_MANSTATE, s4),
++		 FIELD_GET(TFA9874_STATUS1_TDMSTAT, s1),
++		 s1 & TFA9874_STATUS1_PLLS ? ", pll" : "",
++		 s1 & TFA9874_STATUS1_CLKS ? ", clocks" : "",
++		 s1 & TFA9874_STATUS1_AMPS ? ", amp on" : "",
++		 s3 & TFA9874_STATUS3_MANOPER ? ", operating" : "",
++		 s0 & TFA9874_STATUS0_NOCLK ? ", NOCLK" : "",
++		 s0 & TFA9874_STATUS0_TDMERR ? ", TDMERR" : "",
++		 s1 & TFA9874_STATUS1_TDMLUTER ? ", TDMLUTERR" : "",
++		 s4 & TFA9874_STATUS4_CLKOOR ? ", CLKOOR" : "",
++		 s3 & TFA9874_STATUS3_CLIPS ? ", CLIP" : "",
++		 !(s0 & TFA9874_STATUS0_OTPOK) ? ", OVERTEMP" : "",
++		 s0 & TFA9874_STATUS0_OCDS ? ", OVERCURRENT" : "",
++		 !(s0 & TFA9874_STATUS0_UVPOK) ? ", UNDERVOLTAGE" : "",
++		 !(s3 & TFA9874_STATUS3_OVPOK) ? ", OVERVOLTAGE" : "");
++}
++
++static int tfa9874_amp_event(struct snd_soc_dapm_widget *w,
++			     struct snd_kcontrol *kcontrol, int event)
++{
++	struct snd_soc_component *component = snd_soc_dapm_to_component(w->dapm);
++	struct tfa9874 *tfa = snd_soc_component_get_drvdata(component);
++	unsigned int s1;
++	int i;
++
++	switch (event) {
++	case SND_SOC_DAPM_POST_PMU:
++		/* Clear-on-read: drop flags latched before this stream. */
++		tfa9874_log_status(tfa, "pre");
++		/* Never the boost converter (see the top of the file). */
++		regmap_clear_bits(tfa->regmap, TFA9874_SYS_CTRL0,
++				  TFA9874_SYS_CTRL0_DCA);
++		regmap_set_bits(tfa->regmap, TFA9874_SYS_CTRL1,
++				TFA9874_SYS_CTRL1_MANSCONF);
++		regmap_clear_bits(tfa->regmap, TFA9874_SYS_CTRL0,
++				  TFA9874_SYS_CTRL0_PWDN);
++		/* The device manager needs the I2S clock to leave power-down. */
++		for (i = 0; i < 25; i++) {
++			if (!regmap_read(tfa->regmap, TFA9874_STATUS1, &s1) &&
++			    (s1 & TFA9874_STATUS1_CLKS))
++				break;
++			usleep_range(2000, 3000);
++		}
++		regmap_set_bits(tfa->regmap, TFA9874_SYS_CTRL0,
++				TFA9874_SYS_CTRL0_AMPE);
++		usleep_range(5000, 6000);
++		tfa9874_log_status(tfa, "on");
++		break;
++	case SND_SOC_DAPM_PRE_PMD:
++		tfa9874_log_status(tfa, "off");
++		regmap_clear_bits(tfa->regmap, TFA9874_SYS_CTRL0,
++				  TFA9874_SYS_CTRL0_AMPE);
++		regmap_set_bits(tfa->regmap, TFA9874_SYS_CTRL0,
++				TFA9874_SYS_CTRL0_PWDN);
++		break;
++	}
++
++	return 0;
++}
++
++static const char * const tfa9874_slot_text[] = { "Left", "Right" };
++static SOC_ENUM_SINGLE_DECL(tfa9874_slot_enum, TFA9874_TDM_CFG6, 0,
++			    tfa9874_slot_text);
++
++static const struct snd_kcontrol_new tfa9874_controls[] = {
++	SOC_ENUM("Amp Input", tfa9874_slot_enum),
++};
++
++static const struct snd_kcontrol_new tfa9874_enable =
++	SOC_DAPM_SINGLE_VIRT("Switch", 1);
++
++static const struct snd_soc_dapm_widget tfa9874_dapm_widgets[] = {
++	SND_SOC_DAPM_AIF_IN("AIFIN", "HiFi Playback", 0, SND_SOC_NOPM, 0, 0),
++	SND_SOC_DAPM_SWITCH("Amp Enable", SND_SOC_NOPM, 0, 0, &tfa9874_enable),
++	SND_SOC_DAPM_OUT_DRV_E("AMP", SND_SOC_NOPM, 0, 0, NULL, 0,
++			       tfa9874_amp_event,
++			       SND_SOC_DAPM_POST_PMU | SND_SOC_DAPM_PRE_PMD),
++	SND_SOC_DAPM_OUTPUT("OUT"),
++};
++
++static const struct snd_soc_dapm_route tfa9874_dapm_routes[] = {
++	{ "Amp Enable", "Switch", "AIFIN" },
++	{ "AMP", NULL, "Amp Enable" },
++	{ "OUT", NULL, "AMP" },
++};
++
++static const struct snd_soc_component_driver tfa9874_component = {
++	.controls		= tfa9874_controls,
++	.num_controls		= ARRAY_SIZE(tfa9874_controls),
++	.dapm_widgets		= tfa9874_dapm_widgets,
++	.num_dapm_widgets	= ARRAY_SIZE(tfa9874_dapm_widgets),
++	.dapm_routes		= tfa9874_dapm_routes,
++	.num_dapm_routes	= ARRAY_SIZE(tfa9874_dapm_routes),
++	.use_pmdown_time	= 1,
++	.endianness		= 1,
++};
++
++static const unsigned int tfa9874_rates[] = {
++	8000, 11025, 12000, 16000, 22050, 24000, 32000, 44100, 48000,
++};
++
++static int tfa9874_hw_params(struct snd_pcm_substream *substream,
++			     struct snd_pcm_hw_params *params,
++			     struct snd_soc_dai *dai)
++{
++	struct tfa9874 *tfa = snd_soc_component_get_drvdata(dai->component);
++	unsigned int width = params_physical_width(params);
++	unsigned int sample = params_width(params);
++	unsigned int nbck, i;
++	int ret;
++
++	for (i = 0; i < ARRAY_SIZE(tfa9874_rates); i++)
++		if (tfa9874_rates[i] == params_rate(params))
++			break;
++	if (i == ARRAY_SIZE(tfa9874_rates))
++		return -EINVAL;
++
++	/*
++	 * Standard I2S, two slots. The configuration Android uses on this
++	 * board (tfa98xx.cnt) and the chip's power-on default is 2 x 32-bit
++	 * slots, 64 bit clocks per frame: TDMNBCK 2, TDMSLOTS 1 (= 2 slots),
++	 * TDMSLLN 31, TDMSSIZE 31 (vendor; POR 23). That is what the BE
++	 * should send (S32_LE). 2 x 16 bit (32 fs, TDMNBCK 1 assuming the
++	 * 16 << n encoding) is NOT a known-good setting: on the first test it
++	 * ran with TDMERR and TDM LUT error and no sound. Kept only for
++	 * comparison and logged as such.
++	 */
++	if (params_channels(params) != 2 || (width != 16 && width != 32)) {
++		dev_err(tfa->dev, "unsupported format: %u ch, %u bit\n",
++			params_channels(params), width);
++		return -EINVAL;
++	}
++	nbck = width == 16 ? 1 : 2;
++	if (width == 16)
++		dev_warn(tfa->dev, "2 x 16 bit (32 fs) is not a known-good TDM setting\n");
++
++	ret = regmap_update_bits(tfa->regmap, TFA9874_SYS_CTRL2,
++				 TFA9874_SYS_CTRL2_AUDFS,
++				 FIELD_PREP(TFA9874_SYS_CTRL2_AUDFS, i));
++	ret = ret ?: regmap_update_bits(tfa->regmap, TFA9874_TDM_CFG0,
++					TFA9874_TDM_CFG0_NBCK,
++					FIELD_PREP(TFA9874_TDM_CFG0_NBCK, nbck));
++	ret = ret ?: regmap_update_bits(tfa->regmap, TFA9874_TDM_CFG1,
++					TFA9874_TDM_CFG1_SLOTS | TFA9874_TDM_CFG1_SLLN |
++					TFA9874_TDM_CFG1_BRMG,
++					FIELD_PREP(TFA9874_TDM_CFG1_SLOTS, 1) |
++					FIELD_PREP(TFA9874_TDM_CFG1_SLLN, width - 1));
++	ret = ret ?: regmap_update_bits(tfa->regmap, TFA9874_TDM_CFG2,
++					TFA9874_TDM_CFG2_SSIZE,
++					FIELD_PREP(TFA9874_TDM_CFG2_SSIZE, width - 1));
++	if (ret) {
++		dev_err(tfa->dev, "failed to configure the interface: %d\n", ret);
++	} else {
++		unsigned int c0 = 0, c1 = 0, c2 = 0;
++
++		regmap_read(tfa->regmap, TFA9874_TDM_CFG0, &c0);
++		regmap_read(tfa->regmap, TFA9874_TDM_CFG1, &c1);
++		regmap_read(tfa->regmap, TFA9874_TDM_CFG2, &c2);
++		dev_info(tfa->dev, "%u Hz, 2 x %u bit slots (%u-bit samples), tdm %04x %04x %04x\n",
++			 params_rate(params), width, sample, c0, c1, c2);
++	}
++
++	return ret;
++}
++
++static const struct snd_soc_dai_ops tfa9874_dai_ops = {
++	.hw_params = tfa9874_hw_params,
++};
++
++static struct snd_soc_dai_driver tfa9874_dai = {
++	.name = "tfa9874-hifi",
++	.playback = {
++		.stream_name	= "HiFi Playback",
++		.formats	= SNDRV_PCM_FMTBIT_S16_LE | SNDRV_PCM_FMTBIT_S32_LE,
++		.rates		= SNDRV_PCM_RATE_8000_48000,
++		.rate_min	= 8000,
++		.rate_max	= 48000,
++		.channels_min	= 2,
++		.channels_max	= 2,
++	},
++	.ops = &tfa9874_dai_ops,
++};
++
++/* Everything in power-down, then the static part of the configuration. */
++static int tfa9874_init(struct tfa9874 *tfa)
++{
++	struct regmap *map = tfa->regmap;
++	int ret;
++
++	ret = regmap_write(map, TFA9874_SYS_CTRL0, TFA9874_SYS_CTRL0_I2CR);
++	if (ret)
++		return ret;
++	usleep_range(1000, 2000);
++
++	ret = regmap_update_bits(map, TFA9874_SYS_CTRL0,
++				 TFA9874_SYS_CTRL0_PWDN | TFA9874_SYS_CTRL0_AMPE |
++				 TFA9874_SYS_CTRL0_DCA, TFA9874_SYS_CTRL0_PWDN);
++	/* PLL reference from the I2S bit clock (vendor: REFCKEXT = 0). */
++	ret = ret ?: regmap_update_bits(map, TFA9874_CLK_CTRL,
++					TFA9874_CLK_CTRL_REFCKEXT, 0);
++	/* Speaker sink only; no DC-DC feed-forward, no sense data out. */
++	ret = ret ?: regmap_update_bits(map, TFA9874_TDM_CFG3,
++					TFA9874_TDM_CFG3_SPKE | TFA9874_TDM_CFG3_DCE |
++					TFA9874_TDM_CFG3_CSE | TFA9874_TDM_CFG3_VSE,
++					TFA9874_TDM_CFG3_SPKE);
++	ret = ret ?: regmap_update_bits(map, TFA9874_SYS_CTRL2,
++					TFA9874_SYS_CTRL2_INPLEV,
++					TFA9874_SYS_CTRL2_INPLEV);
++	ret = ret ?: regmap_update_bits(map, TFA9874_GAIN, TFA9874_GAIN_TDMSPKG,
++					FIELD_PREP(TFA9874_GAIN_TDMSPKG,
++						   TFA9874_VENDOR_TDMSPKG));
++	ret = ret ?: regmap_update_bits(map, TFA9874_AMP_CFG,
++					TFA9874_AMP_CFG_AMPGAIN,
++					FIELD_PREP(TFA9874_AMP_CFG_AMPGAIN,
++						   TFA9874_VENDOR_AMPGAIN));
++	/* Default to the left I2S slot; userspace picks Right for the 2nd amp. */
++	ret = ret ?: regmap_update_bits(map, TFA9874_TDM_CFG6,
++					TFA9874_TDM_CFG6_SPKS, 0);
++	return ret;
++}
++
++static void tfa9874_power_off(void *data)
++{
++	struct tfa9874 *tfa = data;
++
++	regmap_update_bits(tfa->regmap, TFA9874_SYS_CTRL0,
++			   TFA9874_SYS_CTRL0_AMPE | TFA9874_SYS_CTRL0_PWDN,
++			   TFA9874_SYS_CTRL0_PWDN);
++	gpiod_set_value_cansleep(tfa->reset, 1);
++	regulator_disable(tfa->vdd);
++}
++
++static int tfa9874_i2c_probe(struct i2c_client *i2c)
++{
++	struct device *dev = &i2c->dev;
++	struct tfa9874 *tfa;
++	unsigned int val;
++	int ret;
++
++	tfa = devm_kzalloc(dev, sizeof(*tfa), GFP_KERNEL);
++	if (!tfa)
++		return -ENOMEM;
++	tfa->dev = dev;
++	i2c_set_clientdata(i2c, tfa);
++
++	tfa->vdd = devm_regulator_get(dev, "vdd");
++	if (IS_ERR(tfa->vdd))
++		return dev_err_probe(dev, PTR_ERR(tfa->vdd), "no vdd supply\n");
++
++	/* Held in reset (pin high) until the supply is up. */
++	tfa->reset = devm_gpiod_get_optional(dev, "reset", GPIOD_OUT_HIGH);
++	if (IS_ERR(tfa->reset))
++		return dev_err_probe(dev, PTR_ERR(tfa->reset), "no reset gpio\n");
++
++	tfa->regmap = devm_regmap_init_i2c(i2c, &tfa9874_regmap);
++	if (IS_ERR(tfa->regmap))
++		return PTR_ERR(tfa->regmap);
++
++	ret = regulator_enable(tfa->vdd);
++	if (ret)
++		return dev_err_probe(dev, ret, "failed to enable vdd\n");
++
++	usleep_range(1000, 2000);
++	gpiod_set_value_cansleep(tfa->reset, 0);
++	usleep_range(5000, 6000);
++
++	ret = devm_add_action_or_reset(dev, tfa9874_power_off, tfa);
++	if (ret)
++		return ret;
++
++	/* Dummy read: the first transfer after reset may be NAKed. */
++	regmap_read(tfa->regmap, TFA9874_REVISION, &val);
++	ret = regmap_read(tfa->regmap, TFA9874_REVISION, &val);
++	if (ret)
++		return dev_err_probe(dev, ret, "failed to read the revision\n");
++	if ((val & 0xff) != TFA9874_REV_LSB)
++		return dev_err_probe(dev, -ENODEV,
++				     "not a TFA9874 (revision %#06x)\n", val);
++	tfa->rev = val;
++
++	ret = tfa9874_init(tfa);
++	if (ret)
++		return dev_err_probe(dev, ret, "failed to initialise\n");
++
++	dev_info(dev, "TFA9874 revision %#06x, powered down (no boost, vendor gain)\n",
++		 tfa->rev);
++
++	return devm_snd_soc_register_component(dev, &tfa9874_component,
++					       &tfa9874_dai, 1);
++}
++
++static const struct of_device_id tfa9874_of_match[] = {
++	{ .compatible = "nxp,tfa9874" },
++	{ }
++};
++MODULE_DEVICE_TABLE(of, tfa9874_of_match);
++
++static struct i2c_driver tfa9874_i2c_driver = {
++	.driver = {
++		.name = "tfa9874",
++		.of_match_table = tfa9874_of_match,
++	},
++	.probe = tfa9874_i2c_probe,
++};
++module_i2c_driver(tfa9874_i2c_driver);
++
++MODULE_DESCRIPTION("ASoC NXP/Goodix TFA9874 amplifier driver (no boost, no host-DSP protection)");
++MODULE_LICENSE("GPL");

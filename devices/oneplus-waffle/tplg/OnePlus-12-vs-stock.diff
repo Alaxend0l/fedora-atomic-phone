@@ -1,0 +1,100 @@
+# SPDX-License-Identifier: BSD-3-Clause
+# Reviewed GNU diff: decoded stock SM8550-HDK (back end renamed 16->18) vs
+# decoded OnePlus-12-waffle topology. Checked by build-env/tplg-build.sh.
+361a362,367
+> 	'device18.mfc1' {
+> 		type 'src'
+> 		no_pm 1
+> 		subseq 10
+> 		data 'device18.mfc1:tuple0'
+> 	}
+570a577
+> 	'device18.mfc1:tuple0'.tuples 'device18.mfc1:tuple0'
+611c618
+< 		formats 'S16_LE'
+---
+> 		formats 'S16_LE, S32_LE'
+1385a1393,1412
+> 	'device18.mfc1' {
+> 		token2 2
+> 		token1 1
+> 		token3 3
+> 		token4 4
+> 		token5 5
+> 		token100 100
+> 		token101 101
+> 		token102 102
+> 		token103 103
+> 		token104 104
+> 		token201 201
+> 		token200 200
+> 		token202 202
+> 		token203 203
+> 		token206 206
+> 		token207 207
+> 		token208 208
+> 		token209 209
+> 	}
+2765c2792
+< 				token1 16
+---
+> 				token1 18
+2791a2819,2847
+> 	'device18.mfc1:tuple0' {
+> 		tokens 'device18.mfc1'
+> 		tuples {
+> 			0_word {
+> 				token2 16390
+> 				token1 18
+> 				token3 2
+> 				token4 1
+> 				token5 1
+> 			}
+> 			1_word {
+> 				token100 16390
+> 				token101 184553473
+> 				token102 8192
+> 				token103 1
+> 				token104 2
+> 			}
+> 			2_word {
+> 				token201 24673
+> 				token200 117444629
+> 				token202 1
+> 				token203 1
+> 				token206 1
+> 				token207 2
+> 				token208 24673
+> 				token209 24674
+> 			}
+> 		}
+> 	}
+2797c2853
+< 				token1 16
+---
+> 				token1 18
+2810c2866
+< 				token201 24673
+---
+> 				token201 24674
+2816c2872
+< 				token208 24673
+---
+> 				token208 24674
+2819c2875
+< 				token250 0
+---
+> 				token250 1
+3210c3266
+< 			token1 16
+---
+> 			token1 18
+3325c3381,3382
+< 			'device18.i2s_rx1, , device18.logger1'
+---
+> 			'device18.mfc1, , device18.logger1'
+> 			'device18.i2s_rx1, , device18.mfc1'
+3355c3412
+< 		index 16
+---
+> 		index 18
