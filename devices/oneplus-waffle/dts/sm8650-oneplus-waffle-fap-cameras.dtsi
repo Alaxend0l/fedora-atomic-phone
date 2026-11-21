@@ -1,0 +1,39 @@
+// SPDX-License-Identifier: (GPL-2.0+ OR BSD-3-Clause)
+/*
+ * OnePlus 12 (waffle) cameras, stage 1: front IMX615 only.
+ * DaDDevil's board DT already enables camss, cci0/1 and i2c9 with all four
+ * sensors. CAMSS only creates its links once every sensor in the graph has
+ * bound, so one failing rear sensor would block all cameras: keep the rear
+ * ones (C-PHY on csiphy0/1/2 via CCI, unmerged C-PHY code) out for now.
+ * The front IMX615 is D-PHY (4 lanes, 455 MHz) on csiphy4, on the plain
+ * GENI i2c9 bus at 0x10. Its calibration EEPROM (24c32 @0x54) stays
+ * read-only. Research: OnePlus12/log/2026-11-21-research-cameras.md.
+ */
+
+&csiphy0_ep {
+	status = "disabled";
+};
+
+&csiphy1_ep {
+	status = "disabled";
+};
+
+&csiphy2_ep {
+	status = "disabled";
+};
+
+&cci0 {
+	status = "disabled";
+};
+
+&cci1 {
+	status = "disabled";
+};
+
+&i2c9 {
+	status = "okay";
+
+	eeprom@54 {
+		read-only;
+	};
+};

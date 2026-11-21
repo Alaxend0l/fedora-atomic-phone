@@ -16,6 +16,8 @@
 #include "sm8650-oneplus-waffle-fap-power.dtsi"
 /* Branch oneplus12-speakers: speaker test (RAM boot). */
 #include "sm8650-oneplus-waffle-fap-speakers.dtsi"
+/* Branch oneplus12-camera: front camera (stage 1). */
+#include "sm8650-oneplus-waffle-fap-cameras.dtsi"
 
 /*
  * Boot flags (2026-11-21, suspend tests): no clk/pd/regulator_ignore_unused

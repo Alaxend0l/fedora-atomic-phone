@@ -18,3 +18,14 @@ mesa-vulkan-drivers
 # Speakers (TFA9874): the look-ahead limiter of the PipeWire protection
 # filter (installroot/usr/share/wireplumber/wireplumber.conf.d/50-fap-waffle-speaker-dsp.conf).
 ladspa-swh-plugins
+
+# Cameras: libcamera (simple pipeline + software ISP on CAMSS), its tools
+# and V4L2 compat layer (libcamerify for Qt apps like Qrca), Plasma's
+# libcamera camera app, PipeWire's libcamera plugin for browsers/portals.
+libcamera
+libcamera-ipa
+libcamera-tools
+libcamera-v4l2
+v4l-utils
+plasma-camera
+pipewire-plugin-libcamera
