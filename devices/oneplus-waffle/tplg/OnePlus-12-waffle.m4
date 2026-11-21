@@ -64,11 +64,13 @@ DEVICE_SG_ADD(audioreach/subgraph-device-codec-dma-playback.m4, `WSA_CODEC_DMA_R
 	LPAIF_INTF_TYPE_WSA, CODEC_INTF_IDX_RX0, 0, DATA_FORMAT_FIXED_POINT,
 	0x00004005, 0x00004005, 0x00006050)
 dnl
-dnl Secondary MI2S Playback (speakers). The format here is informational;
+dnl Secondary MI2S Playback (speakers). Data line SD1 (i2s1_data1, gpio124):
+dnl on SD0 the amps lock to the clocks but play silence (tested 2026-11-21).
+dnl The format here is informational;
 dnl the back end runs at the kernel's fixup format (S32_LE, patch 0003).
 DEVICE_SG_ADD(audioreach/subgraph-device-i2s-playback-mfc.m4, `Secondary', SECONDARY_MI2S_RX,
 	`S32_LE', 48000, 48000, 2, 2,
-	LPAIF_INTF_TYPE_LPAIF, I2S_INTF_TYPE_SECONDARY, SD_LINE_IDX_I2S_SD0, DATA_FORMAT_FIXED_POINT,
+	LPAIF_INTF_TYPE_LPAIF, I2S_INTF_TYPE_SECONDARY, SD_LINE_IDX_I2S_SD1, DATA_FORMAT_FIXED_POINT,
 	0x00004006, 0x00004006, 0x00006060, `SECONDARY_MI2S_RX')
 dnl
 dnl WCDRX Playback

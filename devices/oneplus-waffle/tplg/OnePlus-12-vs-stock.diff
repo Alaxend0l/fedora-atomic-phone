@@ -1,6 +1,7 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Reviewed GNU diff: decoded stock SM8550-HDK (back end renamed 16->18) vs
 # decoded OnePlus-12-waffle topology. Checked by build-env/tplg-build.sh.
+# 2026-11-21: + I2S SD line token256 1 -> 2 (SD0 -> SD1, the speakers' data line).
 361a362,367
 > 	'device18.mfc1' {
 > 		type 'src'
@@ -85,6 +86,10 @@
 < 				token250 0
 ---
 > 				token250 1
+2821c2877
+< 				token256 1
+---
+> 				token256 2
 3210c3266
 < 			token1 16
 ---
