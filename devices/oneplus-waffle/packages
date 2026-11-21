@@ -16,5 +16,5 @@ atheros-firmware
 mesa-vulkan-drivers
 
 # Speakers (TFA9874): the look-ahead limiter of the PipeWire protection
-# filter (installroot/usr/share/pipewire/pipewire.conf.d/50-fap-waffle-speaker-protection.conf).
+# filter (installroot/usr/share/wireplumber/wireplumber.conf.d/50-fap-waffle-speaker-dsp.conf).
 ladspa-swh-plugins
