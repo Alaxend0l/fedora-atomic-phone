@@ -1,0 +1,17 @@
+# SPDX-License-Identifier: AGPL-3.0-or-later
+# OnePlus 12 (SM8650): keep ModemManager away from the rpmsg_wwan_ctrl AT
+# ports (DATA1/DATA4 -> /dev/wwan0at0, wwan0at1).
+#
+# MM drives this modem with QMI over QRTR (qrtr0) + rmnet_ipa0 and does not
+# use these ports. Its qcom-soc rules only match qcom-q6v5-mss, not the
+# qcom_q6v5_pas remoteproc used here, so MM treats the AT ports as a separate
+# device and probes them. Each probe open/close makes the modem close and
+# reopen the GLINK channel, which removes and re-adds the wwan port: a
+# re-probe loop every ~2 s.
+# See OnePlus12/log/2026-11-21-research-mm-at-churn.md.
+ACTION!="add|change|move|bind", GOTO="fap_waffle_mm_wwan_at_end"
+SUBSYSTEM!="wwan", GOTO="fap_waffle_mm_wwan_at_end"
+ENV{DEVTYPE}!="wwan_port", GOTO="fap_waffle_mm_wwan_at_end"
+ATTR{type}!="AT", GOTO="fap_waffle_mm_wwan_at_end"
+DRIVERS=="qcom_q6v5_pas", ENV{ID_MM_DEVICE_IGNORE}="1", ENV{ID_MM_PORT_IGNORE}="1"
+LABEL="fap_waffle_mm_wwan_at_end"
