@@ -3,7 +3,10 @@
 #   systemd-modules-load (qrtr, qrtr-smd, qcom_pd_mapper: modules-load.d)
 #   -> fap-efs-ram (RAM copies) + fap-tqftpserv
 #   -> rmtfs -r (read-only: modem writes stay in rmtfs's memory) -o /run/fap-efs
-#      -s (starts the modem remoteproc once ready, stops it when rmtfs exits)
+#   -> fap-modem-start (starts the modem remoteproc once rmtfs is registered).
+#      Not `rmtfs -s`: that also stops the modem when rmtfs exits, and stopping
+#      the modem resets the phone (TZ/hypervisor side; with the unfixed GLINK
+#      driver it oopsed first). A reboot resets the modem anyway.
 #   -> ModemManager (drop-in: After=fap-rmtfs.service).
 # Fedora's rmtfs.service (raw partitions, writable) stays masked.
 [Unit]
@@ -16,7 +19,8 @@ After=fap-efs-ram.service fap-tqftpserv.service systemd-modules-load.service sys
 [Service]
 # /dev/qcom_rmtfs_mem1: rmtfs_mem is built in, but give udev time.
 ExecStartPre=/usr/bin/udevadm wait --timeout=30 /dev/qcom_rmtfs_mem1
-ExecStart=/usr/bin/stdbuf -oL -eL /usr/bin/rmtfs -r -o /run/fap-efs -s -v
+ExecStart=/usr/bin/stdbuf -oL -eL /usr/bin/rmtfs -r -o /run/fap-efs -v
+ExecStartPost=/usr/libexec/fap-modem-start
 Restart=on-failure
 RestartSec=5
 
