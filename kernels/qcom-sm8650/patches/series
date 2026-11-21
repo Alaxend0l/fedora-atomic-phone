@@ -1,0 +1,9 @@
+# SPDX-License-Identifier: AGPL-3.0-or-later
+# Applied in this order to the waffle-voice tree (fap-waffle-build.sh fetch_tree).
+0001-power-sequencing-qcom-wcn-power-down-at-shutdown.patch
+0002-ASoC-codecs-add-TFA9874-amplifier-driver.patch
+0003-ASoC-qcom-sc8280xp-32-bit-SECONDARY_MI2S_RX-on-OnePlus-12.patch
+0004-ASoC-qcom-q6apm-dai-accept-S32_LE-playback.patch
+0010-drm-panel-boe-aa545-keep-backlight-writes-off-the-bus-while-off.patch
+0011-rpmsg-glink-refuse-reopen-while-a-local-close-is-pending.patch
+0012-PM-clock_ops-fail-pm_clk_resume-when-a-clock-cannot-be-enabled.patch

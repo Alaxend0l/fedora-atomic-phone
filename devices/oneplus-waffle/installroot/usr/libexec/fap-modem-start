@@ -1,0 +1,23 @@
+#!/bin/sh
+# SPDX-License-Identifier: AGPL-3.0-or-later
+# Start the modem remoteproc once rmtfs serves QRTR service 14 (what
+# `rmtfs -s` used to do). Nothing stops the modem again: stopping it
+# (rproc_shutdown) resets the whole phone on this board (TZ/hypervisor
+# side, 2026-11-21, ~/Develop/OnePlus12/log/2026-11-21-glink-refcount.md),
+# and a reboot resets the modem anyway.
+set -eu
+for r in /sys/class/remoteproc/remoteproc*; do
+    [ "$(cat "$r/name")" = modem ] && rp=$r && break
+done
+[ -n "${rp:-}" ] || { echo "fap-modem-start: no modem remoteproc" >&2; exit 1; }
+i=0
+until qrtr-lookup 14 2>/dev/null | grep -q 'Remote file system'; do
+    i=$((i + 1))
+    [ $i -le 100 ] || { echo "fap-modem-start: rmtfs not registered after 10 s" >&2; exit 1; }
+    sleep 0.1
+done
+state=$(cat "$rp/state")
+case $state in
+    running) echo "fap-modem-start: modem already running" ;;
+    *) echo "fap-modem-start: modem $state -> start"; echo start > "$rp/state" ;;
+esac

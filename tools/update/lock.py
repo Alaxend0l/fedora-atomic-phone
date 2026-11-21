@@ -23,7 +23,8 @@ ubuntu-24.04-arm runners that is native).
 
 Why not konflux's rpm-lockfile-prototype: docs/updates.md ("Evaluation").
 Known simplification: one transaction per target, so `install_weak_deps`
-is the most permissive of the target's steps (installroot: on).
+is the most permissive of the target's steps (all off since decision 0003:
+layers install their `packages` lists without weak deps).
 """
 import argparse
 import json
@@ -119,11 +120,44 @@ def extract_steps(text, filename="?"):
     return steps
 
 
+def packages_step(text, filename="?"):
+    """A layer's package list (tools/image/install-packages): one install
+    step, always without weak deps. `#` starts a comment."""
+    specs = []
+    for line in text.splitlines():
+        specs += line.split("#", 1)[0].split()
+    return {"action": "install", "specs": specs, "weak_deps": False,
+            "where": "%s:1" % filename, "skipped": []}
+
+
+NETROOT = "boot/android-bootimg/netroot/Containerfile"
+
+
+def layer_sources(layers, target, with_build):
+    """Per layer, in order: packages, packages.<target>, and (bootc images)
+    the build script. Dev roots skip build scripts: by convention they only
+    configure, except a device's kernel swap, which is image-only."""
+    out = []
+    for l in layers:
+        names = ["packages", "packages." + target] + (["build"] if with_build else [])
+        out += [l + "/" + n for n in names if (ul.REPO / l / n).exists()]
+    return out
+
+
 def target_sources(target):
-    """A target's source files; for bootc targets (device + desktop) the
-    layer build scripts in Containerfile order, boot method from device.env."""
+    """A target's source files, in build order.
+      sources: [...]                  as listed (Containerfiles, scripts)
+      kind: devroot + device/desktop  the netroot, then the layers' package
+                                      lists (make-devroot.sh)
+      device + desktop                bootc image: the layers in Containerfile
+                                      order, boot method from device.env
+    Both layered kinds take an optional `layers:` list (opt-in layers/)."""
     if "sources" in target:
         return list(target["sources"])
+    extra = ["layers/" + l for l in target.get("layers") or []]
+    if target.get("kind") == "devroot":
+        layers = ["base", "desktops/" + target["desktop"]] + extra + ["devices/" + target["device"]]
+        return [NETROOT] + layer_sources(layers, "devroot", with_build=False)
     env = (ul.REPO / "devices" / target["device"] / "device.env").read_text(encoding="utf-8")
     boot = None
     for line in env.splitlines():
@@ -131,15 +165,19 @@ def target_sources(target):
             boot = line.split("=", 1)[1].split("#")[0].strip().strip('"')
     if not boot:
         raise SystemExit("lock: no BOOT_METHOD in devices/%s/device.env" % target["device"])
-    layers = ["base", "desktops/" + target["desktop"], "boot/" + boot, "devices/" + target["device"]]
-    return [l + "/build" for l in layers if (ul.REPO / l / "build").exists()]
+    layers = ["base", "desktops/" + target["desktop"], "boot/" + boot] + extra + ["devices/" + target["device"]]
+    return layer_sources(layers, "image", with_build=True)
 
 
 def target_steps(target):
     steps = []
     for src in target_sources(target):
         path = ul.REPO / src
-        steps += extract_steps(path.read_text(encoding="utf-8"), src)
+        text = path.read_text(encoding="utf-8")
+        if path.name.startswith("packages"):
+            steps.append(packages_step(text, src))
+        else:
+            steps += extract_steps(text, src)
     return steps
 
 

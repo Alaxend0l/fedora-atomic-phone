@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # SPDX-License-Identifier: AGPL-3.0-or-later
 # tty: no graphical UI. Useful for first boots of a new device, where all you
-# want is a console on the framebuffer and SSH over USB.
+# want is a console on the framebuffer and SSH over USB. Nothing on top of
+# base/ (base-atomic has no desktop).
 set -euxo pipefail
-
-dnf5 -y remove firefox firefox-langpacks || true
+systemctl set-default multi-user.target

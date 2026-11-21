@@ -1,0 +1,11 @@
+# SPDX-License-Identifier: AGPL-3.0-or-later
+[Unit]
+Description=Save the current time every 10 minutes
+
+[Timer]
+OnBootSec=2min
+OnUnitActiveSec=10min
+Unit=fap-clock-stamp.service
+
+[Install]
+WantedBy=timers.target

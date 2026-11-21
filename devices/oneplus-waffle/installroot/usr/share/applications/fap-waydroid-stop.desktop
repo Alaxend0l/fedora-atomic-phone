@@ -1,0 +1,9 @@
+# SPDX-License-Identifier: AGPL-3.0-or-later
+[Desktop Entry]
+Type=Application
+Name=Stop Waydroid
+Comment=End the Android session (closing the window only hides it)
+Exec=waydroid session stop
+Icon=waydroid
+Categories=System;
+Terminal=false

@@ -1,0 +1,29 @@
+# SPDX-License-Identifier: AGPL-3.0-or-later
+# Partition layout for image-builder (read from inside the bootc image).
+# Two partitions: an EFI system partition and the root filesystem. They're
+# split into separate images by tools/make-disk.sh and flashed into existing
+# Android partitions (FLASH_ESP_PARTITION / FLASH_ROOT_PARTITION).
+mount_configuration: "units"
+partition_table:
+  type: "gpt"
+  sector_size: 4096            # keep in sync with DISK_SECTOR_SIZE
+  partitions:
+    - size: "256 MiB"
+      type: "C12A7328-F81F-11D2-BA4B-00A0C93EC93B"   # EFI system partition
+      payload_type: "filesystem"
+      payload:
+        type: "vfat"
+        mountpoint: "/boot/efi"
+        label: "EFI"
+        fstab_options: "umask=0077,shortname=winnt"
+        fstab_freq: 0
+        fstab_passno: 2
+    - size: "6 GiB"            # grown to fill the partition on first boot
+      type: "0FC63DAF-8483-4772-8E79-3D69D8477DE4"   # Linux filesystem
+      payload_type: "btrfs"
+      payload:
+        subvolumes:
+          - { name: "root", mountpoint: "/" }
+          - { name: "boot", mountpoint: "/boot" }
+          - { name: "var",  mountpoint: "/var" }
+          - { name: "home", mountpoint: "/var/home" }

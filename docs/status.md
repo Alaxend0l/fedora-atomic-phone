@@ -5,6 +5,30 @@ Living document: update the "Where things stand" and "Next steps" sections
 when you stop. Newest log entries at the top.
 
 ## Where things stand (2026-11-20, end of day 1)
+- **Minimal layered images (branch `minimal-layers`, decision 0003,
+  2026-11-20):** layers carry explicit `packages` lists (no weak deps, a
+  reason per package); every bootc image starts from base-atomic; N100
+  specifics (noubwc, null sink, its fap-modem-ram) live in
+  devices/oneplus-billie2, Waydroid is the opt-in `layers/waydroid`.
+  `boot/android-bootimg/make-devroot.sh <device> <desktop> <out> [layer]`
+  builds netroot + layers for RAM boots; make-installroot.sh is now that
+  with `--installroot` (N100: 763 packages on fedora:45, was 1168).
+  OnePlus 12 Plasma Mobile RAM root built (`fap-build/waffle/plasma-netroot/`,
+  sensitive: EFS + OEM firmware), with a v6 boot image whose tiny-init takes
+  `fap.netroot_size=6g`. **Nothing of this booted on a phone yet**; in the
+  container, `kwin_wayland --virtual` + `plasmashell -p
+  org.kde.plasma.mobileshell` runs (folio homescreen, no missing QML
+  modules; plasmashell ~630 MB RSS on llvmpipe). Lockfiles regenerated. Plasma Mobile 6.8 uses plasma-keyboard (no Maliit); the
+  desktop System Settings and QtWebEngine are unavoidable hard deps.
+  On the phone the v6 Plasma root needed `libglvnd-gles` (KWin dlopens
+  libGLESv2), then Plasma came up (slowly, llvmpipe). **v7 merged**
+  (oneplus12-build: GPU, BT, Iris, haptics, WCN shutdown patch) and a GPU
+  Plasma RAM root built (`fap-build/waffle/plasma-netroot-gpu/`, 892
+  packages + v7 netroot bits, 2627 MiB unpacked; sensitive): software
+  rendering forcing removed from devices/oneplus-waffle/build,
+  mesa-vulkan-drivers added, waffle devroot lock regenerated. Wi‑Fi under
+  NetworkManager: new `fap-wifi <ssid>` (base; password asked for or from
+  `FAP_WIFI_PSK`, never in argv or the image). Not booted yet.
 - **Update pipeline (branch `update-bot`, 2026-11-20):** `lock/` pins every
   image (netroot, installroot, billie2 tty + plasma-mobile) to exact NEVRAs
   and base-image digests; pinned builds are opt-in (`just PINNED=1 build`,
@@ -14,6 +38,16 @@ when you stop. Newest log entries at the top.
   Ollama model are untested. **Found:** the phosh desktop no longer resolves
   on Fedora 45 (`squeekboard` is gone; `stevia` replaces it). See
   docs/updates.md.
+- **OnePlus 12 (`oneplus-waffle`, branch `oneplus12-build`, 2026-11-20):**
+  first-light RAM-boot images built, **not booted yet**: uniLoader (board
+  oneplus-waffle) as the kernel of a stock-shaped header v4 boot.img,
+  carrying DaDDevil/linux `waffle-voice` (slim config + 
+  `kernels/qcom-sm8650/fap.config`), our trimmed DT wrapper and tiny-init.
+  Stock layout read from the unit's backup (devices/oneplus-waffle/README.md).
+  Build: `devices/oneplus-waffle/build-env/fap-waffle-build.sh all`;
+  outputs + proposed commands: `~/Develop/fap-build/waffle/README.md`.
+  Stock `boot_a` RAM-boots (verified); fastboot needs a USB 2.0 cable.
+  DaDDevil's board DTS has no licence: never commit it.
 - **Phone tooling (branch `tooling`, 2026-11-20):** `tools/fap-dev` wraps the
   RAM-boot loop (fresh ABL session, `fastboot boot`, gadget/SSH wait, phone
   discovery incl. IPv6 link-local, serve, clock, audit, getvar summary);
@@ -47,6 +81,12 @@ when you stop. Newest log entries at the top.
   verified), slot `a`, bootloader unlocked. Nothing of ours is installed.
 
 ## Next steps
+0. **Minimal layers (branch `minimal-layers`):** RAM-boot the OnePlus 12
+   GPU Plasma root (`fap-build/waffle/plasma-netroot-gpu/`, commands and
+   checks in its README: renderer FD750 in KWin, `fap-wifi`); rebuild + reinstall the N100 installroot from the explicit list
+   and check the session (keyboard, Discover, dialer, battery); first-boot
+   user for the bootc image (SDDM autologin names `phone`); `just build`
+   itself is still untested.
 1. **Fedora userspace boots over the USB network (done 2026-11-20):** next,
    use it to bring up hardware (PMIC DT nodes, display, touch, Wi‑Fi), then a
    microSD-based root, then the real bootc install.
@@ -108,6 +148,7 @@ when you stop. Newest log entries at the top.
 ## Experiment log
 | Date | Experiment | Result |
 |---|---|---|
+| 2026-11-20 | OnePlus 12: `fastboot boot` of the stock boot_a.img (backup) | LineageOS boots from RAM; product `pineapple`, max-download-size 768 MiB; **USB 3/Thunderbolt link crashes ABL fastboot (05c6:900e), USB 2.0 works** |
 | 2026-11-20 | **Waydroid (branch `waydroid`, untested)**: installroot layer `dnf5 install waydroid` + `fap-waydroid-init` + binderfs ordering drop-in + OTA channels; see docs/waydroid.md | `podman build` of the installroot OK; nothing run on the phone. Kernel needs nothing: Fedora 7.3.4 has Rust binder + binderfs built in (`CONFIG_ANDROID_BINDER_IPC_RUST=y`), PSI=y, memfd. Waydroid's vendor image has Mesa 26.0.8 freedreno (FD610); UBWC off via `debug.mesa.fd.mesa.debug=noubwc` |
 | 2026-11-20 | RAM-boot `uboot.img` (stock dtbo, from fastbootd) | `Unrecognized command boot`: fastbootd can't `boot` |
 | 2026-11-20 | RAM-boot `uboot.img` (stock dtbo, bootloader fastboot) | `Booting OKAY`, logo, ABL fastboot stays |

@@ -1,0 +1,256 @@
+From: Alaxendol <alecjakopin@mailbox.org>
+Subject: [PATCH] DEBUG: remoteproc stop-path markers (do not ship)
+
+pr_emerg + mdelay(40) markers around every step of rproc_stop,
+qcom_pas_stop, the GLINK subdev stop and each SSR BEFORE_SHUTDOWN
+notifier, so netconsole shows the last step before the SoC reset seen on
+any DSP stop (2026-11-21, ~/Develop/OnePlus12/log/2026-11-21-adsp-ssr-test.md).
+Only for RAM-boot test builds; not in the series that gets flashed.
+
+AI-assisted (Claude).
+
+Upstream-Status: Inappropriate [debug only]
+--- a/drivers/remoteproc/remoteproc_core.c
++++ b/drivers/remoteproc/remoteproc_core.c
+@@ -18,6 +18,7 @@
+ 
+ #include <asm/byteorder.h>
+ #include <linux/delay.h>
++#define FAPDBG(fmt, ...) do { pr_emerg("fapdbg: " fmt "\n", ##__VA_ARGS__); mdelay(40); } while (0)
+ #include <linux/device.h>
+ #include <linux/dma-mapping.h>
+ #include <linux/elf.h>
+@@ -1123,8 +1124,11 @@
+ 		return;
+ 
+ 	list_for_each_entry_reverse(subdev, &rproc->subdevs, node) {
+-		if (subdev->stop)
++		if (subdev->stop) {
++			FAPDBG("%s: subdev stop %ps", rproc->name, subdev->stop);
+ 			subdev->stop(subdev, crashed);
++			FAPDBG("%s: subdev stop %ps done", rproc->name, subdev->stop);
++		}
+ 	}
+ 
+ 	rproc->subdevs_started = false;
+@@ -1135,8 +1139,11 @@
+ 	struct rproc_subdev *subdev;
+ 
+ 	list_for_each_entry_reverse(subdev, &rproc->subdevs, node) {
+-		if (subdev->unprepare)
++		if (subdev->unprepare) {
++			FAPDBG("%s: subdev unprepare %ps", rproc->name, subdev->unprepare);
+ 			subdev->unprepare(subdev);
++			FAPDBG("%s: subdev unprepare %ps done", rproc->name, subdev->unprepare);
++		}
+ 	}
+ }
+ 
+@@ -1688,8 +1695,10 @@
+ 	if (!rproc->ops->stop)
+ 		return -EINVAL;
+ 
++	FAPDBG("%s: rproc_stop crashed=%d", rproc->name, crashed);
+ 	/* Stop any subdevices for the remote processor */
+ 	rproc_stop_subdevices(rproc, crashed);
++	FAPDBG("%s: subdevices stopped, reset rsc table", rproc->name);
+ 
+ 	/* the installed resource table is no longer accessible */
+ 	ret = rproc_reset_rsc_table_on_stop(rproc);
+@@ -1700,7 +1709,9 @@
+ 
+ 
+ 	/* power off the remote processor */
++	FAPDBG("%s: ops->stop %ps", rproc->name, rproc->ops->stop);
+ 	ret = rproc->ops->stop(rproc);
++	FAPDBG("%s: ops->stop returned %d", rproc->name, ret);
+ 	if (ret) {
+ 		dev_err(dev, "can't stop rproc: %d\n", ret);
+ 		return ret;
+--- a/drivers/remoteproc/qcom_q6v5_pas.c
++++ b/drivers/remoteproc/qcom_q6v5_pas.c
+@@ -10,6 +10,7 @@
+ 
+ #include <linux/clk.h>
+ #include <linux/delay.h>
++#define FAPDBG(fmt, ...) do { pr_emerg("fapdbg: " fmt "\n", ##__VA_ARGS__); mdelay(40); } while (0)
+ #include <linux/firmware.h>
+ #include <linux/interrupt.h>
+ #include <linux/iommu.h>
+@@ -436,11 +437,15 @@
+ 	int dtb_ret;
+ 	int ret;
+ 
++	FAPDBG("pas %d: request_stop", pas->pas_id);
+ 	ret = qcom_q6v5_request_stop(&pas->q6v5, pas->sysmon);
++	FAPDBG("pas %d: request_stop -> %d", pas->pas_id, ret);
+ 	if (ret == -ETIMEDOUT)
+ 		dev_err(pas->dev, "timed out on wait\n");
+ 
++	FAPDBG("pas %d: scm pas shutdown", pas->pas_id);
+ 	ret = qcom_pas_shutdown(pas->pas_id);
++	FAPDBG("pas %d: scm pas shutdown -> %d", pas->pas_id, ret);
+ 	if (ret && pas->decrypt_shutdown)
+ 		ret = qcom_pas_shutdown_poll_decrypt(pas);
+ 
+@@ -458,9 +463,11 @@
+ 		qcom_pas_unmap_carveout(rproc, pas->dtb_mem_phys, pas->dtb_mem_size);
+ 	}
+ 
+-	qcom_pas_unmap_carveout(rproc, pas->mem_phys, pas->mem_size);
+-
++	FAPDBG("pas %d: unmap carveout", pas->pas_id);
++	qcom_pas_unmap_carveout(rproc, pas->mem_phys, pas->mem_size);
++	FAPDBG("pas %d: q6v5 unprepare", pas->pas_id);
+ 	handover = qcom_q6v5_unprepare(&pas->q6v5);
++	FAPDBG("pas %d: q6v5 unprepare -> handover %d", pas->pas_id, handover);
+ 	if (handover)
+ 		qcom_pas_handover(&pas->q6v5);
+ 
+--- a/drivers/remoteproc/qcom_common.c
++++ b/drivers/remoteproc/qcom_common.c
+@@ -8,6 +8,8 @@
+  */
+ 
+ #include <linux/firmware.h>
++#include <linux/delay.h>
++#define FAPDBG(fmt, ...) do { pr_emerg("fapdbg: " fmt "\n", ##__VA_ARGS__); mdelay(40); } while (0)
+ #include <linux/kernel.h>
+ #include <linux/module.h>
+ #include <linux/notifier.h>
+@@ -226,7 +228,9 @@
+ {
+ 	struct qcom_rproc_glink *glink = to_glink_subdev(subdev);
+ 
++	FAPDBG("glink %s: smem unregister", glink->ssr_name);
+ 	qcom_glink_smem_unregister(glink->edge);
++	FAPDBG("glink %s: smem unregister done", glink->ssr_name);
+ 	glink->edge = NULL;
+ }
+ 
+@@ -481,8 +485,18 @@
+ 		.crashed = crashed,
+ 	};
+ 
+-	srcu_notifier_call_chain(&ssr->info->notifier_list,
+-				 QCOM_SSR_BEFORE_SHUTDOWN, &data);
++	{
++		struct notifier_block *nb;
++		int idx = srcu_read_lock(&ssr->info->notifier_list.srcu);
++
++		for (nb = srcu_dereference(ssr->info->notifier_list.head, &ssr->info->notifier_list.srcu);
++		     nb; nb = srcu_dereference(nb->next, &ssr->info->notifier_list.srcu)) {
++			FAPDBG("ssr %s: BEFORE_SHUTDOWN -> %ps", data.name, nb->notifier_call);
++			nb->notifier_call(nb, QCOM_SSR_BEFORE_SHUTDOWN, &data);
++			FAPDBG("ssr %s: BEFORE_SHUTDOWN %ps done", data.name, nb->notifier_call);
++		}
++		srcu_read_unlock(&ssr->info->notifier_list.srcu, idx);
++	}
+ }
+ 
+ static void ssr_notify_unprepare(struct rproc_subdev *subdev)
+--- a/drivers/rpmsg/qcom_glink_smem.c
++++ b/drivers/rpmsg/qcom_glink_smem.c
+@@ -3,6 +3,9 @@
+  * Copyright (c) 2016, Linaro Ltd
+  */
+ 
++#include <linux/delay.h>
++#define FAPDBG(fmt, ...) do { pr_emerg("fapdbg: " fmt "\n", ##__VA_ARGS__); mdelay(40); } while (0)
++extern int fapdbg_dd_on;
+ #include <linux/io.h>
+ #include <linux/module.h>
+ #include <linux/of.h>
+@@ -371,12 +374,17 @@
+ {
+ 	struct qcom_glink *glink = smem->glink;
+ 
++	FAPDBG("smem: disable_irq");
++	WRITE_ONCE(fapdbg_dd_on, 1);
+ 	disable_irq(smem->irq);
+-
++	FAPDBG("smem: native_remove");
+ 	qcom_glink_native_remove(glink);
+-
++	FAPDBG("smem: mbox_free_channel");
+ 	mbox_free_channel(smem->mbox_chan);
++	FAPDBG("smem: device_unregister");
+ 	device_unregister(&smem->dev);
++	FAPDBG("smem: unregister done");
++	WRITE_ONCE(fapdbg_dd_on, 0);
+ }
+ EXPORT_SYMBOL_GPL(qcom_glink_smem_unregister);
+ 
+--- a/drivers/rpmsg/qcom_glink_native.c
++++ b/drivers/rpmsg/qcom_glink_native.c
+@@ -3,6 +3,8 @@
+  * Copyright (c) 2016-2017, Linaro Ltd
+  */
+ 
++#include <linux/delay.h>
++#define FAPDBG(fmt, ...) do { pr_emerg("fapdbg: " fmt "\n", ##__VA_ARGS__); mdelay(40); } while (0)
+ #include <linux/idr.h>
+ #include <linux/interrupt.h>
+ #include <linux/io.h>
+@@ -1961,7 +1963,10 @@
+ 
+ static int qcom_glink_remove_device(struct device *dev, void *data)
+ {
++	FAPDBG("native: unregister child %s (driver %s)", dev_name(dev),
++	       dev->driver ? dev->driver->name : "-");
+ 	device_unregister(dev);
++	FAPDBG("native: child %s gone", dev_name(dev));
+ 
+ 	return 0;
+ }
+@@ -1987,7 +1992,9 @@
+ 		qcom_glink_intent_req_abort(channel);
+ 	spin_unlock_irqrestore(&glink->idr_lock, flags);
+ 
++	FAPDBG("native: remove children");
+ 	ret = device_for_each_child(glink->dev, NULL, qcom_glink_remove_device);
++	FAPDBG("native: children removed, release channels");
+ 	if (ret)
+ 		dev_warn(glink->dev, "Can't remove GLINK devices: %d\n", ret);
+ 
+--- a/drivers/base/dd.c
++++ b/drivers/base/dd.c
+@@ -19,6 +19,7 @@
+ #include <linux/debugfs.h>
+ #include <linux/device.h>
+ #include <linux/delay.h>
++#define FAPDBG_DD(fmt, ...) do { pr_emerg("fapdbg: " fmt "\n", ##__VA_ARGS__); mdelay(40); } while (0)
+ #include <linux/dma-map-ops.h>
+ #include <linux/init.h>
+ #include <linux/module.h>
+@@ -1323,12 +1324,18 @@
+  * __device_release_driver() must be called with @dev lock held.
+  * When called for a USB interface, @dev->parent lock must be held as well.
+  */
++int fapdbg_dd_on;
++EXPORT_SYMBOL_GPL(fapdbg_dd_on);
++
+ static void __device_release_driver(struct device *dev, struct device *parent)
+ {
+ 	struct device_driver *drv;
+ 
+ 	drv = dev->driver;
+ 	if (drv) {
++		/* only log while a DSP teardown is in progress (fapdbg_dd_on) */
++		if (READ_ONCE(fapdbg_dd_on))
++			FAPDBG_DD("release %s (%s): pm get", dev_name(dev), drv->name);
+ 		pm_runtime_get_sync(dev);
+ 
+ 		while (device_links_busy(dev)) {
+@@ -1354,7 +1361,11 @@
+ 
+ 		pm_runtime_put_sync(dev);
+ 
++		if (READ_ONCE(fapdbg_dd_on))
++			FAPDBG_DD("release %s (%s): remove", dev_name(dev), drv->name);
+ 		device_remove(dev);
++		if (READ_ONCE(fapdbg_dd_on))
++			FAPDBG_DD("release %s (%s): removed", dev_name(dev), drv->name);
+ 
+ 		if (dev->bus && dev->bus->dma_cleanup)
+ 			dev->bus->dma_cleanup(dev);

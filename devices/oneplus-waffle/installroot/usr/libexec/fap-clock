@@ -1,0 +1,18 @@
+#!/bin/sh
+# SPDX-License-Identifier: AGPL-3.0-or-later
+# The PMIC RTC reads 1970 for us (Android keeps the real offset in PMIC
+# memory), so every boot starts a month or more behind until chrony syncs, and
+# TLS fails meanwhile. `fap-clock save` stamps the time into a file (timer +
+# shutdown); `fap-clock restore` (early boot) moves the clock forward to it.
+f=/var/lib/fap-clock/stamp
+case ${1:-} in
+    save)
+        mkdir -p "${f%/*}" && date +%s > "$f.tmp" && mv "$f.tmp" "$f" ;;
+    restore)
+        [ -r "$f" ] || exit 0
+        t=$(cat "$f"); now=$(date +%s)
+        if [ "$t" -gt "$now" ] 2>/dev/null; then
+            date -s "@$t" >/dev/null && echo "fap-clock: clock set forward to $(date)" > /dev/kmsg
+        fi ;;
+    *) echo "usage: fap-clock save|restore" >&2; exit 2 ;;
+esac

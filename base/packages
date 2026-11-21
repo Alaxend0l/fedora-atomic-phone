@@ -1,0 +1,53 @@
+# SPDX-License-Identifier: AGPL-3.0-or-later
+# Base layer: every phone, every UI (docs/decisions/0003). Installed without
+# weak deps by tools/image/install-packages. On the bootc image most of these
+# are already in base-atomic; on a dev root (Fedora container + netroot) they
+# are not, so the list is what the base really needs, not what's missing.
+
+# Debug access over the USB cable: sshd on the gadget network, and dnsmasq
+# handing the host its address (fap-usb-dhcp.service; NetworkManager leaves
+# gadget interfaces alone).
+openssh-server
+dnsmasq
+
+# Networking: Wi-Fi and mobile data through NetworkManager (every UI's
+# network applet talks to it), ModemManager for the modem (calls, SMS, data).
+NetworkManager
+NetworkManager-wifi
+NetworkManager-wwan
+ModemManager
+
+# Audio: PipeWire with WirePlumber; pipewire-pulseaudio is the PulseAudio
+# server most apps and plasma-pa/phosh speak (without it dnf could pick
+# the real pulseaudio to satisfy "pulseaudio-daemon").
+pipewire
+wireplumber
+pipewire-pulseaudio
+# pw-dump, pw-cli, pw-top, pw-cat: needed to debug audio on the phone.
+pipewire-utils
+
+# Bluetooth daemon (the UIs only ship applets).
+bluez
+
+# Battery, charging and power-supply state over D-Bus (both shells' battery
+# indicator, powerdevil); nothing hard-requires it.
+upower
+
+# pam_systemd: a logind session for the user, which KWin/phoc need for DRM
+# and input access (porting-cookbook: Plasma Mobile on a minimal root).
+systemd-pam
+
+# Many phones have no RTC battery or an unset RTC: sync the clock.
+chrony
+
+# An English UTF-8 locale (the container base only has C.UTF-8).
+glibc-langpack-en
+
+sudo
+e2fsprogs
+
+# Hardware debugging.
+usbutils
+pciutils
+i2c-tools
+dtc

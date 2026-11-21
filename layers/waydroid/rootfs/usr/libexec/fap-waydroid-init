@@ -1,0 +1,122 @@
+#!/bin/bash
+# SPDX-License-Identifier: AGPL-3.0-or-later
+# Set up Waydroid on the phone: download the LineageOS images (or use ones
+# copied to /etc/waydroid-extra/images), then write our Android properties
+# (density, the device's Mesa options, optional software rendering). Run as root, with
+# network (Wi-Fi) up. See docs/waydroid.md in the fedora-atomic-phone repo.
+#
+#   fap-waydroid-init [--gapps] [--force] [--software|--hardware] [--density N]
+#
+#   --gapps      GAPPS system image (Play Store, ~1.3 GB zip) instead of VANILLA (~0.9 GB)
+#   --force      re-run `waydroid init` although Waydroid is already initialized
+#                (re-downloads; keeps the Android user data in ~/.local/share/waydroid)
+#   --software   SwiftShader instead of the GPU (fallback if the GPU path misrenders)
+#   --hardware   back to the GPU (Mesa freedreno via minigbm), the default
+#   --density N  Android screen density (default: the device's, else 320)
+#
+# Device defaults come from /usr/lib/fap/waydroid.conf (shell KEY=value,
+# shipped by devices/<id>/rootfs/): WAYDROID_DENSITY, WAYDROID_MESA_DEBUG
+# (FD_MESA_DEBUG/TU_DEBUG options for Android's Mesa, e.g. noubwc).
+#
+# Only the properties step runs if Waydroid is already initialized and
+# --force isn't given, so this is also the way to switch --software/--hardware.
+set -euo pipefail
+
+WAYDROID_DENSITY=320 WAYDROID_MESA_DEBUG=
+# shellcheck source=/dev/null
+[ -r /usr/lib/fap/waydroid.conf ] && . /usr/lib/fap/waydroid.conf
+system_type=VANILLA force=0 render=hardware density=$WAYDROID_DENSITY
+while [ $# -gt 0 ]; do
+    case $1 in
+        --gapps) system_type=GAPPS ;;
+        --force) force=1 ;;
+        --software) render=software ;;
+        --hardware) render=hardware ;;
+        --density) density=${2:?--density needs a value}; shift ;;
+        -h|--help) sed -n '2,21p' "$0"; exit 0 ;;
+        *) echo "unknown option: $1" >&2; exit 2 ;;
+    esac
+    shift
+done
+die() { echo "fap-waydroid-init: $*" >&2; exit 1; }
+[ "$(id -u)" = 0 ] || die "run as root (sudo $0 $*)"
+
+# 1. Kernel: Fedora's kernel has the Rust binder built in; it only offers
+#    binderfs (filesystem "binder"), no static /dev/binder.
+#    The container service mounts it (dev-binderfs.mount, our drop-in) and
+#    links /dev/{binder,hwbinder,vndbinder} to it (Fedora's ExecStartPre).
+#    Those links must exist before `waydroid init`: init probes /dev/binder
+#    and otherwise allocates "anbox-*" nodes and saves those names in
+#    waydroid.cfg (tools/helpers/drivers.py probeBinderDriver), which no
+#    longer exist after a reboot.
+grep -qw binder /proc/filesystems || die "kernel has no binderfs (no 'binder' in /proc/filesystems)"
+systemctl start waydroid-container.service
+for n in binder hwbinder vndbinder; do
+    [ -e /dev/$n ] || die "/dev/$n missing (should link to /dev/binderfs/$n)"
+done
+echo "binderfs: $(ls /dev/binderfs | tr '\n' ' ')"
+
+# 2. GPU node Waydroid will hand to Android (first /dev/dri/renderD*; override
+#    with drm_device= in the [waydroid] section of /var/lib/waydroid/waydroid.cfg).
+for r in /dev/dri/renderD*; do
+    [ -e "$r" ] && echo "render node: $r ($(basename "$(readlink -f /sys/class/drm/"$(basename "$r")"/device/driver)"))"
+done
+
+# 3. Images.
+cfg=/var/lib/waydroid/waydroid.cfg
+if [ ! -f "$cfg" ] || [ "$force" = 1 ]; then
+    if [ -f /etc/waydroid-extra/images/system.img ] && [ -f /etc/waydroid-extra/images/vendor.img ]; then
+        echo "using pre-copied images in /etc/waydroid-extra/images (no download)"
+    else
+        # The RTC is unset after a cold boot until chrony syncs; TLS needs the date.
+        [ "$(date +%Y)" -ge 2026 ] || die "clock not set ($(date)); wait for chronyd or set it with date -s"
+        free_mb=$(df -Pm /var/lib | awk 'NR==2 {print $4}')
+        [ "$free_mb" -ge 6000 ] || die "only ${free_mb} MB free under /var/lib; need ~6 GB (zip + images)"
+        echo "downloading $system_type system + MAINLINE vendor images (about 1-1.5 GB)"
+    fi
+    args=(init -s "$system_type")
+    [ "$force" = 1 ] && args+=(-f)
+    waydroid "${args[@]}"
+fi
+[ -f "$cfg" ] || die "waydroid init didn't create $cfg"
+
+# 4. Properties, in waydroid.cfg [properties]; `waydroid upgrade -o` writes
+#    them into waydroid_base.prop (tools/helpers/lxc.py make_base_props).
+#    debug.mesa.*: Mesa on Android reads options from properties
+#    (src/util/os_misc.c os_get_android_option: FD_MESA_DEBUG ->
+#    debug.mesa.fd.mesa.debug); TU_DEBUG is the Vulkan driver's. The value
+#    is the device's (WAYDROID_MESA_DEBUG; N100: noubwc, as FD_MESA_DEBUG on
+#    the host).
+python3 - "$cfg" "$render" "$density" "$WAYDROID_MESA_DEBUG" <<'EOF'
+import configparser, sys
+path, render, density, mesa_debug = sys.argv[1:]
+cfg = configparser.ConfigParser()
+cfg.read(path)
+if "properties" not in cfg:
+    cfg["properties"] = {}
+p = cfg["properties"]
+if mesa_debug:
+    p["debug.mesa.fd.mesa.debug"] = mesa_debug
+    p["debug.mesa.tu.debug"] = mesa_debug
+else:
+    p.pop("debug.mesa.fd.mesa.debug", None)
+    p.pop("debug.mesa.tu.debug", None)
+p["ro.sf.lcd_density"] = density
+if render == "software":
+    p["ro.hardware.gralloc"] = "default"
+    p["ro.hardware.egl"] = "swiftshader"
+else:
+    p.pop("ro.hardware.gralloc", None)
+    p.pop("ro.hardware.egl", None)
+with open(path, "w") as f:
+    cfg.write(f)
+print("[properties]:", dict(p))
+EOF
+waydroid upgrade -o
+echo "== waydroid_base.prop (graphics)"
+grep -E 'gralloc|egl|vulkan|mesa|density|memfd' /var/lib/waydroid/waydroid_base.prop || true
+
+echo
+echo "Done. As the desktop user (phone), in the Plasma session: open 'Waydroid'"
+echo "from the app drawer, or from a terminal: waydroid session start & then"
+echo "waydroid show-full-ui. Logs: /var/lib/waydroid/waydroid.log, sudo waydroid logcat."

@@ -13,10 +13,18 @@ phone, and Mesa freedreno inside the container for the GPU.
 ## What's on the branch
 | File | What |
 |---|---|
-| `boot/android-bootimg/installroot/Containerfile` | own layer: `dnf5 install waydroid` (pulls `lxc`, `python3-gbinder`, `libgbinder`, `nftables`, `dnsmasq`) |
-| `installroot/rootfs/usr/libexec/fap-waydroid-init` | on-phone setup: checks binderfs, `waydroid init`, writes our Android properties, `waydroid upgrade -o` |
-| `installroot/rootfs/usr/lib/systemd/system/waydroid-container.service.d/50-fap-binderfs.conf` | orders the container service after `dev-binderfs.mount` |
-| `installroot/rootfs/usr/share/waydroid-extra/channels.cfg` | official OTA URLs (Fedora ships them empty) |
+Waydroid is an **opt-in layer** (`layers/waydroid/`, decision 0003): never in
+the default image. `just LAYERS=waydroid build`, or
+`make-devroot.sh <device> <desktop> <out> waydroid`; the N100's
+`installroot/make-installroot.sh` includes it.
+
+| File | What |
+|---|---|
+| `layers/waydroid/packages` | `waydroid` (pulls `lxc`, `python3-gbinder`, `libgbinder`, `nftables`, `dnsmasq`) |
+| `layers/waydroid/rootfs/usr/libexec/fap-waydroid-init` | on-phone setup: checks binderfs, `waydroid init`, writes our Android properties (density and Mesa options from the device's `/usr/lib/fap/waydroid.conf`), `waydroid upgrade -o` |
+| `layers/waydroid/rootfs/usr/lib/systemd/system/waydroid-container.service.d/50-fap-binderfs.conf` | orders the container service after `dev-binderfs.mount` |
+| `layers/waydroid/rootfs/usr/share/waydroid-extra/channels.cfg` | official OTA URLs (Fedora ships them empty) |
+| `devices/oneplus-billie2/rootfs/usr/lib/fap/waydroid.conf` | N100 defaults: density 320, `noubwc` |
 
 `waydroid-container.service` is enabled by the package's `%post` (Fedora
 preset), so it starts at boot: it mounts binderfs, links
@@ -181,12 +189,14 @@ Nothing below touches a partition other than the root filesystem's files.
 Needs Wi‑Fi up on the phone and the USB link (`ssh root@172.16.42.1`).
 From this repo's checkout on the Mac:
 ```sh
-# 1. our three files
-tar -C boot/android-bootimg/installroot/rootfs -cf - \
+# 1. our files (the layer's, plus the device's defaults)
+tar -C layers/waydroid/rootfs -cf - \
     usr/libexec/fap-waydroid-init \
     usr/lib/systemd/system/waydroid-container.service.d \
     usr/share/waydroid-extra \
   | ssh root@172.16.42.1 'tar -C / -xvf - && systemctl daemon-reload'
+tar -C devices/oneplus-billie2/rootfs -cf - usr/lib/fap/waydroid.conf \
+  | ssh root@172.16.42.1 'tar -C / -xvf -'
 # 2. the package (clock must be set: `date`; chronyd does it once online)
 ssh root@172.16.42.1 'dnf5 -y install --setopt=install_weak_deps=False waydroid'
 # 3. images + properties (downloads ~1.06 GB; --gapps for Play Store)

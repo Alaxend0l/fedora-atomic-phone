@@ -1,0 +1,15 @@
+# SPDX-License-Identifier: AGPL-3.0-or-later
+# TFTP over QRTR: the modem fetches modem_pr/ (MCFG configs etc.) from next
+# to its firmware (/usr/lib/firmware/qcom/sm8650/oneplus/waffle).
+[Unit]
+Description=QRTR TFTP server for the modem (OnePlus 12 netroot)
+ConditionPathExists=/usr/lib/fap-efs/modem_fs1
+After=systemd-modules-load.service
+Before=fap-rmtfs.service
+
+[Service]
+ExecStart=/usr/bin/stdbuf -oL -eL /usr/bin/tqftpserv
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target

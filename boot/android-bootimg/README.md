@@ -83,10 +83,29 @@ Or with the helper (tools/README.md): `tools/fap-dev serve out/netroot` in one
 terminal, `tools/fap-dev ramboot out/ramboot/ramboot.img` in another, then
 `tools/fap-dev ssh`.
 
-tiny-init downloads the tarball into a 2.5 GB tmpfs, moves /dev /proc /sys
+tiny-init downloads the tarball into a tmpfs (2560m by default; kernel
+argument `fap.netroot_size=` for more, e.g. `6g`), moves /dev /proc /sys
 /run across and `switch_root`s to systemd. The USB gadget (serial + network)
 survives the switch. The rootfs (`netroot/Containerfile`) carries the booted
 kernel's exact modules, sshd (your public key, added at build time) and
-autologin root on the USB serial port and the screen. Development only.
+autologin root on the USB serial port and the screen. `NETROOT_DEVICE=<id>`
+adds the device's RAM-boot files (`devices/<id>/netroot/`, e.g. its
+`fap-modem-ram`). Development only.
+
+### Dev roots with a desktop (`make-devroot.sh`)
+The netroot plus the same layers the bootc image is made of (base, desktop,
+opt-in layers, device; docs/architecture.md), as one RAM-boot tarball:
+```sh
+boot/android-bootimg/make-devroot.sh oneplus-billie2 plasma-mobile out/pm      # netroot.tar.gz
+boot/android-bootimg/make-devroot.sh oneplus-billie2 plasma-mobile out/pm waydroid
+just DEVICE=oneplus-billie2 DESKTOP=plasma-mobile devroot out/pm
+```
+It passes `NETROOT_EXTRA_MODULES`/`NETROOT_EXTRA_FIRMWARE` to make-netroot.sh
+and writes `SIZE` (unpacked KiB, package count): a Plasma Mobile root is
+~2.1 GB plus kernel modules and firmware, more than the default tmpfs, so
+boot it with `fap.netroot_size=` (the OnePlus 12 netroot DT asks for 6g).
+User `phone` (password 147147, dev only) is logged in by SDDM.
+`--installroot` writes `installroot.tar.zst` for an ext4 root instead
+(`installroot/make-installroot.sh` = the N100's, with Waydroid).
 
 Status of the on-device sync tool and make-bootimg.sh: untested.

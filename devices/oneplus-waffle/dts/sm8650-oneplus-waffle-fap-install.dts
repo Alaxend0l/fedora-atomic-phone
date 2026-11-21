@@ -1,0 +1,32 @@
+// SPDX-License-Identifier: (GPL-2.0+ OR BSD-3-Clause)
+/*
+ * OnePlus 12 dual-boot install (INSTALL.md): the image that lives on boot_b.
+ * tiny-init shows a 3 s volume-key menu (fap.menu=3: Fedora / LineageOS),
+ * then maps the logical partition fap_root from super with dm-linear
+ * (fap.root=lp:fap_root) and switches to its systemd. No netroot.
+ * fap.slot=b tells fap-switch-os / fap-boot-ok / the menu that this image
+ * is the one installed on slot b (uniLoader drops ABL's command line, so
+ * androidboot.slot_suffix is set here too, for qbootctl's current-slot
+ * logic). RAM-booting this file from slot a is only valid to see the menu
+ * and the "root not usable" branch before fap_root exists (INSTALL-RUNBOOK).
+ */
+/dts-v1/;
+
+#include "sm8650-oneplus-waffle-fap.dtsi"
+#include "sm8650-oneplus-waffle-fap-power.dtsi"
+/* Branch oneplus12-speakers: speaker test (RAM boot). */
+#include "sm8650-oneplus-waffle-fap-speakers.dtsi"
+/* Branch oneplus12-camera: front camera (stage 1). */
+#include "sm8650-oneplus-waffle-fap-cameras.dtsi"
+
+/*
+ * Boot flags (2026-11-21, suspend tests): no clk/pd/regulator_ignore_unused
+ * (no regressions without them); fw_devlink.sync_state=timeout with a 30 s
+ * deferred-probe timeout forces sync_state on providers whose consumers
+ * never bind (GPU GMU), so their boot-time votes drop and DDR can sleep.
+ */
+/ {
+	chosen {
+		bootargs = "console=tty0 loglevel=4 fbcon=font:TER16x32 nokaslr androidboot.slot_suffix=_b fap.slot=b fap.root=lp:fap_root fap.menu=3 panic=5 oops=panic fw_devlink.sync_state=timeout deferred_probe_timeout=30";
+	};
+};

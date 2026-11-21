@@ -99,9 +99,27 @@ dnf5 -y install x; dnf5 -y install y
                     self.assertEqual(s["skipped"], [], s["where"])
 
     def test_bootc_sources_follow_device_env(self):
-        srcs = lock.target_sources({"device": "oneplus-billie2", "desktop": "tty"})
-        self.assertEqual(srcs[0], "base/build")
+        srcs = lock.target_sources({"device": "oneplus-billie2", "desktop": "plasma-mobile",
+                                    "layers": ["waydroid"]})
+        self.assertEqual(srcs[:2], ["base/packages", "base/build"])
+        self.assertIn("desktops/plasma-mobile/packages.image", srcs)
+        self.assertLess(srcs.index("layers/waydroid/packages"),
+                        srcs.index("devices/oneplus-billie2/packages"))
         self.assertEqual(srcs[-1], "devices/oneplus-billie2/build")
+        # BOOT_METHOD comes from device.env (uboot-android has no build script)
+        self.assertIn("boot/android-bootimg/build",
+                      lock.target_sources({"device": "oneplus-waffle", "desktop": "tty"}))
+
+    def test_devroot_sources(self):
+        srcs = lock.target_sources({"kind": "devroot", "device": "oneplus-billie2",
+                                    "desktop": "plasma-mobile", "layers": ["waydroid"]})
+        self.assertEqual(srcs, [lock.NETROOT, "base/packages", "desktops/plasma-mobile/packages",
+                                "layers/waydroid/packages", "devices/oneplus-billie2/packages"])
+
+    def test_packages_file(self):
+        step = lock.packages_step("# header\nplasma-mobile  # the shell\n\na b\n", "x/packages")
+        self.assertEqual((step["action"], step["specs"], step["weak_deps"]),
+                         ("install", ["plasma-mobile", "a", "b"], False))
 
 
 def make_lock(target, base, layer, removed=(), digest="sha256:a", kernel=None):

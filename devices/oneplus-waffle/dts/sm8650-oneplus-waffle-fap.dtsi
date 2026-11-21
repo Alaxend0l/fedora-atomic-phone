@@ -1,0 +1,230 @@
+// SPDX-License-Identifier: (GPL-2.0+ OR BSD-3-Clause)
+/*
+ * OnePlus 12 (waffle): first-light trim of the board DT, for RAM boots via
+ * uniLoader (devices/oneplus-waffle/README.md). Our own file. It includes
+ * the board DT from DaDDevil/linux waffle-voice (pinned in
+ * build-env/fap-waffle-build.sh), which is read from that kernel tree at
+ * build time and never copied into this repository: it carries no licence
+ * line yet (research/mainline-status.md), so we must not redistribute it.
+ *
+ * What stays on (v7): simplefb until msm, MDSS/DSI panel, GPU (Adreno 750),
+ * video codec (Iris), UFS, touch, ADSP/CDSP/MPSS/IPA, pmic-glink, PCIe0
+ * Wi-Fi, Bluetooth (UART14), haptics (stock drive voltage), reboot-mode,
+ * the WCD9395 audio path (sound card, RX/TX SoundWire, LPASS macros), USB
+ * in device mode (gadget), power/volume keys, ramoops. Off: DP, the speaker
+ * amplifiers and their I2S link, cameras, IR, flash LED, the
+ * charger/redriver/USB-C-audio-switch I2C buses.
+ */
+
+#include "sm8650-oneplus-waffle.dts"
+
+/ {
+	chosen {
+		#address-cells = <2>;
+		#size-cells = <2>;
+		ranges;
+
+		/*
+		 * The splash buffer ABL/UEFI leaves on the panel: 1440x3168
+		 * ARGB8888 at 0xd5100000. Sources: uniLoader board-waffle.c
+		 * (DaDDevil, simplefb at the same address) and ios-waffle's
+		 * measured UEFI GOP reservation 0xd5100000-0xd7c00000 (dossier
+		 * boot-and-flashing.md section 1). Stride 1440 * 4.
+		 */
+		framebuffer@d5100000 {
+			compatible = "simple-framebuffer";
+			reg = <0x0 0xd5100000 0x0 (1440 * 3168 * 4)>;
+			memory-region = <&fap_splash>;
+			width = <1440>;
+			height = <3168>;
+			stride = <(1440 * 4)>;
+			format = "a8r8g8b8";
+		};
+	};
+
+	reserved-memory {
+		/* Keep the kernel out of the whole UEFI display reservation. */
+		fap_splash: splash@d5100000 {
+			reg = <0x0 0xd5100000 0x0 0x02b00000>;
+			no-map;
+		};
+	};
+};
+
+/*
+ * v6 audio: the board DT's sound card (qcom,sm8650-sndcard, AudioReach on
+ * the ADSP) with its two WCD9395 links: RX_CODEC_DMA_RX_0 -> RX macro ->
+ * SoundWire RX (swr1) -> WCD9395 HPH/EAR, and WCD9395 ADCs (AMIC1-5) ->
+ * SoundWire TX (swr2) -> TX macro -> TX_CODEC_DMA_TX_3. Those are the same
+ * back ends as SM8650-QRD, so the generic AudioReach topology from Fedora's
+ * qcom-firmware serves them (netroot installs it as
+ * qcom/sm8650/OnePlus 12-tplg.bin.xz: card driver "sm8650" + the board DT's
+ * model "OnePlus 12"; the same names select the UCM config).
+ *
+ * Not the speakers: the board DT's third link sends SECONDARY_MI2S_RX to a
+ * max98357a placeholder, but the real amplifiers are two NXP TFA9874 on
+ * i2c_hub_7, which have no driver here (tfa989x knows 9890/9895/9897 only)
+ * and need OnePlus's tuning container from the vendor partition (not in our
+ * backup). Smart amps with a boost converter must not be run on guessed
+ * settings, so the link, its pins and the placeholder go, and i2c_hub_7
+ * stays off (below): the amplifiers are never touched.
+ */
+&{/sound} {
+	/delete-property/ pinctrl-0;
+	/delete-property/ pinctrl-names;
+	/delete-node/ sec-mi2s-playback-dai-link;
+};
+
+/delete-node/ &max98357a;
+
+/*
+ * USB: device mode, high speed only. The board DT runs dwc3 as OTG with
+ * role switching from pmic-glink (ADSP), which first light doesn't start;
+ * peripheral mode needs no role source. Only the eUSB2 PHY (+ PM8550B
+ * repeater, both built in) is used: the QMP USB3/DP combo PHY stays
+ * out of dwc3's phys (no USB3 at first light); it is built in only as the
+ * DP clock provider dispcc needs (build-env/waffle.config). USB 2.0 is
+ * plenty for a shell and the netroot.
+ */
+&usb_1 {
+	dr_mode = "peripheral";
+	maximum-speed = "high-speed";
+	phys = <&usb_1_hsphy>;
+	phy-names = "usb2-phy";
+	/*
+	 * Without a USB3 PHY the core still expects the pipe clock: under ABL's
+	 * fastboot (RAM boot) it happens to run, on a normal boot from flash it
+	 * doesn't and "DWC3 controller soft reset failed" (-ETIMEDOUT),
+	 * 2026-11-20. Clock the pipe from UTMI instead, as on the N100
+	 * (devices/oneplus-billie2/hidden-dependencies.md).
+	 */
+	qcom,select-utmi-as-pipe-clk;
+	/delete-property/ usb-role-switch;
+};
+
+
+/*
+ * Display: MDSS + DSI0 + the BOE AA545 panel as the board DT has them (built
+ * into the kernel). The panel is in command mode, so the splash buffer is
+ * only a bridge (simpledrm) until msm takes over. DP is off: it needs the
+ * QMP combo PHY and pmic-glink altmode, neither of which runs at first light,
+ * and a DP controller that never binds would hold back the whole msm DRM
+ * device. The GPU is a component of the same device (v7, below): if it
+ * failed to bind, the display would stay on simpledrm.
+ */
+&mdss_dp0 { status = "disabled"; };
+
+/*
+ * v7 GPU: Adreno 750 (chip id 0x43051401, msm "gen70900"). The board DT
+ * enables &gpu; GMU, gpucc and the Adreno SMMU are on in sm8650.dtsi.
+ * Firmware, loaded at the first open of the DRM device: SQE and GMU from
+ * Fedora's qcom-firmware (qcom/gen70900_sqe.fw, qcom/gmu_gen70900.bin), the
+ * zap shader from this unit's /vendor/firmware (OnePlus-signed; the
+ * qcom/sm8650/gen70900_zap.mbn in linux-firmware is Qualcomm's QRD one,
+ * which this phone's TrustZone rejects). The zap file is a squashed .mbn
+ * (all segments in one ELF), as the vendor ships it.
+ */
+&gpu_zap_shader {
+	firmware-name = "qcom/sm8650/oneplus/waffle/gen70900_zap.mbn";
+};
+
+/*
+ * v7 video: Iris (vpu33). OnePlus-signed firmware from this unit's
+ * /vendor/firmware/vpu33_4v.mbn (Fedora's qcom/vpu/vpu33_p4.mbn is
+ * Qualcomm-signed); the board DT already names it, repeated here so the
+ * firmware path is ours.
+ */
+&iris {
+	firmware-name = "qcom/sm8650/oneplus/waffle/vpu33_4v.mbn";
+};
+
+/*
+ * v7 haptics: PM8550B LRA driver (qcom,spmi-haptics, DaDDevil). The board
+ * DT drives it at 2.4 V; OnePlus's own DT (dtbo entry 15, qcom,hv-haptics)
+ * uses qcom,vmax-mv = 1720 and qcom,lra-period-us = 7692. We use the stock
+ * vmax (lower), and the board DT's 7690 us period (same LRA, 5 us steps).
+ */
+&pm8550b_haptics {
+	qcom,vmax-microvolt = <1720000>;
+};
+
+/*
+ * Cameras and the speaker amplifiers' I2C bus (TFA9874 x2, see the audio
+ * comment above). swr1/swr2 (WCD9395 RX/TX) are on as of v6, Bluetooth
+ * (UART14, qcom,wcn7850-bt on the WCN7850 PMU) as of v7, as the board DT
+ * has them. BT firmware: qca/hmtbtfw20.tlv + qca/hmtnv20.<board id> from
+ * this unit's bluetooth_a partition, installed by the netroot in
+ * /usr/lib/firmware/updates/qca (ahead of Fedora's generic copies).
+ */
+&camss { status = "disabled"; };
+&cci0 { status = "disabled"; };
+&cci1 { status = "disabled"; };
+&i2c_hub_7 { status = "disabled"; };
+
+/*
+ * IR (SPI11), the I2C buses with charger/redriver/sensor parts. i2c3 also
+ * holds the WCD9395 USB-C audio switch (wcd939x-usbss): analog headsets on
+ * the USB-C port need it plus pmic-glink altmode, and the board DT doesn't
+ * link the codec to it (no MBHC plug events). Later: the USB port is our
+ * only link to the phone during RAM boots.
+ */
+&spi11 { status = "disabled"; };
+&i2c3 { status = "disabled"; };
+&i2c6 { status = "disabled"; };
+&i2c9 { status = "disabled"; };
+
+/* Flash LED: PMIC output, nothing to drive yet. */
+&pm8550_flash { status = "disabled"; };
+
+/*
+ * v5: DSPs, pmic-glink (battery via ADSP), Wi-Fi (PCIe0 + WCN7850 PMU) and
+ * touch (SPI4) as the board DT has them. Firmware comes from this unit's own
+ * modem partition and is only installed into the (local, never published)
+ * netroot tarball, as the partition ships it: .mdt + .bNN, so the modem and
+ * IPA names point at the .mdt files (the board DT says .mbn, i.e. squashed).
+ * CDSP isn't enabled in the board DT; same firmware directory.
+ */
+&remoteproc_mpss {
+	firmware-name = "qcom/sm8650/oneplus/waffle/modem.mdt",
+			"qcom/sm8650/oneplus/waffle/modem_dtb.mdt";
+};
+
+&ipa {
+	firmware-name = "qcom/sm8650/oneplus/waffle/ipa_fws.mdt";
+};
+
+&remoteproc_cdsp {
+	firmware-name = "qcom/sm8650/oneplus/waffle/cdsp.mdt",
+			"qcom/sm8650/oneplus/waffle/cdsp_dtb.mdt";
+	status = "okay";
+};
+
+/*
+ * Crash logs: the board DT's ramoops (0x85000000, 2.25 MiB) gives everything
+ * to pmsg/console and nothing to oops/panic dumps (no record-size), so
+ * resets left /sys/fs/pstore empty. Split it: 3 x 256 KiB dump records,
+ * 512 KiB console, 1 MiB pmsg, ECC on. (RESETS-GPS-RESEARCH.md, 2026-11-21.)
+ * Note: booting LineageOS reuses this RAM, so read pstore from our kernel.
+ */
+&{/reserved-memory/ramoops@85000000} {
+	record-size = <0x40000>;
+	console-size = <0x80000>;
+	pmsg-size = <0x100000>;
+	ecc-size = <16>;
+};
+
+/*
+ * Qualcomm crypto engine (QCE) off: our kernel has no driver for it
+ * (CONFIG_CRYPTO_DEV_QCOM_QCE unset; the CPUs' ARMv8 crypto extensions are
+ * faster anyway), and its never-bound device link kept two interconnect
+ * providers from ever running sync_state, which blocks SoC sleep
+ * (2026-11-21, OnePlus12/log/2026-11-21-suspend-tests.md). The UFS inline
+ * crypto engine (ice) is a different block and stays on.
+ */
+&crypto {
+	status = "disabled";
+};
+
+&cryptobam {
+	status = "disabled";
+};

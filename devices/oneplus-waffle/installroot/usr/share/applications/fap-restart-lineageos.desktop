@@ -1,0 +1,9 @@
+# SPDX-License-Identifier: AGPL-3.0-or-later
+[Desktop Entry]
+Type=Application
+Name=Restart into LineageOS
+Comment=Set boot slot a active and restart into LineageOS
+Icon=system-reboot
+Exec=sh -c 'kdialog --title "Restart into LineageOS" --yesno "Restart into LineageOS now? (Back to Fedora: set slot b active from LineageOS, INSTALL.md 5.2.)" && pkexec /usr/libexec/fap-switch-os lineage'
+Terminal=false
+Categories=System;

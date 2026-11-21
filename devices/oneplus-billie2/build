@@ -1,8 +1,28 @@
 #!/usr/bin/env bash
 # SPDX-License-Identifier: AGPL-3.0-or-later
-# OnePlus Nord N100 device layer. Runs inside the container build.
+# OnePlus Nord N100 device layer. Runs inside the build after ./packages and
+# ./rootfs (tools/image/run-layer). FAP_TARGET=image: the bootc image;
+# devroot: a RAM-boot dev root (kernel, modules and initramfs come from the
+# RAM boot image and the netroot, not from here).
 set -euxo pipefail
 source ./device.env
+
+# UBWC (framebuffer compression) on makes Plasma render blocky tile garbage
+# on the N100: GPU and display disagree on UBWC parameters for SM6115
+# (kernel ubwc_config vs Mesa). Off until that's fixed
+# (porting-cookbook: gpu-renders-tile-garbage-ubwc).
+grep -q '^FD_MESA_DEBUG=' /etc/environment || echo 'FD_MESA_DEBUG=noubwc' >> /etc/environment
+
+# rootfs/etc/pipewire/pipewire.conf.d/50-fap-null-sink.conf: no sound card
+# under mainline yet (docs/hardware/n100-audio.md); a null sink keeps apps
+# that open audio from crashing. Remove with the real sound card.
+
+if [ "$FAP_TARGET" = devroot ]; then
+    # netroot/ (in the netroot image): fap-modem-ram serves RAM copies of the
+    # EFS; fap-boot-state records clock/bus state per boot.
+    systemctl enable fap-modem-ram.service fap-boot-state.service
+    exit 0
+fi
 
 # Kernel: Fedora's, for now (KERNEL_PACKAGE=fedora). Fail the build early if
 # that kernel doesn't ship this board's device tree.
@@ -12,7 +32,3 @@ dtb="/usr/lib/modules/$kver/dtb/$KERNEL_DTB"
 
 # Rebuild the initramfs so our dracut config (rootfs/usr/lib/dracut/...) applies.
 dracut --force --kver "$kver" "/usr/lib/modules/$kver/initramfs.img"
-
-# Qualcomm userspace for the remote processors (modem, DSPs). All four are in
-# Fedora. Services get enabled once firmware extraction exists.
-dnf5 -y install qrtr rmtfs pd-mapper tqftpserv

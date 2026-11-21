@@ -10,14 +10,12 @@ DEVICE  := env("FAP_DEVICE", "oneplus-billie2")
 DESKTOP := env("FAP_DESKTOP", "phosh")
 REGISTRY := env("FAP_REGISTRY", "localhost")
 
-# Which Fedora Atomic flavour a desktop starts from.
-BASE_IMAGE := env("FAP_BASE_IMAGE", if DESKTOP == "plasma-mobile" {
-        "quay.io/fedora/fedora-kinoite:" + FEDORA
-    } else if DESKTOP == "tty" {
-        "quay.io/fedora-ostree-desktops/base-atomic:" + FEDORA
-    } else {
-        "quay.io/fedora/fedora-silverblue:" + FEDORA
-    })
+# Every image starts from Fedora's minimal bootc base (no desktop); the
+# desktop layer installs its explicit package list (docs/decisions/0003).
+BASE_IMAGE := env("FAP_BASE_IMAGE", "quay.io/fedora-ostree-desktops/base-atomic:" + FEDORA)
+
+# Opt-in layers (layers/), space-separated, e.g. LAYERS="waydroid".
+LAYERS := env("FAP_LAYERS", "")
 
 IMAGE := REGISTRY / "fap-" + DEVICE + "-" + DESKTOP + ":" + FEDORA
 
@@ -39,6 +37,7 @@ default:
 check:
     tools/check-device.sh devices/{{DEVICE}}
     test -d desktops/{{DESKTOP}}
+    for l in {{LAYERS}}; do test -d "layers/$l" || { echo "no layers/$l" >&2; exit 1; }; done
 
 # Build the bootable OCI image (needs an aarch64 Linux host with podman).
 build: check
@@ -49,7 +48,12 @@ build: check
         --build-arg DEVICE={{DEVICE}} \
         --build-arg DESKTOP={{DESKTOP}} \
         --build-arg BOOT_METHOD={{BOOT_METHOD}} \
+        --build-arg LAYERS="{{LAYERS}}" \
         -t {{IMAGE}} .
+
+# RAM-boot dev root (netroot + the same layers) for fastboot boot + fap.netroot=.
+devroot OUT:
+    boot/android-bootimg/make-devroot.sh {{DEVICE}} {{DESKTOP}} {{OUT}} {{LAYERS}}
 
 # Turn the image into flashable disk images in ./output (needs root podman).
 disk:
@@ -73,7 +77,7 @@ update-review PR *ARGS:
 
 # Print the resolved settings.
 info:
-    @echo "device={{DEVICE}} desktop={{DESKTOP}} fedora={{FEDORA}} boot={{BOOT_METHOD}}"
+    @echo "device={{DEVICE}} desktop={{DESKTOP}} layers={{LAYERS}} fedora={{FEDORA}} boot={{BOOT_METHOD}}"
     @echo "base={{BUILD_BASE}}"
     @echo "pinned={{ if PINNED == "" { "no (newest packages)" } else { "lock/" + LOCK } }}"
     @echo "image={{IMAGE}}"

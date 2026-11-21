@@ -1,0 +1,72 @@
+# SPDX-License-Identifier: AGPL-3.0-or-later
+# Feature status for OnePlus 12 (nothing booted yet: everything untested): the source of truth for what works
+# (docs/features.md has the schema; docs/devices.md is generated from all
+# devices' files by tools/support-matrix.py).
+#
+# This template is also the feature catalogue: groups, feature ids and their
+# order, and each feature's `title`. Device files repeat groups and ids but
+# leave out `title`. Adding a feature = add it here and to every device.
+#
+# status: works | partial | broken | untested | n-a
+# notes: one line, what's missing or how it's worked around
+# evidence: a repo path, a URL or a commit hash (where it was shown to work/fail)
+schema: 1
+device: "oneplus-waffle"
+updated: "2026-11-20"
+features:
+  core:
+    ram-boot:          {title: "RAM boot (fastboot boot) dev loop", status: untested, notes: "stock boot_a RAM-boots (2026-11-20, USB 2.0 cable only); our uniLoader images built, not booted", evidence: ""}
+    boot-storage:      {title: "Boot from internal storage", status: untested, notes: "nothing written; RAM boots only until first light works", evidence: ""}
+    usb-gadget:        {title: "USB networking / serial (gadget)", status: untested, notes: "DT forces dwc3 peripheral + high speed (eUSB2 only); gadget built into the kernel", evidence: ""}
+    cpufreq:           {title: "CPU frequency scaling", status: untested, notes: "", evidence: ""}
+    thermal:           {title: "Thermal zones and cooling", status: untested, notes: "", evidence: ""}
+    suspend:           {title: "Suspend (s2idle)", status: untested, notes: "", evidence: ""}
+    reboot-bootloader: {title: "Reboot to bootloader from Linux", status: untested, notes: "", evidence: ""}
+    crash-logs:        {title: "Crash logs (ramoops/pstore)", status: untested, notes: "ramoops at 0x85000000 (0x240000) in DaDDevil's DT; PSTORE_RAM built in", evidence: ""}
+  display:
+    display:           {title: "Display panel", status: untested, notes: "first light: simple-framebuffer on the splash buffer 0xd5100000 (1440x3168); panel-boe-aa545 in DaDDevil's tree (module), MDSS off", evidence: ""}
+    backlight:         {title: "Backlight", status: untested, notes: "", evidence: ""}
+    gpu:               {title: "GPU acceleration", status: untested, notes: "v7: Adreno 750 (msm/freedreno), gpucc built in, Fedora SQE/GMU + unit zap shader, mesa in the netroot; built, not tested", evidence: ""}
+    video-codec:       {title: "Hardware video decode/encode", status: untested, notes: "v7: Iris (vpu33) with the unit vpu33_4v.mbn; built, not tested", evidence: ""}
+  input:
+    keys:              {title: "Buttons (power, volume)", status: untested, notes: "power + volume up on PON (resin = vol up), volume down on PM8550 GPIO6 (DaDDevil's DT)", evidence: ""}
+    touchscreen:       {title: "Touchscreen", status: untested, notes: "Synaptics S3910 driver in DaDDevil's tree (module); SPI4 off in the first-light DT", evidence: ""}
+  connectivity:
+    wifi:              {title: "Wi-Fi", status: untested, notes: "WCN7850/ath12k upstream + DaDDevil's 0x1107 board-data fallback; PCIe off in the first-light DT", evidence: ""}
+    bluetooth:         {title: "Bluetooth", status: untested, notes: "v7: WCN7850 over UART14 (hci_qca), firmware from the bluetooth_a backup, bluez; built, not tested", evidence: ""}
+    usb-host:          {title: "USB host / OTG", status: untested, notes: "", evidence: ""}
+    tethering:         {title: "Hotspot / USB tethering", status: untested, notes: "", evidence: ""}
+    nfc:               {title: "NFC", status: untested, notes: "", evidence: ""}
+  audio:
+    speaker:           {title: "Loudspeaker", status: broken, notes: "2x TFA9874 (i2c_hub_7): no driver, needs OnePlus tuning container from vendor; kept off", evidence: "devices/oneplus-waffle/README.md"}
+    earpiece:          {title: "Earpiece", status: broken, notes: "most likely the top TFA9874 (stereo); blocked with the speakers", evidence: "devices/oneplus-waffle/README.md"}
+    headphones:        {title: "Headphone jack / USB-C audio", status: untested, notes: "v6: WCD9395 HPH path on; USB-C analog switch (wcd939x-usbss, i2c3) still off", evidence: ""}
+    microphone:        {title: "Microphones", status: untested, notes: "v6: WCD9395 AMIC1/3/4/5 via SoundWire TX, UCM Mic1/3/4/5", evidence: ""}
+  power:
+    battery:           {title: "Battery level", status: untested, notes: "", evidence: ""}
+    charging:          {title: "Charging and charge status", status: untested, notes: "", evidence: ""}
+    fast-charging:     {title: "Fast charging", status: untested, notes: "", evidence: ""}
+  sensors:
+    vibrator:          {title: "Vibrator / haptics", status: untested, notes: "v7: PM8550B LRA (qcom-spmi-haptics, DaDDevil) at the stock 1.72 V vmax; built, not tested", evidence: ""}
+    accelerometer:     {title: "Accelerometer / gyroscope (rotation)", status: untested, notes: "", evidence: ""}
+    proximity:         {title: "Proximity sensor", status: untested, notes: "", evidence: ""}
+    light-sensor:      {title: "Ambient light sensor", status: untested, notes: "", evidence: ""}
+    compass:           {title: "Magnetometer", status: untested, notes: "", evidence: ""}
+    fingerprint:       {title: "Fingerprint reader", status: untested, notes: "", evidence: ""}
+    microsd:           {title: "microSD card", status: untested, notes: "", evidence: ""}
+    notification-led:  {title: "Notification LED", status: untested, notes: "", evidence: ""}
+  cameras:
+    camera-rear:       {title: "Rear camera", status: untested, notes: "", evidence: ""}
+    camera-front:      {title: "Front camera", status: untested, notes: "", evidence: ""}
+    camera-flash:      {title: "Camera flash / torch", status: untested, notes: "", evidence: ""}
+  telephony:
+    modem:             {title: "Modem firmware boots", status: untested, notes: "mpss off in the first-light DT; ARB fuse 1: never flash firmware", evidence: ""}
+    sim:               {title: "SIM detection", status: untested, notes: "", evidence: ""}
+    sms:               {title: "SMS", status: untested, notes: "", evidence: ""}
+    mobile-data:       {title: "Mobile data", status: untested, notes: "", evidence: ""}
+    calls:             {title: "Voice calls (incl. call audio)", status: untested, notes: "", evidence: ""}
+    gnss:              {title: "GNSS / GPS", status: untested, notes: "", evidence: ""}
+  software:
+    desktop:           {title: "Mobile desktop (Plasma Mobile / Phosh)", status: untested, notes: "Plasma Mobile RAM-boot dev root built (make-devroot.sh + fap-waffle-build.sh netroot, llvmpipe: GPU off in the DT); not booted", evidence: "boot/android-bootimg/make-devroot.sh"}
+    waydroid:          {title: "Android apps (Waydroid)", status: untested, notes: "", evidence: ""}
+    bootc-updates:     {title: "Image updates (bootc upgrade/rollback)", status: untested, notes: "", evidence: ""}

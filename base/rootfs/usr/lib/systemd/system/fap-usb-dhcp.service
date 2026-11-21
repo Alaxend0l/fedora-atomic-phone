@@ -1,0 +1,21 @@
+# SPDX-License-Identifier: AGPL-3.0-or-later
+# DHCP for the host on the USB gadget network (phone 172.16.42.1: set up by
+# fap-usb-gadget, or by tiny-init on a RAM boot; host 172.16.42.2).
+# NetworkManager leaves gadget interfaces unmanaged by design, and
+# tiny-init's udhcpd ends at switch_root; when the link re-enumerates (the
+# OnePlus 12 does once pmic-glink takes the USB role) the host asks again.
+# No DNS, no gateway: USB is for SSH. The address is re-applied first in
+# case the interface came back without it.
+[Unit]
+Description=DHCP for the host on the USB gadget network
+After=network-pre.target
+
+[Service]
+ExecStartPre=-/usr/sbin/ip addr replace 172.16.42.1/24 dev usb0
+ExecStartPre=-/usr/sbin/ip link set usb0 up
+ExecStart=/usr/sbin/dnsmasq --no-daemon --port=0 --interface=usb0 --bind-dynamic --dhcp-range=172.16.42.2,172.16.42.2,255.255.255.0,12h --dhcp-option=3 --dhcp-option=6 --dhcp-leasefile=/run/fap-usb-dhcp.leases
+Restart=on-failure
+RestartSec=2
+
+[Install]
+WantedBy=multi-user.target

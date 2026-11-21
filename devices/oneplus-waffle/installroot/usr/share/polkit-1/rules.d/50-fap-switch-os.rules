@@ -1,0 +1,9 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
+// The phone's user may switch OS without a password (the launcher still
+// asks for confirmation).
+polkit.addRule(function(action, subject) {
+    if (action.id == "org.fedora-atomic-phone.switch-os" &&
+        subject.local && subject.active && subject.user == "phone") {
+        return polkit.Result.YES;
+    }
+});

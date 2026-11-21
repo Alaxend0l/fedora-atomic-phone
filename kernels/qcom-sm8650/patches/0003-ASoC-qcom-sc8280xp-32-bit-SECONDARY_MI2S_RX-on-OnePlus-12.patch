@@ -1,0 +1,62 @@
+SPDX-License-Identifier: GPL-2.0-only
+From: fedora-atomic-phone <noreply@fedora-atomic-phone.invalid>
+Subject: [PATCH] ASoC: qcom: sc8280xp: 32-bit SECONDARY_MI2S_RX on the OnePlus 12
+
+The machine driver's BE fixup runs every back end at 48 kHz, 2 x 16 bit.
+On the OnePlus 12 (oneplus,waffle) SECONDARY_MI2S_RX feeds two TFA9874
+amplifiers that Android configures for 2 x 32-bit I2S slots (64 bit
+clocks per frame, tfa98xx.cnt: TDMNBCK 2, TDMSLLN 31, TDMSSIZE 31). With
+2 x 16 bit (32 fs) the amplifier reached its operating state but flagged
+a TDM error and a TDM LUT error and stayed silent.
+
+Force S32_LE on that BE on this board only. A module parameter
+(waffle_sec_mi2s_bits, 0644, read at every stream start) switches back to
+16 bit for comparison without a rebuild.
+
+Upstream-Status: Inappropriate [board hack; upstream would take the BE
+  format from DT or the topology]
+Tested: not yet (v9 RAM test)
+
+---
+--- a/sound/soc/qcom/sc8280xp.c
++++ b/sound/soc/qcom/sc8280xp.c
+@@ -3,6 +3,7 @@
+ 
+ #include <dt-bindings/sound/qcom,q6afe.h>
+ #include <linux/module.h>
++#include <linux/of.h>
+ #include <linux/platform_device.h>
+ #include <sound/soc.h>
+ #include <sound/soc-dapm.h>
+@@ -288,6 +289,17 @@
+ 	}
+ }
+ 
++/*
++ * OnePlus 12 (waffle): the TFA9874 speaker amplifiers on SECONDARY_MI2S
++ * are configured by Android for 2 x 32-bit I2S slots (64 bit clocks per
++ * frame); with the generic 2 x 16 bit (32 fs) they report a TDM error and
++ * stay silent. 32 by default, 16 to compare; read at every stream start.
++ */
++static unsigned int waffle_sec_mi2s_bits = 32;
++module_param(waffle_sec_mi2s_bits, uint, 0644);
++MODULE_PARM_DESC(waffle_sec_mi2s_bits,
++		 "OnePlus 12: SECONDARY_MI2S_RX sample width, 32 (default) or 16");
++
+ static int sc8280xp_be_hw_params_fixup(struct snd_soc_pcm_runtime *rtd,
+ 				     struct snd_pcm_hw_params *params)
+ {
+@@ -309,6 +321,13 @@
+ 	case TX_CODEC_DMA_TX_3:
+ 		channels->min = 1;
+ 		break;
++	case SECONDARY_MI2S_RX:
++		if (of_machine_is_compatible("oneplus,waffle") &&
++		    waffle_sec_mi2s_bits == 32) {
++			snd_mask_none(fmt);
++			snd_mask_set_format(fmt, SNDRV_PCM_FORMAT_S32_LE);
++		}
++		break;
+ 	default:
+ 		break;
+ 	}

@@ -1,0 +1,4 @@
+# SPDX-License-Identifier: AGPL-3.0-or-later
+# bootc image only (FAP_TARGET=image; a dev root isn't an ostree deployment).
+# OS updates in Discover: its rpm-ostree backend.
+plasma-discover-rpm-ostree

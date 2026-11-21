@@ -24,10 +24,11 @@ Fedora Silverblue on a laptop.
 ## Build flow
 ```
 just build ──> podman build (Containerfile)
-                 FROM quay.io/fedora/fedora-silverblue:45 (or kinoite, base-atomic)
+                 FROM quay.io/fedora-ostree-desktops/base-atomic:45   (every desktop)
                  run-layer base/
                  run-layer desktops/$DESKTOP/
                  run-layer boot/$BOOT_METHOD/     (BOOT_METHOD from device.env)
+                 run-layer layers/$L/             (opt-in, LAYERS="waydroid")
                  run-layer devices/$DEVICE/
                  finalize
                  bootc container lint
@@ -37,18 +38,46 @@ just disk  ──> tools/make-disk.sh: image-builder → disk.raw → esp.img + 
                  (+ boot.img for BOOT_METHOD=android-bootimg)
 just uboot <src> ──> uboot.img          (BOOT_METHOD=uboot-android)
 just flash ──> tools/flash.sh: fastboot flash boot/ESP/userdata per device.env
+
+make-devroot.sh <device> <desktop> <out> [layer...]   (RAM-boot dev root)
+               ──> make-netroot.sh: fedora:45 + dev tools + kernel modules
+                     + devices/<device>/netroot/      = localhost/fap-netroot-<device>
+                   devroot/Containerfile FROM that, FAP_TARGET=devroot:
+                     run-layer base/, desktops/<desktop>/, layers/<l>/, devices/<device>/
+                     devroot/finalize (user phone, hostname, tty1)
+               = <out>/netroot.tar.gz (tiny-init fap.netroot=) or, with
+                 --installroot, installroot.tar.zst (ext4 root, fap.root=)
 ```
+Device-specific data that can't be in git (firmware and EFS copies from
+the phone) is added to the dev-root tarball afterwards, locally; e.g.
+`devices/oneplus-waffle/build-env/fap-waffle-build.sh netroot` with
+`NETROOT_GENERIC=<dev root>` and `PHONE_BACKUP=`. Such tarballs are
+sensitive and stay in `fap-build/`.
 
 ## Layers
-Every layer folder has the same shape, applied by `tools/image/run-layer`:
+Images are minimal and layered (docs/decisions/0003): **base** (every
+phone: systemd, NetworkManager, ModemManager, PipeWire, SSH over the USB
+gadget) → **desktop** (one per UI: the shell and its core apps) → **device**
+(kernel, boot, firmware, quirks), plus opt-in **layers/** (Waydroid, ...)
+that are never in the default image. The bootc image and the dev roots are
+built from the same layer folders; nothing generic lives in `devices/`, and
+anything two devices need moves down a layer.
+
+Every layer folder has the same shape, applied by `tools/image/run-layer`
+in this order:
 
 | Item | Meaning |
 |---|---|
-| `rootfs/usr/...`, `rootfs/etc/...` | copied into the image as-is |
-| `build` | script run inside the build with the folder as working directory |
+| `packages` | explicit package list, one per line with a `#` reason; installed with `install_weak_deps=False` (no comps groups) |
+| `packages.image`, `packages.devroot` | packages for one target only (e.g. Discover's rpm-ostree backend in the bootc image) |
+| `rootfs/usr/...`, `rootfs/etc/...` | copied in as-is |
+| `build` | script run with the folder as working directory: configuration (services, config edits); `FAP_TARGET` is `image` or `devroot` |
 
-Order matters: base → desktop → device. A device can override anything a
-desktop did (e.g. a tablet forcing landscape).
+Packages go in the lists, not in `build` (tools/update/lock.py pins the
+lists); the one exception is a device's kernel swap, which is image-only.
+Order matters: base → desktop → boot method → opt-in layers → device. A
+device can override anything a desktop did (e.g. a tablet forcing
+landscape).
 
 Only `/usr` and `/etc` may be shipped. `run-layer` refuses anything else, and
 `finalize` empties `/var`. Both are bootc rules, not ours.
@@ -59,8 +88,10 @@ Only `/usr` and `/etc` may be shipped. `run-layer` refuses anything else, and
 | File | Read by | Purpose |
 |---|---|---|
 | `device.env` | `build`, `check-device.sh`, `flash.sh` | identity, kernel, boot method, flash plan |
-| `build` | image build | device packages, services, kernel swap |
-| `rootfs/` | image build | device config files, incl. `disk.yaml` |
+| `packages` | image + dev root | device packages (Qualcomm remoteproc tools, firmware) |
+| `build` | image + dev root | device config (`FAP_TARGET`), kernel swap and dracut (image only) |
+| `rootfs/` | image + dev root | device config files, incl. `disk.yaml` |
+| `netroot/` | netroot, dev roots | RAM-boot-only files (e.g. `fap-modem-ram` serving EFS copies) |
 | `README.md` | humans | hardware table, partitions, recovery, status |
 
 `device.env` is plain `KEY=value` so both shell scripts and humans can read it

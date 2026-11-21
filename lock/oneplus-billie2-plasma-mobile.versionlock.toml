@@ -4,12 +4,308 @@
 version = "1.0"
 
 [[packages]]
+name = "ModemManager"
+comment = "oneplus-billie2-plasma-mobile"
+[[packages.conditions]]
+key = "evr"
+comparator = "="
+value = "1.24.2-5.fc45"
+
+[[packages]]
+name = "NetworkManager"
+comment = "oneplus-billie2-plasma-mobile"
+[[packages.conditions]]
+key = "evr"
+comparator = "="
+value = "1:1.58.1-3.fc45"
+
+[[packages]]
+name = "NetworkManager-wifi"
+comment = "oneplus-billie2-plasma-mobile"
+[[packages.conditions]]
+key = "evr"
+comparator = "="
+value = "1:1.58.1-3.fc45"
+
+[[packages]]
+name = "NetworkManager-wwan"
+comment = "oneplus-billie2-plasma-mobile"
+[[packages.conditions]]
+key = "evr"
+comparator = "="
+value = "1:1.58.1-3.fc45"
+
+[[packages]]
+name = "PackageKit-Qt6"
+comment = "oneplus-billie2-plasma-mobile"
+[[packages.conditions]]
+key = "evr"
+comparator = "="
+value = "1.1.4-5.fc45"
+
+[[packages]]
+name = "accounts-qml-module-qt6"
+comment = "oneplus-billie2-plasma-mobile"
+[[packages.conditions]]
+key = "evr"
+comparator = "="
+value = "0.7^20231216.05e79eb-9.fc45"
+
+[[packages]]
+name = "appstream-qt"
+comment = "oneplus-billie2-plasma-mobile"
+[[packages.conditions]]
+key = "evr"
+comparator = "="
+value = "1.1.3-4.fc45"
+
+[[packages]]
+name = "assimp"
+comment = "oneplus-billie2-plasma-mobile"
+[[packages.conditions]]
+key = "evr"
+comparator = "="
+value = "6.0.6-1.fc45"
+
+[[packages]]
+name = "atheros-firmware"
+comment = "oneplus-billie2-plasma-mobile"
+[[packages.conditions]]
+key = "evr"
+comparator = "="
+value = "20261019-1.fc45"
+
+[[packages]]
+name = "aurorae"
+comment = "oneplus-billie2-plasma-mobile"
+[[packages.conditions]]
+key = "evr"
+comparator = "="
+value = "6.8.3-1.fc45"
+
+[[packages]]
+name = "bluedevil"
+comment = "oneplus-billie2-plasma-mobile"
+[[packages.conditions]]
+key = "evr"
+comparator = "="
+value = "6.8.3-1.fc45"
+
+[[packages]]
+name = "bluez"
+comment = "oneplus-billie2-plasma-mobile"
+[[packages.conditions]]
+key = "evr"
+comparator = "="
+value = "5.88-1.fc45"
+
+[[packages]]
+name = "bluez-obexd"
+comment = "oneplus-billie2-plasma-mobile"
+[[packages.conditions]]
+key = "evr"
+comparator = "="
+value = "5.88-1.fc45"
+
+[[packages]]
+name = "boost-atomic"
+comment = "oneplus-billie2-plasma-mobile"
+[[packages.conditions]]
+key = "evr"
+comparator = "="
+value = "1.90.0-13.fc45"
+
+[[packages]]
+name = "boost-chrono"
+comment = "oneplus-billie2-plasma-mobile"
+[[packages.conditions]]
+key = "evr"
+comparator = "="
+value = "1.90.0-13.fc45"
+
+[[packages]]
+name = "boost-container"
+comment = "oneplus-billie2-plasma-mobile"
+[[packages.conditions]]
+key = "evr"
+comparator = "="
+value = "1.90.0-13.fc45"
+
+[[packages]]
+name = "boost-date-time"
+comment = "oneplus-billie2-plasma-mobile"
+[[packages.conditions]]
+key = "evr"
+comparator = "="
+value = "1.90.0-13.fc45"
+
+[[packages]]
+name = "boost-thread"
+comment = "oneplus-billie2-plasma-mobile"
+[[packages.conditions]]
+key = "evr"
+comparator = "="
+value = "1.90.0-13.fc45"
+
+[[packages]]
+name = "breeze-cursor-theme"
+comment = "oneplus-billie2-plasma-mobile"
+[[packages.conditions]]
+key = "evr"
+comparator = "="
+value = "6.8.3-1.fc45"
+
+[[packages]]
+name = "breeze-icon-theme"
+comment = "oneplus-billie2-plasma-mobile"
+[[packages.conditions]]
+key = "evr"
+comparator = "="
+value = "6.32.0-1.fc45"
+
+[[packages]]
+name = "callaudiod"
+comment = "oneplus-billie2-plasma-mobile"
+[[packages.conditions]]
+key = "evr"
+comparator = "="
+value = "0.1.99-4.fc45"
+
+[[packages]]
+name = "chrony"
+comment = "oneplus-billie2-plasma-mobile"
+[[packages.conditions]]
+key = "evr"
+comparator = "="
+value = "4.9-1.fc45"
+
+[[packages]]
+name = "cmake-filesystem"
+comment = "oneplus-billie2-plasma-mobile"
+[[packages.conditions]]
+key = "evr"
+comparator = "="
+value = "4.3.0-7.fc45"
+
+[[packages]]
+name = "cxx-rust-cssparser"
+comment = "oneplus-billie2-plasma-mobile"
+[[packages.conditions]]
+key = "evr"
+comparator = "="
+value = "1.1.0-1.fc45"
+
+[[packages]]
+name = "dbus-tools"
+comment = "oneplus-billie2-plasma-mobile"
+[[packages.conditions]]
+key = "evr"
+comparator = "="
+value = "1:1.16.4-2.fc45"
+
+[[packages]]
+name = "ddcutil"
+comment = "oneplus-billie2-plasma-mobile"
+[[packages.conditions]]
+key = "evr"
+comparator = "="
+value = "3.0.2-1.fc45"
+
+[[packages]]
+name = "desktop-backgrounds-compat"
+comment = "oneplus-billie2-plasma-mobile"
+[[packages.conditions]]
+key = "evr"
+comparator = "="
+value = "45.0.0-3.fc45"
+
+[[packages]]
+name = "desktop-backgrounds-kde"
+comment = "oneplus-billie2-plasma-mobile"
+[[packages.conditions]]
+key = "evr"
+comparator = "="
+value = "45.0.0-3.fc45"
+
+[[packages]]
+name = "dnsmasq"
+comment = "oneplus-billie2-plasma-mobile"
+[[packages.conditions]]
+key = "evr"
+comparator = "="
+value = "2.93-2.fc45"
+
+[[packages]]
+name = "docbook-dtds"
+comment = "oneplus-billie2-plasma-mobile"
+[[packages.conditions]]
+key = "evr"
+comparator = "="
+value = "1.0-93.fc45"
+
+[[packages]]
+name = "docbook-style-xsl"
+comment = "oneplus-billie2-plasma-mobile"
+[[packages.conditions]]
+key = "evr"
+comparator = "="
+value = "1.79.2-29.fc45"
+
+[[packages]]
+name = "double-conversion"
+comment = "oneplus-billie2-plasma-mobile"
+[[packages.conditions]]
+key = "evr"
+comparator = "="
+value = "3.4.0-4.fc45"
+
+[[packages]]
 name = "dtc"
 comment = "oneplus-billie2-plasma-mobile"
 [[packages.conditions]]
 key = "evr"
 comparator = "="
 value = "1.8.1-6.fc45"
+
+[[packages]]
+name = "e2fsprogs"
+comment = "oneplus-billie2-plasma-mobile"
+[[packages.conditions]]
+key = "evr"
+comparator = "="
+value = "1.47.4-2.fc45"
+
+[[packages]]
+name = "editorconfig-libs"
+comment = "oneplus-billie2-plasma-mobile"
+[[packages.conditions]]
+key = "evr"
+comparator = "="
+value = "0.12.11-2.fc45"
+
+[[packages]]
+name = "f45-backgrounds-base"
+comment = "oneplus-billie2-plasma-mobile"
+[[packages.conditions]]
+key = "evr"
+comparator = "="
+value = "45.0.4-1.fc45"
+
+[[packages]]
+name = "f45-backgrounds-kde"
+comment = "oneplus-billie2-plasma-mobile"
+[[packages.conditions]]
+key = "evr"
+comparator = "="
+value = "45.0.4-1.fc45"
+
+[[packages]]
+name = "fedora-flathub-remote"
+comment = "oneplus-billie2-plasma-mobile"
+[[packages.conditions]]
+key = "evr"
+comparator = "="
+value = "1-20.fc45"
 
 [[packages]]
 name = "feedbackd"
@@ -20,12 +316,92 @@ comparator = "="
 value = "0.8.11-1.fc45"
 
 [[packages]]
+name = "flatpak"
+comment = "oneplus-billie2-plasma-mobile"
+[[packages.conditions]]
+key = "evr"
+comparator = "="
+value = "1.19.0^really1.18.4-1.fc45"
+
+[[packages]]
+name = "flatpak-kcm"
+comment = "oneplus-billie2-plasma-mobile"
+[[packages.conditions]]
+key = "evr"
+comparator = "="
+value = "6.8.3-1.fc45"
+
+[[packages]]
+name = "flatpak-libs"
+comment = "oneplus-billie2-plasma-mobile"
+[[packages.conditions]]
+key = "evr"
+comparator = "="
+value = "1.19.0^really1.18.4-1.fc45"
+
+[[packages]]
+name = "gcr-libs"
+comment = "oneplus-billie2-plasma-mobile"
+[[packages.conditions]]
+key = "evr"
+comparator = "="
+value = "4.4.1-1.fc45"
+
+[[packages]]
+name = "glibc-langpack-en"
+comment = "oneplus-billie2-plasma-mobile"
+[[packages.conditions]]
+key = "evr"
+comparator = "="
+value = "2.44-2.fc45"
+
+[[packages]]
+name = "glx-utils"
+comment = "oneplus-billie2-plasma-mobile"
+[[packages.conditions]]
+key = "evr"
+comparator = "="
+value = "9.0.0-12.fc45"
+
+[[packages]]
 name = "gmobile"
 comment = "oneplus-billie2-plasma-mobile"
 [[packages.conditions]]
 key = "evr"
 comparator = "="
 value = "0.7.5-1.fc45"
+
+[[packages]]
+name = "google-noto-color-emoji-fonts"
+comment = "oneplus-billie2-plasma-mobile"
+[[packages.conditions]]
+key = "evr"
+comparator = "="
+value = "20260921-1.fc45"
+
+[[packages]]
+name = "google-noto-sans-fonts"
+comment = "oneplus-billie2-plasma-mobile"
+[[packages.conditions]]
+key = "evr"
+comparator = "="
+value = "20260601-3.fc45"
+
+[[packages]]
+name = "google-noto-sans-mono-fonts"
+comment = "oneplus-billie2-plasma-mobile"
+[[packages.conditions]]
+key = "evr"
+comparator = "="
+value = "20260601-3.fc45"
+
+[[packages]]
+name = "gpsd-libs"
+comment = "oneplus-billie2-plasma-mobile"
+[[packages.conditions]]
+key = "evr"
+comparator = "="
+value = "1:3.27.5-8.fc45"
 
 [[packages]]
 name = "gsound"
@@ -44,6 +420,934 @@ comparator = "="
 value = "4.4-7.fc45"
 
 [[packages]]
+name = "ibus-panel"
+comment = "oneplus-billie2-plasma-mobile"
+[[packages.conditions]]
+key = "evr"
+comparator = "="
+value = "1.5.35-2.fc45"
+
+[[packages]]
+name = "iio-sensor-proxy"
+comment = "oneplus-billie2-plasma-mobile"
+[[packages.conditions]]
+key = "evr"
+comparator = "="
+value = "3.9-3.fc45"
+
+[[packages]]
+name = "jsoncpp"
+comment = "oneplus-billie2-plasma-mobile"
+[[packages.conditions]]
+key = "evr"
+comparator = "="
+value = "1.9.6-3.fc44"
+
+[[packages]]
+name = "kaccounts-integration-qt6"
+comment = "oneplus-billie2-plasma-mobile"
+[[packages.conditions]]
+key = "evr"
+comparator = "="
+value = "26.08.3-1.fc45"
+
+[[packages]]
+name = "kactivitymanagerd"
+comment = "oneplus-billie2-plasma-mobile"
+[[packages.conditions]]
+key = "evr"
+comparator = "="
+value = "6.8.3-1.fc45"
+
+[[packages]]
+name = "kcm-plasma-keyboard"
+comment = "oneplus-billie2-plasma-mobile"
+[[packages.conditions]]
+key = "evr"
+comparator = "="
+value = "1:6.8.3-1.fc45"
+
+[[packages]]
+name = "kde-cli-tools"
+comment = "oneplus-billie2-plasma-mobile"
+[[packages.conditions]]
+key = "evr"
+comparator = "="
+value = "6.8.3-1.fc45"
+
+[[packages]]
+name = "kde-filesystem"
+comment = "oneplus-billie2-plasma-mobile"
+[[packages.conditions]]
+key = "evr"
+comparator = "="
+value = "5-8.fc45"
+
+[[packages]]
+name = "kde-settings"
+comment = "oneplus-billie2-plasma-mobile"
+[[packages.conditions]]
+key = "evr"
+comparator = "="
+value = "44.0-1.fc45"
+
+[[packages]]
+name = "kde-settings-plasma"
+comment = "oneplus-billie2-plasma-mobile"
+[[packages.conditions]]
+key = "evr"
+comparator = "="
+value = "44.0-1.fc45"
+
+[[packages]]
+name = "kdecoration"
+comment = "oneplus-billie2-plasma-mobile"
+[[packages.conditions]]
+key = "evr"
+comparator = "="
+value = "6.8.3-1.fc45"
+
+[[packages]]
+name = "kdegraphics-mobipocket"
+comment = "oneplus-billie2-plasma-mobile"
+[[packages.conditions]]
+key = "evr"
+comparator = "="
+value = "26.08.3-1.fc45"
+
+[[packages]]
+name = "kdesu"
+comment = "oneplus-billie2-plasma-mobile"
+[[packages.conditions]]
+key = "evr"
+comparator = "="
+value = "1:6.8.3-1.fc45"
+
+[[packages]]
+name = "kdsoap-ws-discovery-client"
+comment = "oneplus-billie2-plasma-mobile"
+[[packages.conditions]]
+key = "evr"
+comparator = "="
+value = "0.4.0-7.fc45"
+
+[[packages]]
+name = "kdsoap6"
+comment = "oneplus-billie2-plasma-mobile"
+[[packages.conditions]]
+key = "evr"
+comparator = "="
+value = "2.2.0-10.fc45"
+
+[[packages]]
+name = "kf6-attica"
+comment = "oneplus-billie2-plasma-mobile"
+[[packages.conditions]]
+key = "evr"
+comparator = "="
+value = "6.32.0-1.fc45"
+
+[[packages]]
+name = "kf6-baloo"
+comment = "oneplus-billie2-plasma-mobile"
+[[packages.conditions]]
+key = "evr"
+comparator = "="
+value = "6.32.0-1.fc45"
+
+[[packages]]
+name = "kf6-baloo-libs"
+comment = "oneplus-billie2-plasma-mobile"
+[[packages.conditions]]
+key = "evr"
+comparator = "="
+value = "6.32.0-1.fc45"
+
+[[packages]]
+name = "kf6-bluez-qt"
+comment = "oneplus-billie2-plasma-mobile"
+[[packages.conditions]]
+key = "evr"
+comparator = "="
+value = "6.32.0-1.fc45"
+
+[[packages]]
+name = "kf6-breeze-icons"
+comment = "oneplus-billie2-plasma-mobile"
+[[packages.conditions]]
+key = "evr"
+comparator = "="
+value = "6.32.0-1.fc45"
+
+[[packages]]
+name = "kf6-filesystem"
+comment = "oneplus-billie2-plasma-mobile"
+[[packages.conditions]]
+key = "evr"
+comparator = "="
+value = "6.32.0-1.fc45"
+
+[[packages]]
+name = "kf6-frameworkintegration"
+comment = "oneplus-billie2-plasma-mobile"
+[[packages.conditions]]
+key = "evr"
+comparator = "="
+value = "6.32.0-1.fc45"
+
+[[packages]]
+name = "kf6-frameworkintegration-libs"
+comment = "oneplus-billie2-plasma-mobile"
+[[packages.conditions]]
+key = "evr"
+comparator = "="
+value = "6.32.0-1.fc45"
+
+[[packages]]
+name = "kf6-karchive"
+comment = "oneplus-billie2-plasma-mobile"
+[[packages.conditions]]
+key = "evr"
+comparator = "="
+value = "6.32.0-1.fc45"
+
+[[packages]]
+name = "kf6-kauth"
+comment = "oneplus-billie2-plasma-mobile"
+[[packages.conditions]]
+key = "evr"
+comparator = "="
+value = "6.32.0-1.fc45"
+
+[[packages]]
+name = "kf6-kbookmarks"
+comment = "oneplus-billie2-plasma-mobile"
+[[packages.conditions]]
+key = "evr"
+comparator = "="
+value = "6.32.0-1.fc45"
+
+[[packages]]
+name = "kf6-kcmutils"
+comment = "oneplus-billie2-plasma-mobile"
+[[packages.conditions]]
+key = "evr"
+comparator = "="
+value = "6.32.0-1.fc45"
+
+[[packages]]
+name = "kf6-kcodecs"
+comment = "oneplus-billie2-plasma-mobile"
+[[packages.conditions]]
+key = "evr"
+comparator = "="
+value = "6.32.0-1.fc45"
+
+[[packages]]
+name = "kf6-kcolorscheme"
+comment = "oneplus-billie2-plasma-mobile"
+[[packages.conditions]]
+key = "evr"
+comparator = "="
+value = "6.32.0-1.fc45"
+
+[[packages]]
+name = "kf6-kcompletion"
+comment = "oneplus-billie2-plasma-mobile"
+[[packages.conditions]]
+key = "evr"
+comparator = "="
+value = "6.32.0-1.fc45"
+
+[[packages]]
+name = "kf6-kconfig"
+comment = "oneplus-billie2-plasma-mobile"
+[[packages.conditions]]
+key = "evr"
+comparator = "="
+value = "6.32.0-1.fc45"
+
+[[packages]]
+name = "kf6-kconfigwidgets"
+comment = "oneplus-billie2-plasma-mobile"
+[[packages.conditions]]
+key = "evr"
+comparator = "="
+value = "6.32.0-1.fc45"
+
+[[packages]]
+name = "kf6-kcontacts"
+comment = "oneplus-billie2-plasma-mobile"
+[[packages.conditions]]
+key = "evr"
+comparator = "="
+value = "6.32.0-1.fc45"
+
+[[packages]]
+name = "kf6-kcoreaddons"
+comment = "oneplus-billie2-plasma-mobile"
+[[packages.conditions]]
+key = "evr"
+comparator = "="
+value = "6.32.0-1.fc45"
+
+[[packages]]
+name = "kf6-kcrash"
+comment = "oneplus-billie2-plasma-mobile"
+[[packages.conditions]]
+key = "evr"
+comparator = "="
+value = "6.32.0-1.fc45"
+
+[[packages]]
+name = "kf6-kdbusaddons"
+comment = "oneplus-billie2-plasma-mobile"
+[[packages.conditions]]
+key = "evr"
+comparator = "="
+value = "6.32.0-1.fc45"
+
+[[packages]]
+name = "kf6-kdeclarative"
+comment = "oneplus-billie2-plasma-mobile"
+[[packages.conditions]]
+key = "evr"
+comparator = "="
+value = "6.32.0-1.fc45"
+
+[[packages]]
+name = "kf6-kded"
+comment = "oneplus-billie2-plasma-mobile"
+[[packages.conditions]]
+key = "evr"
+comparator = "="
+value = "6.32.0-1.fc45"
+
+[[packages]]
+name = "kf6-kdesu"
+comment = "oneplus-billie2-plasma-mobile"
+[[packages.conditions]]
+key = "evr"
+comparator = "="
+value = "6.32.0-1.fc45"
+
+[[packages]]
+name = "kf6-kdnssd"
+comment = "oneplus-billie2-plasma-mobile"
+[[packages.conditions]]
+key = "evr"
+comparator = "="
+value = "6.32.0-1.fc45"
+
+[[packages]]
+name = "kf6-kdoctools"
+comment = "oneplus-billie2-plasma-mobile"
+[[packages.conditions]]
+key = "evr"
+comparator = "="
+value = "6.32.0-1.fc45"
+
+[[packages]]
+name = "kf6-kfilemetadata"
+comment = "oneplus-billie2-plasma-mobile"
+[[packages.conditions]]
+key = "evr"
+comparator = "="
+value = "6.32.0-1.fc45"
+
+[[packages]]
+name = "kf6-kglobalaccel"
+comment = "oneplus-billie2-plasma-mobile"
+[[packages.conditions]]
+key = "evr"
+comparator = "="
+value = "6.32.0-1.fc45"
+
+[[packages]]
+name = "kf6-kguiaddons"
+comment = "oneplus-billie2-plasma-mobile"
+[[packages.conditions]]
+key = "evr"
+comparator = "="
+value = "6.32.0-1.fc45"
+
+[[packages]]
+name = "kf6-kholidays"
+comment = "oneplus-billie2-plasma-mobile"
+[[packages.conditions]]
+key = "evr"
+comparator = "="
+value = "6.32.0-1.fc45"
+
+[[packages]]
+name = "kf6-ki18n"
+comment = "oneplus-billie2-plasma-mobile"
+[[packages.conditions]]
+key = "evr"
+comparator = "="
+value = "6.32.0-1.fc45"
+
+[[packages]]
+name = "kf6-kiconthemes"
+comment = "oneplus-billie2-plasma-mobile"
+[[packages.conditions]]
+key = "evr"
+comparator = "="
+value = "6.32.0-1.fc45"
+
+[[packages]]
+name = "kf6-kidletime"
+comment = "oneplus-billie2-plasma-mobile"
+[[packages.conditions]]
+key = "evr"
+comparator = "="
+value = "6.32.0-1.fc45"
+
+[[packages]]
+name = "kf6-kimageformats"
+comment = "oneplus-billie2-plasma-mobile"
+[[packages.conditions]]
+key = "evr"
+comparator = "="
+value = "6.32.0-1.fc45"
+
+[[packages]]
+name = "kf6-kio-core"
+comment = "oneplus-billie2-plasma-mobile"
+[[packages.conditions]]
+key = "evr"
+comparator = "="
+value = "6.32.0-1.fc45"
+
+[[packages]]
+name = "kf6-kio-core-libs"
+comment = "oneplus-billie2-plasma-mobile"
+[[packages.conditions]]
+key = "evr"
+comparator = "="
+value = "6.32.0-1.fc45"
+
+[[packages]]
+name = "kf6-kio-doc"
+comment = "oneplus-billie2-plasma-mobile"
+[[packages.conditions]]
+key = "evr"
+comparator = "="
+value = "6.32.0-1.fc45"
+
+[[packages]]
+name = "kf6-kio-file-widgets"
+comment = "oneplus-billie2-plasma-mobile"
+[[packages.conditions]]
+key = "evr"
+comparator = "="
+value = "6.32.0-1.fc45"
+
+[[packages]]
+name = "kf6-kio-gui"
+comment = "oneplus-billie2-plasma-mobile"
+[[packages.conditions]]
+key = "evr"
+comparator = "="
+value = "6.32.0-1.fc45"
+
+[[packages]]
+name = "kf6-kio-widgets"
+comment = "oneplus-billie2-plasma-mobile"
+[[packages.conditions]]
+key = "evr"
+comparator = "="
+value = "6.32.0-1.fc45"
+
+[[packages]]
+name = "kf6-kio-widgets-libs"
+comment = "oneplus-billie2-plasma-mobile"
+[[packages.conditions]]
+key = "evr"
+comparator = "="
+value = "6.32.0-1.fc45"
+
+[[packages]]
+name = "kf6-kirigami"
+comment = "oneplus-billie2-plasma-mobile"
+[[packages.conditions]]
+key = "evr"
+comparator = "="
+value = "6.32.0-1.fc45"
+
+[[packages]]
+name = "kf6-kirigami-addons"
+comment = "oneplus-billie2-plasma-mobile"
+[[packages.conditions]]
+key = "evr"
+comparator = "="
+value = "1.13.1-1.fc45"
+
+[[packages]]
+name = "kf6-kitemmodels"
+comment = "oneplus-billie2-plasma-mobile"
+[[packages.conditions]]
+key = "evr"
+comparator = "="
+value = "6.32.0-1.fc45"
+
+[[packages]]
+name = "kf6-kitemviews"
+comment = "oneplus-billie2-plasma-mobile"
+[[packages.conditions]]
+key = "evr"
+comparator = "="
+value = "6.32.0-1.fc45"
+
+[[packages]]
+name = "kf6-kjobwidgets"
+comment = "oneplus-billie2-plasma-mobile"
+[[packages.conditions]]
+key = "evr"
+comparator = "="
+value = "6.32.0-1.fc45"
+
+[[packages]]
+name = "kf6-knewstuff"
+comment = "oneplus-billie2-plasma-mobile"
+[[packages.conditions]]
+key = "evr"
+comparator = "="
+value = "6.32.0-1.fc45"
+
+[[packages]]
+name = "kf6-knotifications"
+comment = "oneplus-billie2-plasma-mobile"
+[[packages.conditions]]
+key = "evr"
+comparator = "="
+value = "6.32.0-1.fc45"
+
+[[packages]]
+name = "kf6-knotifyconfig"
+comment = "oneplus-billie2-plasma-mobile"
+[[packages.conditions]]
+key = "evr"
+comparator = "="
+value = "6.32.0-1.fc45"
+
+[[packages]]
+name = "kf6-kpackage"
+comment = "oneplus-billie2-plasma-mobile"
+[[packages.conditions]]
+key = "evr"
+comparator = "="
+value = "6.32.0-1.fc45"
+
+[[packages]]
+name = "kf6-kparts"
+comment = "oneplus-billie2-plasma-mobile"
+[[packages.conditions]]
+key = "evr"
+comparator = "="
+value = "6.32.0-1.fc45"
+
+[[packages]]
+name = "kf6-kpeople"
+comment = "oneplus-billie2-plasma-mobile"
+[[packages.conditions]]
+key = "evr"
+comparator = "="
+value = "6.32.0-1.fc45"
+
+[[packages]]
+name = "kf6-kpty"
+comment = "oneplus-billie2-plasma-mobile"
+[[packages.conditions]]
+key = "evr"
+comparator = "="
+value = "6.32.0-1.fc45"
+
+[[packages]]
+name = "kf6-kquickcharts"
+comment = "oneplus-billie2-plasma-mobile"
+[[packages.conditions]]
+key = "evr"
+comparator = "="
+value = "6.32.0-1.fc45"
+
+[[packages]]
+name = "kf6-krunner"
+comment = "oneplus-billie2-plasma-mobile"
+[[packages.conditions]]
+key = "evr"
+comparator = "="
+value = "6.32.0-1.fc45"
+
+[[packages]]
+name = "kf6-kservice"
+comment = "oneplus-billie2-plasma-mobile"
+[[packages.conditions]]
+key = "evr"
+comparator = "="
+value = "6.32.0-1.fc45"
+
+[[packages]]
+name = "kf6-kstatusnotifieritem"
+comment = "oneplus-billie2-plasma-mobile"
+[[packages.conditions]]
+key = "evr"
+comparator = "="
+value = "6.32.0-1.fc45"
+
+[[packages]]
+name = "kf6-ksvg"
+comment = "oneplus-billie2-plasma-mobile"
+[[packages.conditions]]
+key = "evr"
+comparator = "="
+value = "6.32.0-1.fc45"
+
+[[packages]]
+name = "kf6-ktexteditor"
+comment = "oneplus-billie2-plasma-mobile"
+[[packages.conditions]]
+key = "evr"
+comparator = "="
+value = "6.32.0-1.fc45"
+
+[[packages]]
+name = "kf6-ktextwidgets"
+comment = "oneplus-billie2-plasma-mobile"
+[[packages.conditions]]
+key = "evr"
+comparator = "="
+value = "6.32.0-1.fc45"
+
+[[packages]]
+name = "kf6-kunitconversion"
+comment = "oneplus-billie2-plasma-mobile"
+[[packages.conditions]]
+key = "evr"
+comparator = "="
+value = "6.32.0-1.fc45"
+
+[[packages]]
+name = "kf6-kuserfeedback"
+comment = "oneplus-billie2-plasma-mobile"
+[[packages.conditions]]
+key = "evr"
+comparator = "="
+value = "6.32.0-1.fc45"
+
+[[packages]]
+name = "kf6-kwallet"
+comment = "oneplus-billie2-plasma-mobile"
+[[packages.conditions]]
+key = "evr"
+comparator = "="
+value = "6.32.0-1.fc45"
+
+[[packages]]
+name = "kf6-kwallet-libs"
+comment = "oneplus-billie2-plasma-mobile"
+[[packages.conditions]]
+key = "evr"
+comparator = "="
+value = "6.32.0-1.fc45"
+
+[[packages]]
+name = "kf6-kwidgetsaddons"
+comment = "oneplus-billie2-plasma-mobile"
+[[packages.conditions]]
+key = "evr"
+comparator = "="
+value = "6.32.0-1.fc45"
+
+[[packages]]
+name = "kf6-kwindowsystem"
+comment = "oneplus-billie2-plasma-mobile"
+[[packages.conditions]]
+key = "evr"
+comparator = "="
+value = "6.32.0-1.fc45"
+
+[[packages]]
+name = "kf6-kxmlgui"
+comment = "oneplus-billie2-plasma-mobile"
+[[packages.conditions]]
+key = "evr"
+comparator = "="
+value = "6.32.0-1.fc45"
+
+[[packages]]
+name = "kf6-modemmanager-qt"
+comment = "oneplus-billie2-plasma-mobile"
+[[packages.conditions]]
+key = "evr"
+comparator = "="
+value = "6.32.0-1.fc45"
+
+[[packages]]
+name = "kf6-networkmanager-qt"
+comment = "oneplus-billie2-plasma-mobile"
+[[packages.conditions]]
+key = "evr"
+comparator = "="
+value = "6.32.0-1.fc45"
+
+[[packages]]
+name = "kf6-prison"
+comment = "oneplus-billie2-plasma-mobile"
+[[packages.conditions]]
+key = "evr"
+comparator = "="
+value = "6.32.0-1.fc45"
+
+[[packages]]
+name = "kf6-purpose"
+comment = "oneplus-billie2-plasma-mobile"
+[[packages.conditions]]
+key = "evr"
+comparator = "="
+value = "6.32.0-1.fc45"
+
+[[packages]]
+name = "kf6-qqc2-desktop-style"
+comment = "oneplus-billie2-plasma-mobile"
+[[packages.conditions]]
+key = "evr"
+comparator = "="
+value = "6.32.0-1.fc45"
+
+[[packages]]
+name = "kf6-solid"
+comment = "oneplus-billie2-plasma-mobile"
+[[packages.conditions]]
+key = "evr"
+comparator = "="
+value = "6.32.0-1.fc45"
+
+[[packages]]
+name = "kf6-sonnet"
+comment = "oneplus-billie2-plasma-mobile"
+[[packages.conditions]]
+key = "evr"
+comparator = "="
+value = "6.32.0-1.fc45"
+
+[[packages]]
+name = "kf6-syndication"
+comment = "oneplus-billie2-plasma-mobile"
+[[packages.conditions]]
+key = "evr"
+comparator = "="
+value = "6.32.0-1.fc45"
+
+[[packages]]
+name = "kf6-syntax-highlighting"
+comment = "oneplus-billie2-plasma-mobile"
+[[packages.conditions]]
+key = "evr"
+comparator = "="
+value = "6.32.0-1.fc45"
+
+[[packages]]
+name = "kglobalacceld"
+comment = "oneplus-billie2-plasma-mobile"
+[[packages.conditions]]
+key = "evr"
+comparator = "="
+value = "6.8.3-1.fc45"
+
+[[packages]]
+name = "kio-extras"
+comment = "oneplus-billie2-plasma-mobile"
+[[packages.conditions]]
+key = "evr"
+comparator = "="
+value = "26.08.3-1.fc45"
+
+[[packages]]
+name = "kio-fuse"
+comment = "oneplus-billie2-plasma-mobile"
+[[packages.conditions]]
+key = "evr"
+comparator = "="
+value = "5.1.1-4.fc45"
+
+[[packages]]
+name = "kmenuedit"
+comment = "oneplus-billie2-plasma-mobile"
+[[packages.conditions]]
+key = "evr"
+comparator = "="
+value = "6.8.3-1.fc45"
+
+[[packages]]
+name = "knighttime"
+comment = "oneplus-billie2-plasma-mobile"
+[[packages.conditions]]
+key = "evr"
+comparator = "="
+value = "6.8.3-1.fc45"
+
+[[packages]]
+name = "kpipewire"
+comment = "oneplus-billie2-plasma-mobile"
+[[packages.conditions]]
+key = "evr"
+comparator = "="
+value = "6.8.3-1.fc45"
+
+[[packages]]
+name = "kscreen"
+comment = "oneplus-billie2-plasma-mobile"
+[[packages.conditions]]
+key = "evr"
+comparator = "="
+value = "1:6.8.3-1.fc45"
+
+[[packages]]
+name = "kscreenlocker"
+comment = "oneplus-billie2-plasma-mobile"
+[[packages.conditions]]
+key = "evr"
+comparator = "="
+value = "6.8.3-1.fc45"
+
+[[packages]]
+name = "ksystemstats"
+comment = "oneplus-billie2-plasma-mobile"
+[[packages.conditions]]
+key = "evr"
+comparator = "="
+value = "6.8.3-1.fc45"
+
+[[packages]]
+name = "kwayland"
+comment = "oneplus-billie2-plasma-mobile"
+[[packages.conditions]]
+key = "evr"
+comparator = "="
+value = "6.8.3-1.fc45"
+
+[[packages]]
+name = "kwin"
+comment = "oneplus-billie2-plasma-mobile"
+[[packages.conditions]]
+key = "evr"
+comparator = "="
+value = "6.8.3-1.fc45"
+
+[[packages]]
+name = "kwin-common"
+comment = "oneplus-billie2-plasma-mobile"
+[[packages.conditions]]
+key = "evr"
+comparator = "="
+value = "6.8.3-1.fc45"
+
+[[packages]]
+name = "kwin-libs"
+comment = "oneplus-billie2-plasma-mobile"
+[[packages.conditions]]
+key = "evr"
+comparator = "="
+value = "6.8.3-1.fc45"
+
+[[packages]]
+name = "kwrited"
+comment = "oneplus-billie2-plasma-mobile"
+[[packages.conditions]]
+key = "evr"
+comparator = "="
+value = "6.8.3-1.fc45"
+
+[[packages]]
+name = "layer-shell-qt"
+comment = "oneplus-billie2-plasma-mobile"
+[[packages.conditions]]
+key = "evr"
+comparator = "="
+value = "6.8.3-1.fc45"
+
+[[packages]]
+name = "libXaw"
+comment = "oneplus-billie2-plasma-mobile"
+[[packages.conditions]]
+key = "evr"
+comparator = "="
+value = "1.0.16-6.fc45"
+
+[[packages]]
+name = "libXmu"
+comment = "oneplus-billie2-plasma-mobile"
+[[packages.conditions]]
+key = "evr"
+comparator = "="
+value = "1.2.1-6.fc45"
+
+[[packages]]
+name = "libaccounts-glib"
+comment = "oneplus-billie2-plasma-mobile"
+[[packages.conditions]]
+key = "evr"
+comparator = "="
+value = "1.25-28.fc45"
+
+[[packages]]
+name = "libaccounts-qt6"
+comment = "oneplus-billie2-plasma-mobile"
+[[packages.conditions]]
+key = "evr"
+comparator = "="
+value = "1.17-5.fc45"
+
+[[packages]]
+name = "libb2"
+comment = "oneplus-billie2-plasma-mobile"
+[[packages.conditions]]
+key = "evr"
+comparator = "="
+value = "0.98.1-16.fc45"
+
+[[packages]]
+name = "libdbusmenu"
+comment = "oneplus-billie2-plasma-mobile"
+[[packages.conditions]]
+key = "evr"
+comparator = "="
+value = "16.04.0-32.fc45"
+
+[[packages]]
+name = "libdbusmenu-gtk3"
+comment = "oneplus-billie2-plasma-mobile"
+[[packages.conditions]]
+key = "evr"
+comparator = "="
+value = "16.04.0-32.fc45"
+
+[[packages]]
+name = "libddcutil"
+comment = "oneplus-billie2-plasma-mobile"
+[[packages.conditions]]
+key = "evr"
+comparator = "="
+value = "3.0.2-1.fc45"
+
+[[packages]]
+name = "libdmtx"
+comment = "oneplus-billie2-plasma-mobile"
+[[packages.conditions]]
+key = "evr"
+comparator = "="
+value = "0.7.8-4.fc45"
+
+[[packages]]
+name = "libeis"
+comment = "oneplus-billie2-plasma-mobile"
+[[packages.conditions]]
+key = "evr"
+comparator = "="
+value = "1.6.0-3.fc45"
+
+[[packages]]
 name = "libfdt"
 comment = "oneplus-billie2-plasma-mobile"
 [[packages.conditions]]
@@ -60,12 +1364,196 @@ comparator = "="
 value = "0.8.11-1.fc45"
 
 [[packages]]
+name = "libi2c"
+comment = "oneplus-billie2-plasma-mobile"
+[[packages.conditions]]
+key = "evr"
+comparator = "="
+value = "4.4-7.fc45"
+
+[[packages]]
+name = "libical"
+comment = "oneplus-billie2-plasma-mobile"
+[[packages.conditions]]
+key = "evr"
+comparator = "="
+value = "3.0.20-11.fc45"
+
+[[packages]]
+name = "libinput"
+comment = "oneplus-billie2-plasma-mobile"
+[[packages.conditions]]
+key = "evr"
+comparator = "="
+value = "1.32.0-1.fc45"
+
+[[packages]]
+name = "libkexiv2-qt6"
+comment = "oneplus-billie2-plasma-mobile"
+[[packages.conditions]]
+key = "evr"
+comparator = "="
+value = "26.08.3-1.fc45"
+
+[[packages]]
+name = "libkscreen"
+comment = "oneplus-billie2-plasma-mobile"
+[[packages.conditions]]
+key = "evr"
+comparator = "="
+value = "6.8.3-1.fc45"
+
+[[packages]]
+name = "libksysguard"
+comment = "oneplus-billie2-plasma-mobile"
+[[packages.conditions]]
+key = "evr"
+comparator = "="
+value = "6.8.3-1.fc45"
+
+[[packages]]
+name = "libksysguard-common"
+comment = "oneplus-billie2-plasma-mobile"
+[[packages.conditions]]
+key = "evr"
+comparator = "="
+value = "6.8.3-1.fc45"
+
+[[packages]]
+name = "libkworkspace6"
+comment = "oneplus-billie2-plasma-mobile"
+[[packages.conditions]]
+key = "evr"
+comparator = "="
+value = "6.8.3-1.fc45"
+
+[[packages]]
+name = "libmtp"
+comment = "oneplus-billie2-plasma-mobile"
+[[packages.conditions]]
+key = "evr"
+comparator = "="
+value = "1.1.22-4.fc45"
+
+[[packages]]
+name = "libphonenumber"
+comment = "oneplus-billie2-plasma-mobile"
+[[packages.conditions]]
+key = "evr"
+comparator = "="
+value = "8.13.55-13.fc45"
+
+[[packages]]
+name = "libplasma"
+comment = "oneplus-billie2-plasma-mobile"
+[[packages.conditions]]
+key = "evr"
+comparator = "="
+value = "6.8.3-1.fc45"
+
+[[packages]]
+name = "libqalculate"
+comment = "oneplus-billie2-plasma-mobile"
+[[packages.conditions]]
+key = "evr"
+comparator = "="
+value = "5.11.0-3.fc45"
+
+[[packages]]
+name = "libunity-gtk3-parser"
+comment = "oneplus-billie2-plasma-mobile"
+[[packages.conditions]]
+key = "evr"
+comparator = "="
+value = "0.0.0+17.04.20170403-25.fc45"
+
+[[packages]]
+name = "libutempter"
+comment = "oneplus-billie2-plasma-mobile"
+[[packages.conditions]]
+key = "evr"
+comparator = "="
+value = "1.2.1-21.fc45"
+
+[[packages]]
+name = "libwacom"
+comment = "oneplus-billie2-plasma-mobile"
+[[packages.conditions]]
+key = "evr"
+comparator = "="
+value = "2.19.0-2.fc45"
+
+[[packages]]
+name = "libwacom-data"
+comment = "oneplus-billie2-plasma-mobile"
+[[packages.conditions]]
+key = "evr"
+comparator = "="
+value = "2.19.0-2.fc45"
+
+[[packages]]
+name = "libwayland-server"
+comment = "oneplus-billie2-plasma-mobile"
+[[packages.conditions]]
+key = "evr"
+comparator = "="
+value = "1.26.0-3.fc45"
+
+[[packages]]
+name = "libxkbcommon-x11"
+comment = "oneplus-billie2-plasma-mobile"
+[[packages.conditions]]
+key = "evr"
+comparator = "="
+value = "1.13.1-4.fc45"
+
+[[packages]]
+name = "mesa-dri-drivers"
+comment = "oneplus-billie2-plasma-mobile"
+[[packages.conditions]]
+key = "evr"
+comparator = "="
+value = "26.2.7-1.fc45"
+
+[[packages]]
+name = "minizip-ng-compat"
+comment = "oneplus-billie2-plasma-mobile"
+[[packages.conditions]]
+key = "evr"
+comparator = "="
+value = "4.1.0-5.fc45"
+
+[[packages]]
+name = "mtdev"
+comment = "oneplus-billie2-plasma-mobile"
+[[packages.conditions]]
+key = "evr"
+comparator = "="
+value = "1.1.6-13.fc45"
+
+[[packages]]
+name = "ocean-sound-theme"
+comment = "oneplus-billie2-plasma-mobile"
+[[packages.conditions]]
+key = "evr"
+comparator = "="
+value = "6.8.3-1.fc45"
+
+[[packages]]
 name = "openssh-server"
 comment = "oneplus-billie2-plasma-mobile"
 [[packages.conditions]]
 key = "evr"
 comparator = "="
 value = "10.5p1-1.fc45"
+
+[[packages]]
+name = "openxr-libs"
+comment = "oneplus-billie2-plasma-mobile"
+[[packages.conditions]]
+key = "evr"
+comparator = "="
+value = "1.1.65-1.fc45"
 
 [[packages]]
 name = "pciutils"
@@ -76,7 +1564,159 @@ comparator = "="
 value = "3.15.0-2.fc45"
 
 [[packages]]
+name = "pcre2-utf16"
+comment = "oneplus-billie2-plasma-mobile"
+[[packages.conditions]]
+key = "evr"
+comparator = "="
+value = "10.49-1.fc45"
+
+[[packages]]
+name = "pinentry-gnome3"
+comment = "oneplus-billie2-plasma-mobile"
+[[packages.conditions]]
+key = "evr"
+comparator = "="
+value = "1.3.3-2.fc45"
+
+[[packages]]
+name = "pipewire"
+comment = "oneplus-billie2-plasma-mobile"
+[[packages.conditions]]
+key = "evr"
+comparator = "="
+value = "1.6.11-1.fc45"
+
+[[packages]]
+name = "pipewire-pulseaudio"
+comment = "oneplus-billie2-plasma-mobile"
+[[packages.conditions]]
+key = "evr"
+comparator = "="
+value = "1.6.11-1.fc45"
+
+[[packages]]
+name = "plasma-activities"
+comment = "oneplus-billie2-plasma-mobile"
+[[packages.conditions]]
+key = "evr"
+comparator = "="
+value = "6.8.3-1.fc45"
+
+[[packages]]
+name = "plasma-activities-stats"
+comment = "oneplus-billie2-plasma-mobile"
+[[packages.conditions]]
+key = "evr"
+comparator = "="
+value = "6.8.3-1.fc45"
+
+[[packages]]
+name = "plasma-breeze"
+comment = "oneplus-billie2-plasma-mobile"
+[[packages.conditions]]
+key = "evr"
+comparator = "="
+value = "6.8.3-1.fc45"
+
+[[packages]]
+name = "plasma-breeze-common"
+comment = "oneplus-billie2-plasma-mobile"
+[[packages.conditions]]
+key = "evr"
+comparator = "="
+value = "6.8.3-1.fc45"
+
+[[packages]]
+name = "plasma-breeze-qt6"
+comment = "oneplus-billie2-plasma-mobile"
+[[packages.conditions]]
+key = "evr"
+comparator = "="
+value = "6.8.3-1.fc45"
+
+[[packages]]
+name = "plasma-desktop"
+comment = "oneplus-billie2-plasma-mobile"
+[[packages.conditions]]
+key = "evr"
+comparator = "="
+value = "6.8.3-1.fc45"
+
+[[packages]]
+name = "plasma-dialer"
+comment = "oneplus-billie2-plasma-mobile"
+[[packages.conditions]]
+key = "evr"
+comparator = "="
+value = "1:6.8.3-1.fc45"
+
+[[packages]]
+name = "plasma-discover"
+comment = "oneplus-billie2-plasma-mobile"
+[[packages.conditions]]
+key = "evr"
+comparator = "="
+value = "6.8.3-1.fc45"
+
+[[packages]]
+name = "plasma-discover-flatpak"
+comment = "oneplus-billie2-plasma-mobile"
+[[packages.conditions]]
+key = "evr"
+comparator = "="
+value = "6.8.3-1.fc45"
+
+[[packages]]
+name = "plasma-discover-libs"
+comment = "oneplus-billie2-plasma-mobile"
+[[packages.conditions]]
+key = "evr"
+comparator = "="
+value = "6.8.3-1.fc45"
+
+[[packages]]
+name = "plasma-discover-rpm-ostree"
+comment = "oneplus-billie2-plasma-mobile"
+[[packages.conditions]]
+key = "evr"
+comparator = "="
+value = "6.8.3-1.fc45"
+
+[[packages]]
+name = "plasma-integration"
+comment = "oneplus-billie2-plasma-mobile"
+[[packages.conditions]]
+key = "evr"
+comparator = "="
+value = "6.8.3-1.fc45"
+
+[[packages]]
+name = "plasma-keyboard"
+comment = "oneplus-billie2-plasma-mobile"
+[[packages.conditions]]
+key = "evr"
+comparator = "="
+value = "1:6.8.3-1.fc45"
+
+[[packages]]
+name = "plasma-lookandfeel-fedora"
+comment = "oneplus-billie2-plasma-mobile"
+[[packages.conditions]]
+key = "evr"
+comparator = "="
+value = "6.8.3-1.fc45"
+
+[[packages]]
 name = "plasma-lookandfeel-fedora-mobile"
+comment = "oneplus-billie2-plasma-mobile"
+[[packages.conditions]]
+key = "evr"
+comparator = "="
+value = "6.8.3-1.fc45"
+
+[[packages]]
+name = "plasma-milou"
 comment = "oneplus-billie2-plasma-mobile"
 [[packages.conditions]]
 key = "evr"
@@ -92,7 +1732,207 @@ comparator = "="
 value = "6.8.3-1.fc45"
 
 [[packages]]
+name = "plasma-mobile-sounds"
+comment = "oneplus-billie2-plasma-mobile"
+[[packages.conditions]]
+key = "evr"
+comparator = "="
+value = "0.1-13.fc45"
+
+[[packages]]
 name = "plasma-nano"
+comment = "oneplus-billie2-plasma-mobile"
+[[packages.conditions]]
+key = "evr"
+comparator = "="
+value = "6.8.3-1.fc45"
+
+[[packages]]
+name = "plasma-nm"
+comment = "oneplus-billie2-plasma-mobile"
+[[packages.conditions]]
+key = "evr"
+comparator = "="
+value = "6.8.3-1.fc45"
+
+[[packages]]
+name = "plasma-pa"
+comment = "oneplus-billie2-plasma-mobile"
+[[packages.conditions]]
+key = "evr"
+comparator = "="
+value = "6.8.3-1.fc45"
+
+[[packages]]
+name = "plasma-settings"
+comment = "oneplus-billie2-plasma-mobile"
+[[packages.conditions]]
+key = "evr"
+comparator = "="
+value = "26.08.3-1.fc45"
+
+[[packages]]
+name = "plasma-systemsettings"
+comment = "oneplus-billie2-plasma-mobile"
+[[packages.conditions]]
+key = "evr"
+comparator = "="
+value = "6.8.3-1.fc45"
+
+[[packages]]
+name = "plasma-union"
+comment = "oneplus-billie2-plasma-mobile"
+[[packages.conditions]]
+key = "evr"
+comparator = "="
+value = "6.8.3-1.fc45"
+
+[[packages]]
+name = "plasma-workspace"
+comment = "oneplus-billie2-plasma-mobile"
+[[packages.conditions]]
+key = "evr"
+comparator = "="
+value = "6.8.3-1.fc45"
+
+[[packages]]
+name = "plasma-workspace-common"
+comment = "oneplus-billie2-plasma-mobile"
+[[packages.conditions]]
+key = "evr"
+comparator = "="
+value = "6.8.3-1.fc45"
+
+[[packages]]
+name = "plasma-workspace-libs"
+comment = "oneplus-billie2-plasma-mobile"
+[[packages.conditions]]
+key = "evr"
+comparator = "="
+value = "6.8.3-1.fc45"
+
+[[packages]]
+name = "plasma5support"
+comment = "oneplus-billie2-plasma-mobile"
+[[packages.conditions]]
+key = "evr"
+comparator = "="
+value = "6.8.3-1.fc45"
+
+[[packages]]
+name = "polkit-kde"
+comment = "oneplus-billie2-plasma-mobile"
+[[packages.conditions]]
+key = "evr"
+comparator = "="
+value = "6.8.3-1.fc45"
+
+[[packages]]
+name = "polkit-qt6-1"
+comment = "oneplus-billie2-plasma-mobile"
+[[packages.conditions]]
+key = "evr"
+comparator = "="
+value = "0.201.1-2.fc45"
+
+[[packages]]
+name = "poly2tri"
+comment = "oneplus-billie2-plasma-mobile"
+[[packages.conditions]]
+key = "evr"
+comparator = "="
+value = "0.0^20130501hg26242d0aa7b8-8.fc45"
+
+[[packages]]
+name = "poppler-qt6"
+comment = "oneplus-billie2-plasma-mobile"
+[[packages.conditions]]
+key = "evr"
+comparator = "="
+value = "26.08.0-2.fc45"
+
+[[packages]]
+name = "powerdevil"
+comment = "oneplus-billie2-plasma-mobile"
+[[packages.conditions]]
+key = "evr"
+comparator = "="
+value = "6.8.3-1.fc45"
+
+[[packages]]
+name = "protobuf-cpp"
+comment = "oneplus-billie2-plasma-mobile"
+[[packages.conditions]]
+key = "evr"
+comparator = "="
+value = "6.33.5-7.fc45"
+
+[[packages]]
+name = "pugixml"
+comment = "oneplus-billie2-plasma-mobile"
+[[packages.conditions]]
+key = "evr"
+comparator = "="
+value = "1.16-2.fc45"
+
+[[packages]]
+name = "pulseaudio-libs-glib2"
+comment = "oneplus-billie2-plasma-mobile"
+[[packages.conditions]]
+key = "evr"
+comparator = "="
+value = "17.0-11.fc45"
+
+[[packages]]
+name = "pulseaudio-qt-qt6"
+comment = "oneplus-billie2-plasma-mobile"
+[[packages.conditions]]
+key = "evr"
+comparator = "="
+value = "1.8.1-2.fc45"
+
+[[packages]]
+name = "qaccessibilityclient-qt6"
+comment = "oneplus-billie2-plasma-mobile"
+[[packages.conditions]]
+key = "evr"
+comparator = "="
+value = "0.6.0-6.fc45"
+
+[[packages]]
+name = "qca-qt6"
+comment = "oneplus-billie2-plasma-mobile"
+[[packages.conditions]]
+key = "evr"
+comparator = "="
+value = "2.3.12-1.fc45"
+
+[[packages]]
+name = "qca-qt6-ossl"
+comment = "oneplus-billie2-plasma-mobile"
+[[packages.conditions]]
+key = "evr"
+comparator = "="
+value = "2.3.12-1.fc45"
+
+[[packages]]
+name = "qcom-firmware"
+comment = "oneplus-billie2-plasma-mobile"
+[[packages.conditions]]
+key = "evr"
+comparator = "="
+value = "20261019-1.fc45"
+
+[[packages]]
+name = "qcoro-qt6"
+comment = "oneplus-billie2-plasma-mobile"
+[[packages.conditions]]
+key = "evr"
+comparator = "="
+value = "0.12.0-7.fc45"
+
+[[packages]]
+name = "qqc2-breeze-style"
 comment = "oneplus-billie2-plasma-mobile"
 [[packages.conditions]]
 key = "evr"
@@ -108,12 +1948,316 @@ comparator = "="
 value = "1.2-3.fc45"
 
 [[packages]]
+name = "qt6-filesystem"
+comment = "oneplus-billie2-plasma-mobile"
+[[packages.conditions]]
+key = "evr"
+comparator = "="
+value = "6.11.2-1.fc45"
+
+[[packages]]
+name = "qt6-qt5compat"
+comment = "oneplus-billie2-plasma-mobile"
+[[packages.conditions]]
+key = "evr"
+comparator = "="
+value = "6.11.2-1.fc45"
+
+[[packages]]
+name = "qt6-qtbase"
+comment = "oneplus-billie2-plasma-mobile"
+[[packages.conditions]]
+key = "evr"
+comparator = "="
+value = "6.11.2-3.fc45"
+
+[[packages]]
+name = "qt6-qtbase-common"
+comment = "oneplus-billie2-plasma-mobile"
+[[packages.conditions]]
+key = "evr"
+comparator = "="
+value = "6.11.2-3.fc45"
+
+[[packages]]
+name = "qt6-qtbase-gui"
+comment = "oneplus-billie2-plasma-mobile"
+[[packages.conditions]]
+key = "evr"
+comparator = "="
+value = "6.11.2-3.fc45"
+
+[[packages]]
+name = "qt6-qtdeclarative"
+comment = "oneplus-billie2-plasma-mobile"
+[[packages.conditions]]
+key = "evr"
+comparator = "="
+value = "6.11.2-3.fc45"
+
+[[packages]]
+name = "qt6-qtlocation"
+comment = "oneplus-billie2-plasma-mobile"
+[[packages.conditions]]
+key = "evr"
+comparator = "="
+value = "6.11.2-1.fc45"
+
+[[packages]]
+name = "qt6-qtmultimedia"
+comment = "oneplus-billie2-plasma-mobile"
+[[packages.conditions]]
+key = "evr"
+comparator = "="
+value = "6.11.2-2.fc45"
+
+[[packages]]
+name = "qt6-qtpdf"
+comment = "oneplus-billie2-plasma-mobile"
+[[packages.conditions]]
+key = "evr"
+comparator = "="
+value = "6.11.2-4.fc45"
+
+[[packages]]
+name = "qt6-qtpositioning"
+comment = "oneplus-billie2-plasma-mobile"
+[[packages.conditions]]
+key = "evr"
+comparator = "="
+value = "6.11.2-1.fc45"
+
+[[packages]]
+name = "qt6-qtquick3d"
+comment = "oneplus-billie2-plasma-mobile"
+[[packages.conditions]]
+key = "evr"
+comparator = "="
+value = "6.11.2-1.fc45"
+
+[[packages]]
+name = "qt6-qtquicktimeline"
+comment = "oneplus-billie2-plasma-mobile"
+[[packages.conditions]]
+key = "evr"
+comparator = "="
+value = "6.11.2-1.fc45"
+
+[[packages]]
+name = "qt6-qtserialport"
+comment = "oneplus-billie2-plasma-mobile"
+[[packages.conditions]]
+key = "evr"
+comparator = "="
+value = "6.11.2-1.fc45"
+
+[[packages]]
+name = "qt6-qtshadertools"
+comment = "oneplus-billie2-plasma-mobile"
+[[packages.conditions]]
+key = "evr"
+comparator = "="
+value = "6.11.2-1.fc45"
+
+[[packages]]
+name = "qt6-qtspeech"
+comment = "oneplus-billie2-plasma-mobile"
+[[packages.conditions]]
+key = "evr"
+comparator = "="
+value = "6.11.2-1.fc45"
+
+[[packages]]
+name = "qt6-qtsvg"
+comment = "oneplus-billie2-plasma-mobile"
+[[packages.conditions]]
+key = "evr"
+comparator = "="
+value = "6.11.2-1.fc45"
+
+[[packages]]
+name = "qt6-qttools"
+comment = "oneplus-billie2-plasma-mobile"
+[[packages.conditions]]
+key = "evr"
+comparator = "="
+value = "6.11.2-2.fc45"
+
+[[packages]]
+name = "qt6-qttools-common"
+comment = "oneplus-billie2-plasma-mobile"
+[[packages.conditions]]
+key = "evr"
+comparator = "="
+value = "6.11.2-2.fc45"
+
+[[packages]]
+name = "qt6-qtvirtualkeyboard"
+comment = "oneplus-billie2-plasma-mobile"
+[[packages.conditions]]
+key = "evr"
+comparator = "="
+value = "6.11.2-1.fc45"
+
+[[packages]]
+name = "qt6-qtwayland"
+comment = "oneplus-billie2-plasma-mobile"
+[[packages.conditions]]
+key = "evr"
+comparator = "="
+value = "6.11.2-1.fc45"
+
+[[packages]]
+name = "qt6-qtwebchannel"
+comment = "oneplus-billie2-plasma-mobile"
+[[packages.conditions]]
+key = "evr"
+comparator = "="
+value = "6.11.2-1.fc45"
+
+[[packages]]
+name = "qt6-qtwebengine"
+comment = "oneplus-billie2-plasma-mobile"
+[[packages.conditions]]
+key = "evr"
+comparator = "="
+value = "6.11.2-4.fc45"
+
+[[packages]]
+name = "qt6-qtwebsockets"
+comment = "oneplus-billie2-plasma-mobile"
+[[packages.conditions]]
+key = "evr"
+comparator = "="
+value = "6.11.2-1.fc45"
+
+[[packages]]
+name = "qt6-qtwebview"
+comment = "oneplus-billie2-plasma-mobile"
+[[packages.conditions]]
+key = "evr"
+comparator = "="
+value = "6.11.2-1.fc45"
+
+[[packages]]
+name = "qtkeychain-qt6"
+comment = "oneplus-billie2-plasma-mobile"
+[[packages.conditions]]
+key = "evr"
+comparator = "="
+value = "0.17.0-1.fc45"
+
+[[packages]]
+name = "re2"
+comment = "oneplus-billie2-plasma-mobile"
+[[packages.conditions]]
+key = "evr"
+comparator = "="
+value = "2:20251105-19.fc45"
+
+[[packages]]
+name = "redhat-menus"
+comment = "oneplus-billie2-plasma-mobile"
+[[packages.conditions]]
+key = "evr"
+comparator = "="
+value = "12.0.2-42.fc45"
+
+[[packages]]
 name = "rmtfs"
 comment = "oneplus-billie2-plasma-mobile"
 [[packages.conditions]]
 key = "evr"
 comparator = "="
 value = "1.3-1.fc45"
+
+[[packages]]
+name = "sddm"
+comment = "oneplus-billie2-plasma-mobile"
+[[packages.conditions]]
+key = "evr"
+comparator = "="
+value = "0.21.0-16.fc45"
+
+[[packages]]
+name = "sddm-wayland-plasma"
+comment = "oneplus-billie2-plasma-mobile"
+[[packages.conditions]]
+key = "evr"
+comparator = "="
+value = "6.8.3-1.fc45"
+
+[[packages]]
+name = "setxkbmap"
+comment = "oneplus-billie2-plasma-mobile"
+[[packages.conditions]]
+key = "evr"
+comparator = "="
+value = "1.3.5-7.fc45"
+
+[[packages]]
+name = "sgml-common"
+comment = "oneplus-billie2-plasma-mobile"
+[[packages.conditions]]
+key = "evr"
+comparator = "="
+value = "0.6.3-70.fc45"
+
+[[packages]]
+name = "signon"
+comment = "oneplus-billie2-plasma-mobile"
+[[packages.conditions]]
+key = "evr"
+comparator = "="
+value = "8.60^20240205.c8ad982-6.fc45"
+
+[[packages]]
+name = "signon-plugin-oauth2"
+comment = "oneplus-billie2-plasma-mobile"
+[[packages.conditions]]
+key = "evr"
+comparator = "="
+value = "0.25^20231216.fab6988-8.fc45"
+
+[[packages]]
+name = "signon-qt6"
+comment = "oneplus-billie2-plasma-mobile"
+[[packages.conditions]]
+key = "evr"
+comparator = "="
+value = "8.60^20240205.c8ad982-6.fc45"
+
+[[packages]]
+name = "socat"
+comment = "oneplus-billie2-plasma-mobile"
+[[packages.conditions]]
+key = "evr"
+comparator = "="
+value = "1.8.1.3-1.fc45"
+
+[[packages]]
+name = "source-foundry-hack-fonts"
+comment = "oneplus-billie2-plasma-mobile"
+[[packages.conditions]]
+key = "evr"
+comparator = "="
+value = "3.003-8.fc45"
+
+[[packages]]
+name = "sudo"
+comment = "oneplus-billie2-plasma-mobile"
+[[packages.conditions]]
+key = "evr"
+comparator = "="
+value = "1.9.17-18.p2.fc45"
+
+[[packages]]
+name = "systemd-pam"
+comment = "oneplus-billie2-plasma-mobile"
+[[packages.conditions]]
+key = "evr"
+comparator = "="
+value = "262.1-1.fc45"
 
 [[packages]]
 name = "tqftpserv"
@@ -124,9 +2268,161 @@ comparator = "="
 value = "1.3-1.fc45"
 
 [[packages]]
+name = "tslib"
+comment = "oneplus-billie2-plasma-mobile"
+[[packages.conditions]]
+key = "evr"
+comparator = "="
+value = "1.24-3.fc45"
+
+[[packages]]
+name = "unity-gtk-module-common"
+comment = "oneplus-billie2-plasma-mobile"
+[[packages.conditions]]
+key = "evr"
+comparator = "="
+value = "0.0.0+17.04.20170403-25.fc45"
+
+[[packages]]
+name = "unity-gtk3-module"
+comment = "oneplus-billie2-plasma-mobile"
+[[packages.conditions]]
+key = "evr"
+comparator = "="
+value = "0.0.0+17.04.20170403-25.fc45"
+
+[[packages]]
+name = "upower"
+comment = "oneplus-billie2-plasma-mobile"
+[[packages.conditions]]
+key = "evr"
+comparator = "="
+value = "1.91.5-1.fc45"
+
+[[packages]]
 name = "usbutils"
 comment = "oneplus-billie2-plasma-mobile"
 [[packages.conditions]]
 key = "evr"
 comparator = "="
 value = "019-3.fc45"
+
+[[packages]]
+name = "wireplumber"
+comment = "oneplus-billie2-plasma-mobile"
+[[packages.conditions]]
+key = "evr"
+comparator = "="
+value = "0.5.19-1.fc45"
+
+[[packages]]
+name = "xcb-util-cursor"
+comment = "oneplus-billie2-plasma-mobile"
+[[packages.conditions]]
+key = "evr"
+comparator = "="
+value = "0.1.6-3.fc45"
+
+[[packages]]
+name = "xcb-util-image"
+comment = "oneplus-billie2-plasma-mobile"
+[[packages.conditions]]
+key = "evr"
+comparator = "="
+value = "0.4.1-10.fc45"
+
+[[packages]]
+name = "xcb-util-keysyms"
+comment = "oneplus-billie2-plasma-mobile"
+[[packages.conditions]]
+key = "evr"
+comparator = "="
+value = "0.4.1-10.fc45"
+
+[[packages]]
+name = "xcb-util-renderutil"
+comment = "oneplus-billie2-plasma-mobile"
+[[packages.conditions]]
+key = "evr"
+comparator = "="
+value = "0.3.10-10.fc45"
+
+[[packages]]
+name = "xcb-util-wm"
+comment = "oneplus-billie2-plasma-mobile"
+[[packages.conditions]]
+key = "evr"
+comparator = "="
+value = "0.4.2-10.fc45"
+
+[[packages]]
+name = "xdg-desktop-portal-kde"
+comment = "oneplus-billie2-plasma-mobile"
+[[packages.conditions]]
+key = "evr"
+comparator = "="
+value = "6.8.3-1.fc45"
+
+[[packages]]
+name = "xdg-user-dirs"
+comment = "oneplus-billie2-plasma-mobile"
+[[packages.conditions]]
+key = "evr"
+comparator = "="
+value = "0.20-2.fc45"
+
+[[packages]]
+name = "xhost"
+comment = "oneplus-billie2-plasma-mobile"
+[[packages.conditions]]
+key = "evr"
+comparator = "="
+value = "1.0.10-3.fc45"
+
+[[packages]]
+name = "xmessage"
+comment = "oneplus-billie2-plasma-mobile"
+[[packages.conditions]]
+key = "evr"
+comparator = "="
+value = "1.0.7-10.fc45"
+
+[[packages]]
+name = "xmodmap"
+comment = "oneplus-billie2-plasma-mobile"
+[[packages.conditions]]
+key = "evr"
+comparator = "="
+value = "1.0.12-4.fc45"
+
+[[packages]]
+name = "xorg-x11-xauth"
+comment = "oneplus-billie2-plasma-mobile"
+[[packages.conditions]]
+key = "evr"
+comparator = "="
+value = "1:1.1.5-6.fc45"
+
+[[packages]]
+name = "xorg-x11-xinit"
+comment = "oneplus-billie2-plasma-mobile"
+[[packages.conditions]]
+key = "evr"
+comparator = "="
+value = "1.4.3-6.fc45"
+
+[[packages]]
+name = "xrdb"
+comment = "oneplus-billie2-plasma-mobile"
+[[packages.conditions]]
+key = "evr"
+comparator = "="
+value = "1.2.3-3.fc45"
+
+[[packages]]
+name = "zxing-cpp"
+comment = "oneplus-billie2-plasma-mobile"
+[[packages.conditions]]
+key = "evr"
+comparator = "="
+value = "2.2.1-9.fc45"

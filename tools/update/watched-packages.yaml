@@ -41,19 +41,20 @@ watched:
     upstream: {}
 
   - id: plasma
-    match: [sddm, "sddm-*", plasma-login-manager, plasma-mobile, "plasma-mobile-*", "kwin*", plasma-workspace, plasma-setup]
-    why: autologin via SDDM (Plasma Login replaced), plasma-setup masked, KWin needs a logind session
+    match: [sddm, "sddm-*", plasma-mobile, "plasma-mobile-*", "kwin*", plasma-workspace, plasma-desktop, plasma-keyboard, plasma-systemsettings]
+    why: desktops/plasma-mobile/packages is an explicit list without weak deps (decision 0003); autologin via SDDM (Plasma Login and plasma-setup not installed), plasma-keyboard is the OSK plasma-mobile-envmanager configures, KWin needs a logind session; a new hard dependency or a renamed package changes the image
     recipe: ["#plasma-mobile-on-a-minimal-fedora-root"]
     test:
       - boots straight into Plasma Mobile (SDDM autologin, no setup wizard)
       - rotation, on-screen keyboard, lock screen
+      - "lock diff: no unexpected new packages (e.g. a new hard dep pulling a desktop app)"
     keywords: [plasma mobile, plasma-mobile, kwin drm, sddm autologin, phone]
     upstream:
       kde: [plasma-mobile, kwin]
 
   - id: pipewire
     match: [pipewire, "pipewire-*", wireplumber, "wireplumber-*"]
-    why: no sound card on the N100 yet; a PipeWire null sink keeps apps from crashing
+    why: base layer audio; the N100 (no sound card yet) gets a PipeWire null sink from its device layer so apps don't crash
     recipe: ["#apps-crash-with-no-sound-card-pipewire-null-sink"]
     test:
       - "pactl info: default sink is the null sink"

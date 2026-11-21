@@ -1,16 +1,31 @@
 #!/usr/bin/env bash
 # SPDX-License-Identifier: AGPL-3.0-or-later
-# Apply one layer folder to the image being built. Runs inside the container
-# build (see Containerfile).
+# Apply one layer folder to the root being built: the bootc image
+# (Containerfile) or a RAM-boot dev root (boot/android-bootimg/make-devroot.sh).
 #
-# A layer folder may contain:
-#   rootfs/   copied over / as-is (use rootfs/usr and rootfs/etc only)
-#   build     executable script, run with the layer folder as working dir
-# Both are optional.
+# A layer folder may contain, applied in this order:
+#   packages          package list (tools/image/install-packages: no weak deps)
+#   packages.<target> packages only for that target (e.g. packages.image)
+#   rootfs/           copied over / as-is (use rootfs/usr and rootfs/etc only)
+#   build             executable script, run with the layer folder as working
+#                     dir; configures (services, config edits). Packages go
+#                     in the lists, which tools/update/lock.py pins; the one
+#                     exception is a device's kernel swap (image only).
+# All optional. FAP_TARGET says what is being built: "image" (bootc, the
+# default) or "devroot"; build scripts skip what doesn't apply (e.g. dracut
+# in a dev root, whose kernel and initramfs come from the RAM boot image).
 set -euxo pipefail
 
 layer=${1:?usage: run-layer <layer-dir>}
 [ -d "$layer" ] || { echo "no such layer: $layer" >&2; exit 1; }
+export FAP_TARGET=${FAP_TARGET:-image}
+here=$(cd "$(dirname "$0")" && pwd)
+
+for list in "$layer/packages" "$layer/packages.$FAP_TARGET"; do
+    if [ -f "$list" ]; then
+        "$here/install-packages" "$list"
+    fi
+done
 
 if [ -d "$layer/rootfs" ]; then
     # Only /usr and /etc are safe to ship in a bootc image; /var is created at

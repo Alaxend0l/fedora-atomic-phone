@@ -1,0 +1,44 @@
+# SPDX-License-Identifier: AGPL-3.0-or-later
+# Dev root: the netroot (kernel modules, SSH key, root shells, the device's
+# RAM-boot overlay) plus the same layers the bootc image is built from:
+# base → desktop → opt-in layers → device (docs/decisions/0003). For RAM
+# boots (tiny-init fap.netroot=) or as a plain ext4 root (fap.root=,
+# --installroot). Built by make-devroot.sh, which fills the context:
+#   layers/{base,desktop,device,layers/<name>,tools}  copies of the repo folders
+#   finalize                                          ./finalize
+#   pin/                                              versionlock (FAP_PINNED=1) or empty
+
+ARG NETROOT_IMAGE=localhost/fap-netroot:latest
+
+FROM scratch AS ctx
+COPY layers/ /
+COPY finalize /finalize
+
+FROM ${NETROOT_IMAGE}
+
+ARG DEVICE
+ARG DESKTOP
+ARG LAYERS=""
+ARG INSTALLROOT=""
+ENV FAP_TARGET=devroot FAP_DEVICE=${DEVICE} FAP_DESKTOP=${DESKTOP}
+
+COPY pin/ /
+
+RUN --mount=type=bind,from=ctx,source=/,target=/ctx \
+    --mount=type=cache,target=/var/cache/libdnf5 \
+    /ctx/tools/run-layer /ctx/base
+
+RUN --mount=type=bind,from=ctx,source=/,target=/ctx \
+    --mount=type=cache,target=/var/cache/libdnf5 \
+    /ctx/tools/run-layer /ctx/desktop
+
+RUN --mount=type=bind,from=ctx,source=/,target=/ctx \
+    --mount=type=cache,target=/var/cache/libdnf5 \
+    for l in ${LAYERS}; do /ctx/tools/run-layer "/ctx/layers/$l" || exit 1; done
+
+RUN --mount=type=bind,from=ctx,source=/,target=/ctx \
+    --mount=type=cache,target=/var/cache/libdnf5 \
+    /ctx/tools/run-layer /ctx/device
+
+RUN --mount=type=bind,from=ctx,source=/,target=/ctx \
+    INSTALLROOT="${INSTALLROOT}" /ctx/finalize

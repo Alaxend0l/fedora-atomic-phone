@@ -14,57 +14,58 @@ Status: **works** · **partial** (works with limits or a workaround) ·
 | Device | Name | SoC | Status | Boot method | Maintainer | Works | Updated |
 |---|---|---|---|---|---|---|---|
 | [`oneplus-billie2`](../devices/oneplus-billie2/README.md) | OnePlus Nord N100 | qcom-sm6115 | usable | uboot-android | Alaxend0l | 11/46 (+6 partial) | 2026-11-20 |
+| [`oneplus-waffle`](../devices/oneplus-waffle/README.md) | OnePlus 12 | qcom-sm8650 | planned | android-bootimg | Alaxend0l | 0/46 (+0 partial) | 2026-11-20 |
 
 ## Feature matrix
 
-| Group | Feature | `oneplus-billie2` |
-|---|---|---|
-| core | RAM boot (fastboot boot) dev loop | works |
-| core | Boot from internal storage | works |
-| core | USB networking / serial (gadget) | works |
-| core | CPU frequency scaling | works |
-| core | Thermal zones and cooling | partial |
-| core | Suspend (s2idle) | untested |
-| core | Reboot to bootloader from Linux | broken |
-| core | Crash logs (ramoops/pstore) | untested |
-| display | Display panel | works |
-| display | Backlight | works |
-| display | GPU acceleration | partial |
-| display | Hardware video decode/encode | broken |
-| input | Buttons (power, volume) | works |
-| input | Touchscreen | works |
-| connectivity | Wi-Fi | partial |
-| connectivity | Bluetooth | broken |
-| connectivity | USB host / OTG | broken |
-| connectivity | Hotspot / USB tethering | untested |
-| connectivity | NFC | untested |
-| audio | Loudspeaker | broken |
-| audio | Earpiece | broken |
-| audio | Headphone jack / USB-C audio | broken |
-| audio | Microphones | broken |
-| power | Battery level | partial |
-| power | Charging and charge status | partial |
-| power | Fast charging | broken |
-| sensors | Vibrator / haptics | works |
-| sensors | Accelerometer / gyroscope (rotation) | broken |
-| sensors | Proximity sensor | broken |
-| sensors | Ambient light sensor | broken |
-| sensors | Magnetometer | broken |
-| sensors | Fingerprint reader | broken |
-| sensors | microSD card | untested |
-| sensors | Notification LED | n-a |
-| cameras | Rear camera | broken |
-| cameras | Front camera | broken |
-| cameras | Camera flash / torch | broken |
-| telephony | Modem firmware boots | partial |
-| telephony | SIM detection | untested |
-| telephony | SMS | untested |
-| telephony | Mobile data | broken |
-| telephony | Voice calls (incl. call audio) | broken |
-| telephony | GNSS / GPS | untested |
-| software | Mobile desktop (Plasma Mobile / Phosh) | works |
-| software | Android apps (Waydroid) | works |
-| software | Image updates (bootc upgrade/rollback) | broken |
+| Group | Feature | `oneplus-billie2` | `oneplus-waffle` |
+|---|---|---|---|
+| core | RAM boot (fastboot boot) dev loop | works | untested |
+| core | Boot from internal storage | works | untested |
+| core | USB networking / serial (gadget) | works | untested |
+| core | CPU frequency scaling | works | untested |
+| core | Thermal zones and cooling | partial | untested |
+| core | Suspend (s2idle) | untested | untested |
+| core | Reboot to bootloader from Linux | broken | untested |
+| core | Crash logs (ramoops/pstore) | untested | untested |
+| display | Display panel | works | untested |
+| display | Backlight | works | untested |
+| display | GPU acceleration | partial | untested |
+| display | Hardware video decode/encode | broken | untested |
+| input | Buttons (power, volume) | works | untested |
+| input | Touchscreen | works | untested |
+| connectivity | Wi-Fi | partial | untested |
+| connectivity | Bluetooth | broken | untested |
+| connectivity | USB host / OTG | broken | untested |
+| connectivity | Hotspot / USB tethering | untested | untested |
+| connectivity | NFC | untested | untested |
+| audio | Loudspeaker | broken | broken |
+| audio | Earpiece | broken | broken |
+| audio | Headphone jack / USB-C audio | broken | untested |
+| audio | Microphones | broken | untested |
+| power | Battery level | partial | untested |
+| power | Charging and charge status | partial | untested |
+| power | Fast charging | broken | untested |
+| sensors | Vibrator / haptics | works | untested |
+| sensors | Accelerometer / gyroscope (rotation) | broken | untested |
+| sensors | Proximity sensor | broken | untested |
+| sensors | Ambient light sensor | broken | untested |
+| sensors | Magnetometer | broken | untested |
+| sensors | Fingerprint reader | broken | untested |
+| sensors | microSD card | untested | untested |
+| sensors | Notification LED | n-a | untested |
+| cameras | Rear camera | broken | untested |
+| cameras | Front camera | broken | untested |
+| cameras | Camera flash / torch | broken | untested |
+| telephony | Modem firmware boots | partial | untested |
+| telephony | SIM detection | untested | untested |
+| telephony | SMS | untested | untested |
+| telephony | Mobile data | broken | untested |
+| telephony | Voice calls (incl. call audio) | broken | untested |
+| telephony | GNSS / GPS | untested | untested |
+| software | Mobile desktop (Plasma Mobile / Phosh) | works | untested |
+| software | Android apps (Waydroid) | works | untested |
+| software | Image updates (bootc upgrade/rollback) | broken | untested |
 
 ## OnePlus Nord N100 (`oneplus-billie2`)
 
@@ -115,6 +116,59 @@ From [devices/oneplus-billie2/features.yaml](../devices/oneplus-billie2/features
 | Mobile data | broken | needs the IPA v4.2 node (from agatti) and rmnet | [n100-telephony-bt-gnss.md](../docs/hardware/n100-telephony-bt-gnss.md) |
 | Voice calls (incl. call audio) | broken | call audio needs q6voice and a sound card | [n100-telephony-bt-gnss.md](../docs/hardware/n100-telephony-bt-gnss.md) |
 | GNSS / GPS | untested | QMI LOC + geoclue not tried | [n100-telephony-bt-gnss.md](../docs/hardware/n100-telephony-bt-gnss.md) |
-| Mobile desktop (Plasma Mobile / Phosh) | works | Fedora 45 + Plasma Mobile from userdata (installroot), autologin | `2c68e81` |
+| Mobile desktop (Plasma Mobile / Phosh) | works | Fedora 45 + Plasma Mobile from userdata (installroot), autologin; shown with the old @kde-mobile-environment root, the explicit-list rebuild (decision 0003) not booted yet | `2c68e81` |
 | Android apps (Waydroid) | works | Android 13 on Rust binder, GPU via freedreno with noubwc; no audio; ~1 min first start | [waydroid.md](../docs/waydroid.md) |
 | Image updates (bootc upgrade/rollback) | broken | installed root is a plain ext4 tarball; bootc/ostree + fap-android-boot not done | [README.md](../boot/android-bootimg/README.md) |
+
+## OnePlus 12 (`oneplus-waffle`)
+
+From [devices/oneplus-waffle/features.yaml](../devices/oneplus-waffle/features.yaml), updated 2026-11-20.
+
+| Feature | Status | Notes | Evidence |
+|---|---|---|---|
+| RAM boot (fastboot boot) dev loop | untested | stock boot_a RAM-boots (2026-11-20, USB 2.0 cable only); our uniLoader images built, not booted |  |
+| Boot from internal storage | untested | nothing written; RAM boots only until first light works |  |
+| USB networking / serial (gadget) | untested | DT forces dwc3 peripheral + high speed (eUSB2 only); gadget built into the kernel |  |
+| CPU frequency scaling | untested |  |  |
+| Thermal zones and cooling | untested |  |  |
+| Suspend (s2idle) | untested |  |  |
+| Reboot to bootloader from Linux | untested |  |  |
+| Crash logs (ramoops/pstore) | untested | ramoops at 0x85000000 (0x240000) in DaDDevil's DT; PSTORE_RAM built in |  |
+| Display panel | untested | first light: simple-framebuffer on the splash buffer 0xd5100000 (1440x3168); panel-boe-aa545 in DaDDevil's tree (module), MDSS off |  |
+| Backlight | untested |  |  |
+| GPU acceleration | untested | v7: Adreno 750 (msm/freedreno), gpucc built in, Fedora SQE/GMU + unit zap shader, mesa in the netroot; built, not tested |  |
+| Hardware video decode/encode | untested | v7: Iris (vpu33) with the unit vpu33_4v.mbn; built, not tested |  |
+| Buttons (power, volume) | untested | power + volume up on PON (resin = vol up), volume down on PM8550 GPIO6 (DaDDevil's DT) |  |
+| Touchscreen | untested | Synaptics S3910 driver in DaDDevil's tree (module); SPI4 off in the first-light DT |  |
+| Wi-Fi | untested | WCN7850/ath12k upstream + DaDDevil's 0x1107 board-data fallback; PCIe off in the first-light DT |  |
+| Bluetooth | untested | v7: WCN7850 over UART14 (hci_qca), firmware from the bluetooth_a backup, bluez; built, not tested |  |
+| USB host / OTG | untested |  |  |
+| Hotspot / USB tethering | untested |  |  |
+| NFC | untested |  |  |
+| Loudspeaker | broken | 2x TFA9874 (i2c_hub_7): no driver, needs OnePlus tuning container from vendor; kept off | [README.md](../devices/oneplus-waffle/README.md) |
+| Earpiece | broken | most likely the top TFA9874 (stereo); blocked with the speakers | [README.md](../devices/oneplus-waffle/README.md) |
+| Headphone jack / USB-C audio | untested | v6: WCD9395 HPH path on; USB-C analog switch (wcd939x-usbss, i2c3) still off |  |
+| Microphones | untested | v6: WCD9395 AMIC1/3/4/5 via SoundWire TX, UCM Mic1/3/4/5 |  |
+| Battery level | untested |  |  |
+| Charging and charge status | untested |  |  |
+| Fast charging | untested |  |  |
+| Vibrator / haptics | untested | v7: PM8550B LRA (qcom-spmi-haptics, DaDDevil) at the stock 1.72 V vmax; built, not tested |  |
+| Accelerometer / gyroscope (rotation) | untested |  |  |
+| Proximity sensor | untested |  |  |
+| Ambient light sensor | untested |  |  |
+| Magnetometer | untested |  |  |
+| Fingerprint reader | untested |  |  |
+| microSD card | untested |  |  |
+| Notification LED | untested |  |  |
+| Rear camera | untested |  |  |
+| Front camera | untested |  |  |
+| Camera flash / torch | untested |  |  |
+| Modem firmware boots | untested | mpss off in the first-light DT; ARB fuse 1: never flash firmware |  |
+| SIM detection | untested |  |  |
+| SMS | untested |  |  |
+| Mobile data | untested |  |  |
+| Voice calls (incl. call audio) | untested |  |  |
+| GNSS / GPS | untested |  |  |
+| Mobile desktop (Plasma Mobile / Phosh) | untested | Plasma Mobile RAM-boot dev root built (make-devroot.sh + fap-waffle-build.sh netroot, llvmpipe: GPU off in the DT); not booted | [make-devroot.sh](../boot/android-bootimg/make-devroot.sh) |
+| Android apps (Waydroid) | untested |  |  |
+| Image updates (bootc upgrade/rollback) | untested |  |  |

@@ -1,0 +1,29 @@
+#!/usr/bin/env bash
+# SPDX-License-Identifier: AGPL-3.0-or-later
+# OnePlus 12 device layer. Runs inside the build after ./packages and
+# ./rootfs (tools/image/run-layer). FAP_TARGET=image: the bootc image;
+# devroot: a RAM-boot dev root. Keep this script about *this* phone; anything
+# shared by a whole SoC family belongs in kernels/<soc>/ or a package.
+set -euxo pipefail
+source ./device.env
+
+# GPU (v7): Adreno 750 is on in the DT, so Mesa's freedreno (GL/GBM) and
+# turnip (Vulkan) render; no LIBGL/GBM_ALWAYS_SOFTWARE here any more (v5/v6
+# forced llvmpipe). The GPU firmware (Fedora SQE/GMU + the unit's zap
+# shader) is added outside the build: build-env/fap-waffle-build.sh netroot
+# or gpu-firmware. Without it the GPU fails to start and Mesa falls back to
+# llvmpipe on its own.
+
+if [ "$FAP_TARGET" = devroot ]; then
+    # Kernel modules, netroot/ (modules-load, fap-modem-ram) and this unit's
+    # firmware/EFS copies are added outside the container build, by
+    # build-env/fap-waffle-build.sh netroot (never in git, never published).
+    exit 0
+fi
+
+# Kernel: by default Fedora's kernel is already in the base image.
+if [ "$KERNEL_PACKAGE" != "fedora" ]; then
+    dnf5 -y remove kernel kernel-core kernel-modules kernel-modules-core || true
+    rm -rf /usr/lib/modules/*
+    dnf5 -y install "$KERNEL_PACKAGE"
+fi

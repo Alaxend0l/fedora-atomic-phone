@@ -1,0 +1,97 @@
+# SPDX-License-Identifier: AGPL-3.0-or-later
+# Plasma Mobile: the shell, what it needs at runtime, and its core apps.
+# Explicit list, no weak deps, no comps groups (docs/decisions/0003).
+# Checked on Fedora 45 aarch64 (2026-11-20, Plasma 6.8.3): resolves, and
+# compared with @kde-mobile-environment (mandatory: plasma-mobile,
+# plasma-mobile-sounds, plasma-setup) and its defaults. Left out on purpose:
+#   plasma-setup               first-run wizard; would replace our autologin
+#   plasma-login-manager,      Fedora 45's default greeter; SDDM autologin is
+#     kde-settings-plasmalogin   a plain config file (rootfs/etc/sddm.conf.d)
+#   plasma-discover-notifier   update notifier, ~300 MB resident
+#   plasma-discover-packagekit, -offline-updates
+#                              rpm updates don't apply to a bootc image
+#   maliit-keyboard            Plasma Mobile 6.8 uses plasma-keyboard
+#                              (plasma-mobile-envmanager sets InputMethod to
+#                              org.kde.plasma.keyboard.desktop)
+#   glibc-all-langpacks, the kde-mobile-apps group, firefox
+# Pulled in anyway by hard deps (can't be left out): plasma-desktop and
+# plasma-systemsettings (plasma-workspace → plasma-desktop; ./build hides
+# the desktop System Settings), qt6-qtwebengine (Discover → qt6-qtwebview,
+# ~250 MB), git-core (kf6-ktexteditor).
+
+# The shell. Hard-requires kwin, plasma-workspace, kscreen, plasma-nm,
+# plasma-pa, plasma-nano, feedbackd, qt6-qtwayland and the Fedora mobile
+# look-and-feel; listed here too where we rely on them directly.
+plasma-mobile
+# Ringtones and notification sounds (the group's mandatory list).
+plasma-mobile-sounds
+# Compositor (Wayland, DRM backend).
+kwin
+# Session, plasmashell, startplasma, portals, polkit agent.
+plasma-workspace
+# On-screen keyboard: what plasma-mobile-envmanager configures.
+plasma-keyboard
+
+# Core apps.
+# Mobile settings app (the desktop System Settings is hidden).
+plasma-settings
+# Phone calls (ModemManager comes from base).
+plasma-dialer
+# App store and updates UI (kept on purpose, decision 0003) with the
+# Flatpak backend and Flathub as a source.
+plasma-discover
+plasma-discover-flatpak
+flatpak
+# Flatpak hands the host's CA certificates to apps over p11-kit's server
+# (flatpak-session-helper); a weak dependency, so list it. Without it Fedora's
+# Firefox Flatpak fails every site with SEC_ERROR_UNKNOWN_ISSUER (2026-11-20).
+p11-kit-server
+fedora-flathub-remote
+
+# Shell applets and services.
+# Network applet and settings (NetworkManager from base).
+plasma-nm
+# Volume applet and settings (PipeWire from base).
+plasma-pa
+# Power management: screen dimming/blanking, suspend, brightness.
+powerdevil
+# Bluetooth applet and pairing (bluez from base).
+bluedevil
+# Display configuration: scale, rotation.
+kscreen
+# Portals for Flatpak apps: file chooser, screenshots, settings.
+xdg-desktop-portal-kde
+
+# Login: SDDM straight into the plasma-mobile session
+# (rootfs/etc/sddm.conf.d/50-fap-autologin.conf). SDDM needs a greeter
+# display server even with autologin: the KWin one (KWin is installed).
+sddm
+sddm-wayland-plasma
+
+# Fonts: Plasma's defaults (Noto Sans, Noto Sans Mono) and colour emoji.
+google-noto-sans-fonts
+google-noto-sans-mono-fonts
+google-noto-color-emoji-fonts
+
+# OpenGL/GBM drivers: freedreno (Adreno) and llvmpipe/kms_swrast for phones
+# whose GPU isn't up yet. Nothing hard-requires the drivers themselves.
+mesa-dri-drivers
+# KWin/phoc dlopen() libGLESv2.so.2 at runtime (no RPM dependency); without it
+# the compositor aborts in a loop. Found on the OnePlus 12, 2026-11-20.
+libglvnd-gles
+
+# Phone essentials (user's choice, 2026-11-20): what a phone needs out of the
+# box. Everything else from Fedora's kde-mobile-apps group is the opt-in layer
+# layers/apps-extra, or installable with Discover.
+angelfish
+kalk
+kclock
+kweather
+koko
+qmlkonsole
+spacebar
+elisa-player
+haruna
+krecorder
+okular-mobile
+qrca

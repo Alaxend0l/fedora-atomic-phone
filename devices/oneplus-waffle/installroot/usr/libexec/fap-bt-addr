@@ -1,0 +1,15 @@
+#!/bin/sh
+# SPDX-License-Identifier: AGPL-3.0-or-later
+# Give the WCN7850 Bluetooth controller an address. ABL writes the unit's
+# address into the stock DT (local-bd-address); our DT has none, so the
+# controller stays "unconfigured" and BlueZ ignores it. Use a stable, locally
+# administered address derived from /etc/machine-id.
+i=0
+until btmgmt config 2>/dev/null | grep -q "^hci0"; do
+    i=$((i + 1)); [ $i -ge 20 ] && exit 0   # already configured or no BT
+    sleep 1
+done
+h=$(sha256sum /etc/machine-id | cut -c1-10)
+a=$(printf "c2:%s:%s:%s:%s:%s" "$(echo "$h" | cut -c1-2)" "$(echo "$h" | cut -c3-4)" \
+    "$(echo "$h" | cut -c5-6)" "$(echo "$h" | cut -c7-8)" "$(echo "$h" | cut -c9-10)")
+exec btmgmt --index 0 public-addr "$a"

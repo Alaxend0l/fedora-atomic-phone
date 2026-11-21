@@ -189,7 +189,8 @@ Contents
   `firmware-name` directory and point the firmware search path there.
 - **Check:** `cat /sys/class/remoteproc/*/state`, `journalctl -u fap-tqftpserv`
   (which files the modem asked for).
-- **Where:** `409bb00`; boot/android-bootimg/netroot/rootfs/usr/libexec/fap-modem-ram.
+- **Where:** `409bb00`; devices/oneplus-billie2/netroot/usr/libexec/fap-modem-ram
+  (was in the generic netroot; the OnePlus 12 has its own in devices/oneplus-waffle/netroot/).
 
 ### Modem stalls when started early at boot
 - **Symptom:** at boot, sometimes no Wi‑Fi; the modem's watchdog fires
@@ -270,7 +271,8 @@ Contents
 - **Fix:** workaround: `FD_MESA_DEBUG=noubwc` in `/etc/environment` (and
   `debug.mesa...` properties for Waydroid). Real fix: align the kernel's
   ubwc_config with Mesa's a610 parameters (costs bandwidth until then).
-- **Where:** `2c68e81`; installroot/Containerfile; TODO.md Display.
+- **Where:** `2c68e81`; devices/oneplus-billie2/build (device layer since decision
+  0003; Waydroid's value in rootfs/usr/lib/fap/waydroid.conf); TODO.md Display.
 
 ## Userspace
 
@@ -280,17 +282,55 @@ Contents
 - **Cause:** a minimal root lacks `systemd-pam` (no logind session → KWin
   can't get DRM); `plasma-setup` (first-run wizard) takes over; NetworkManager
   deliberately ignores USB gadget interfaces, so nobody serves DHCP on `usb0`.
-- **Fix:** install `systemd-pam`; mask `plasma-setup.service`; SDDM with a
-  plain autologin config; a small dnsmasq unit for `usb0` (no DNS/gateway).
-- **Where:** `842c274`, `2c68e81`; boot/android-bootimg/installroot/Containerfile,
-  `rootfs/usr/lib/systemd/system/fap-usb-dhcp.service`.
+- **Fix:** install `systemd-pam`; don't install `plasma-setup` (explicit
+  package list, no weak deps; was: mask it); SDDM (+ `sddm-wayland-plasma`,
+  its greeter display server) with a plain autologin config; a small dnsmasq
+  unit for `usb0` (no DNS/gateway). Without weak deps also list `upower`
+  (battery state) and `pipewire-pulseaudio` (else dnf may pick pulseaudio
+  for plasma-pa's `pulseaudio-daemon`).
+- **Where:** `842c274`, `2c68e81`; now base/packages,
+  base/rootfs/usr/lib/systemd/system/fap-usb-dhcp.service,
+  desktops/plasma-mobile/ (packages, rootfs/etc/sddm.conf.d).
+
+### Plasma with no GPU yet: software rendering
+- **Symptom:** a new phone has display (msm KMS or simple-framebuffer) but
+  the GPU node is still disabled; KWin/Plasma should still come up.
+- **Cause:** with no render node Mesa first tries the hardware driver
+  (freedreno) and only then falls back; that path is noisy and untested here.
+- **Fix:** say it outright in the device layer: `LIBGL_ALWAYS_SOFTWARE=1`
+  and `GBM_ALWAYS_SOFTWARE=1` in `/etc/environment` (llvmpipe; KWin on
+  kms_swrast). `mesa-dri-drivers` carries both. Remove once the GPU is on.
+- **Where:** was devices/oneplus-waffle/build for the v5/v6 DT (`&gpu`
+  disabled); removed with v7 (GPU on). Without the GPU firmware Mesa falls
+  back to llvmpipe by itself.
+
+### Wi‑Fi by hand fails once NetworkManager runs
+- **Symptom:** in a Plasma (or phosh) root, the netroot's manual
+  `wpa_supplicant -i wlp1s0 …` + DHCP never associates or drops at once.
+- **Cause:** NetworkManager manages `wlp1s0` and runs its own supplicant
+  over D-Bus; a second one fights it.
+- **Fix:** go through NM: `fap-wifi <ssid>` (base/rootfs/usr/bin) asks for
+  the password (or reads `FAP_WIFI_PSK`) and installs a root-only keyfile
+  profile, never passing the PSK as an argument; or the Plasma settings.
+- **Where:** OnePlus 12 Plasma RAM root, 2026-11-20.
+
+### Hostname set in a container build doesn't stick
+- **Symptom:** the RAM root or installed root boots with a random or
+  default hostname although the Containerfile wrote `/etc/hostname`.
+- **Cause:** buildah/podman bind-mount `/etc/hostname` (and `hosts`,
+  `resolv.conf`) during every `RUN`, so the write lands in the mount, and
+  `podman export` leaves those files out anyway.
+- **Fix:** systemd's fallback: `DEFAULT_HOSTNAME=` in `/usr/lib/os-release`
+  (os-release(5)); dev roots set the device's codename there.
+- **Where:** boot/android-bootimg/devroot/finalize, netroot/Containerfile.
 
 ### Apps crash with no sound card: PipeWire null sink
 - **Symptom:** some apps segfault when opening audio (VLC in `MuteSet`).
 - **Cause:** no ALSA card at all → PipeWire has no sink.
 - **Fix:** a `support.null-audio-sink` in `pipewire.conf.d/`; remove it once
   the sound card exists.
-- **Where:** `74bc5ce`; installroot/rootfs/etc/pipewire/pipewire.conf.d/50-fap-null-sink.conf.
+- **Where:** `74bc5ce`; devices/oneplus-billie2/rootfs/etc/pipewire/pipewire.conf.d/50-fap-null-sink.conf
+  (device layer: only phones without a sound card).
 
 ### Waydroid on Fedora's Rust binder
 - **Symptom:** "no binder" worries: Fedora doesn't build the C binder.

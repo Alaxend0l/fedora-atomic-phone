@@ -1,0 +1,12 @@
+# SPDX-License-Identifier: AGPL-3.0-or-later
+[Unit]
+Description=Set the Bluetooth address (unconfigured WCN7850 controller)
+After=bluetooth.service
+Wants=bluetooth.service
+
+[Service]
+Type=oneshot
+ExecStart=/usr/libexec/fap-bt-addr
+
+[Install]
+WantedBy=bluetooth.target
