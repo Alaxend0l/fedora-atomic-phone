@@ -1,0 +1,81 @@
+From: Alaxendol <alecjakopin@mailbox.org>
+Subject: [PATCH] rpmsg: glink: refuse reopen while a local close is pending
+
+ModemManager opens and closes the rpmsg_wwan_ctrl AT ports (DATA1, DATA4)
+several times within a millisecond at boot. Every open of the
+remote-initiated channel goes through qcom_glink_create_remote(), which
+allocates a new lcid (and takes a reference) for the same channel while
+the previous close is still waiting for its close-ack, and channel->lcid
+only remembers the latest one. Trace on OnePlus 12 (SM8650), DATA4 gets
+lcids 2, 4, 6, 8 before the first close-ack arrives.
+
+qcom_glink_rx_close_ack() then removes channel->lcid (8) instead of the
+acked id (2), sets lcid to 0 and removes the rpmsg device, whose
+endpoint destroy sends a close for lcid 0. The later acks put further
+references, the ack for 8 hits "close ack on unknown channel", and
+lcids 2/4/6 stay in the idr pointing at a channel with a single
+reference. qcom_glink_native_remove() puts each of them at modem
+shutdown: refcount underflow / use-after-free, an oops in rmtfs, and
+with oops=panic a hang at every reboot.
+
+- qcom_glink_create_remote(): return -EBUSY while the channel still owns
+  an lcid (open, or close not yet acked).
+- qcom_glink_destroy_ept(): don't send a close without a local open.
+- qcom_glink_rx_close_ack(): remove the acked lcid, and clear
+  channel->lcid only if it is that one.
+
+AI-assisted (Claude).
+
+Upstream-Status: Pending [not submitted; drivers/rpmsg/qcom_glink_native.c
+  is unchanged from mainline here, so this is a candidate for
+  linux-remoteproc once tested]
+
+--- a/drivers/rpmsg/qcom_glink_native.c
++++ b/drivers/rpmsg/qcom_glink_native.c
+@@ -1290,6 +1290,17 @@
+ {
+ 	int ret;
+ 
++	/*
++	 * A local open (or a close still waiting for its close-ack) already
++	 * owns an lcid for this channel. Opening again would register a
++	 * second lcid for the same channel while channel->lcid only tracks
++	 * the latest one; the close-acks then remove the wrong ids and the
++	 * stale ones are put again in qcom_glink_native_remove() (refcount
++	 * underflow / use-after-free). Refuse until the previous close-ack.
++	 */
++	if (channel->lcid)
++		return -EBUSY;
++
+ 	qcom_glink_send_open_ack(glink, channel);
+ 
+ 	ret = qcom_glink_send_open_req(glink, channel);
+@@ -1417,6 +1428,15 @@
+ 	spin_lock_irqsave(&channel->recv_lock, flags);
+ 	channel->ept.cb = NULL;
+ 	spin_unlock_irqrestore(&channel->recv_lock, flags);
++
++	/*
++	 * No local open (never opened, or already closed and acked, e.g. when
++	 * qcom_glink_rx_close_ack() removes the rpmsg device and the core
++	 * destroys rpdev->ept): there is nothing to close, and a close for
++	 * lcid 0 only earns an ack for an unknown channel.
++	 */
++	if (!channel->lcid)
++		return;
+ 
+ 	qcom_glink_send_close_req(glink, channel);
+ }
+@@ -1754,8 +1774,10 @@
+ 		return;
+ 	}
+ 
+-	idr_remove(&glink->lcids, channel->lcid);
+-	channel->lcid = 0;
++	/* Remove the id that was acked, which is not always channel->lcid */
++	idr_remove(&glink->lcids, lcid);
++	if (channel->lcid == lcid)
++		channel->lcid = 0;
+ 	spin_unlock_irqrestore(&glink->idr_lock, flags);
+ 
+ 	/* Decouple the potential rpdev from the channel */
