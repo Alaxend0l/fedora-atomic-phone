@@ -6,6 +6,38 @@ notebooks (not in git; contain unit data) are `~/Develop/OnePlus12/`
 (`AGENTS.md` = safety rules, `log/2026-11-20-recon.md` = everything tested),
 `~/Develop/Pixel8/` and `~/Develop/UBports-N100/`.
 
+## Update 2026-11-21 (day): merged to main, phone state
+
+`oneplus12-camera` (= dualboot + speakers + camera groundwork) is merged
+into main. The phone (boot_b) runs kernel #20 = `install-suspend1`
+(oneplus12-speakers b7af6a7). Rollback images in
+`~/Develop/OnePlus12/backup/boot_b-20261121-*`. Logs and research:
+`~/Develop/OnePlus12/log/2026-11-21-*.md` (read these first).
+
+Done and on the phone:
+- GLINK refcount fix (0011): no shutdown oops; rmtfs no longer stops the
+  modem (modem stop resets the SoC, not root-caused).
+- pm_clk_resume fix (0012): an ADSP crash/restart no longer resets the
+  phone (sound card is gone until reboot afterwards).
+- Speakers (TFA9874, both): SD1 data line, MFC topology (topology .bin
+  override in /usr/lib/firmware on the phone), driver slot fix, UCM
+  speaker device (-12 dB cap), WirePlumber software-dsp protection
+  (HPF 400/300 Hz, limiter, RMS compressor, raw sink hidden).
+- ModemManager ignores the GLINK AT ports (udev rule; stops the re-probe loop).
+- Cleanup: no fap-audio modules-load list, BlueDevil launchState=enable,
+  mics as stock (Mic1 bottom, Mic2 top, Mic3 both; ADC_ULP bug avoided).
+- Suspend: s2idle via logind (sleep.conf.d/50-fap-waffle-sleep.conf), RTC
+  and power-key wake OK, screen stays on. Boot args: no *_ignore_unused,
+  fw_devlink.sync_state=timeout deferred_probe_timeout=30; QCE disabled.
+  DDR self-refresh works; CX collapse (cxsd) still blocked by the PCIe0
+  CESTA vote (patch attempt resets the SoC; archived in the log folder).
+  Owner set Plasma auto-suspend to "never" for testing.
+
+Next: camera stage 1 (front IMX615; branch commit aa182d4, not built yet:
+plan in research-cameras.md section 7; libcamera not yet installed on the
+phone). Open decisions: sensors, bootc migration (D1-D7), speaker
+protection stages 1+, PCIe CESTA, call/SMS wake, lockfile regeneration.
+
 ## Headline
 **Fedora (Plasma Mobile, GPU-accelerated) is installed on the OnePlus 12
 (waffle) and boots from storage**, with Waydroid. LineageOS's system is
@@ -65,7 +97,7 @@ rewrite slot b. Re-enable: `adb shell pm enable org.lineageos.updater`.
 | Alert slider | needs a new driver (MXM1120 hall sensors), plan in POWER.md |
 | Spontaneous resets | 2 tonight (sensors test; telephony build idle), cause unknown |
 
-## Branches (none merged to main yet; merge order suggestion)
+## Branches (2026-11-21: dualboot/speakers/camera merged to main; the rest as below)
 1. `minimal-layers`: layered images (decision 0003), phone-essentials apps,
    `layers/apps-extra`, `fap-wifi`, libglvnd-gles fix. Lockfiles need regenerating.
 2. `oneplus12-build` → `oneplus12-install` (INSTALL.md) → `oneplus12-dualboot`
