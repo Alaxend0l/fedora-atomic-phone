@@ -81,7 +81,7 @@ new file mode 100644
 index 000000000..fc046854c
 --- /dev/null
 +++ b/sound/soc/codecs/tfa9874.c
-@@ -0,0 +1,463 @@
+@@ -0,0 +1,488 @@
 +// SPDX-License-Identifier: GPL-2.0-only
 +/*
 + * NXP/Goodix TFA9874 (TFA2 family) mono class-D speaker amplifier, driven
@@ -176,6 +176,9 @@ index 000000000..fc046854c
 +#define TFA9874_TDM_CFG6		0x26
 +#define  TFA9874_TDM_CFG6_SPKS		GENMASK(3, 0)
 +#define  TFA9874_TDM_CFG6_DCS		GENMASK(7, 4)
++#define  TFA9874_TDM_CFG6_CSS		GENMASK(15, 12)
++#define TFA9874_TDM_CFG7		0x27
++#define  TFA9874_TDM_CFG7_VSS		GENMASK(3, 0)
 +#define TFA9874_AMP_CFG			0x52
 +#define  TFA9874_AMP_CFG_AMPGAIN	GENMASK(12, 5)
 +#define TFA9874_GAIN			0x61
@@ -204,6 +207,7 @@ index 000000000..fc046854c
 +	case TFA9874_CLK_CTRL:
 +	case TFA9874_TDM_CFG0 ... TFA9874_TDM_CFG3:
 +	case TFA9874_TDM_CFG6:
++	case TFA9874_TDM_CFG7:
 +	case TFA9874_AMP_CFG:
 +	case TFA9874_GAIN:
 +		return true;
@@ -387,6 +391,27 @@ index 000000000..fc046854c
 +	ret = ret ?: regmap_update_bits(tfa->regmap, TFA9874_TDM_CFG2,
 +					TFA9874_TDM_CFG2_SSIZE,
 +					FIELD_PREP(TFA9874_TDM_CFG2_SSIZE, width - 1));
++	/*
++	 * The other sink/source slots follow the speaker slot ("Amp Input"),
++	 * as in the vendor container for both amps: DC-DC sink (disabled,
++	 * TDMDCE = 0) and voltage sense on the other slot, current sense on
++	 * the speaker's own slot. The power-on DCS is slot 1, so with the
++	 * speaker on slot 1 as well the chip reports TDMLUTERR (seen on the
++	 * amp at 0x35, 2026-11-21).
++	 */
++	if (!ret) {
++		unsigned int c6, spks;
++
++		ret = regmap_read(tfa->regmap, TFA9874_TDM_CFG6, &c6);
++		spks = FIELD_GET(TFA9874_TDM_CFG6_SPKS, c6) & 1;
++		ret = ret ?: regmap_update_bits(tfa->regmap, TFA9874_TDM_CFG6,
++						TFA9874_TDM_CFG6_DCS | TFA9874_TDM_CFG6_CSS,
++						FIELD_PREP(TFA9874_TDM_CFG6_DCS, !spks) |
++						FIELD_PREP(TFA9874_TDM_CFG6_CSS, spks));
++		ret = ret ?: regmap_update_bits(tfa->regmap, TFA9874_TDM_CFG7,
++						TFA9874_TDM_CFG7_VSS,
++						FIELD_PREP(TFA9874_TDM_CFG7_VSS, !spks));
++	}
 +	if (ret) {
 +		dev_err(tfa->dev, "failed to configure the interface: %d\n", ret);
 +	} else {

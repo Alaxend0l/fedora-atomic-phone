@@ -39,15 +39,22 @@
 	status = "okay";
 };
 
-/* vdd-supply (L15B 1.8 V) and reset-gpios (173/178, high = reset) as the board DT has them. */
-&speaker_amp_bot {
-	compatible = "nxp,tfa9874";
-	#sound-dai-cells = <0>;
-	sound-name-prefix = "SpkrBot";
-};
-
-&speaker_amp_top {
+/*
+ * vdd-supply (L15B 1.8 V) and reset-gpios (173/178, high = reset) as the
+ * board DT has them. The board DT's labels are swapped: tested 2026-11-21
+ * (and stock mixer_paths: "handset" = TFA chip 1 = 0x34, profile
+ * "receiver"; 0x35's profile is "speakerR"), 0x34 drives the earpiece at
+ * the top and 0x35 the loudspeaker at the bottom. The prefixes name what
+ * the user hears. Stock stereo: earpiece = left slot, bottom = right slot.
+ */
+&speaker_amp_bot {	/* i2c 0x34: earpiece (top) */
 	compatible = "nxp,tfa9874";
 	#sound-dai-cells = <0>;
 	sound-name-prefix = "SpkrTop";
+};
+
+&speaker_amp_top {	/* i2c 0x35: loudspeaker (bottom) */
+	compatible = "nxp,tfa9874";
+	#sound-dai-cells = <0>;
+	sound-name-prefix = "SpkrBot";
 };
