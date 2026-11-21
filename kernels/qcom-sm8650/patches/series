@@ -3,3 +3,4 @@
 0001-power-sequencing-qcom-wcn-power-down-at-shutdown.patch
 0010-drm-panel-boe-aa545-keep-backlight-writes-off-the-bus-while-off.patch
 0011-rpmsg-glink-refuse-reopen-while-a-local-close-is-pending.patch
+0012-PM-clock_ops-fail-pm_clk_resume-when-a-clock-cannot-be-enabled.patch

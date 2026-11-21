@@ -1,0 +1,97 @@
+From: Alaxendol <alecjakopin@mailbox.org>
+Subject: [PATCH] PM: clock_ops: fail pm_clk_resume() when a clock cannot be enabled
+
+pm_clk_resume() logs a clock that fails to enable and returns 0, so the
+runtime-resume callback goes on to access the device with that clock off.
+
+On the OnePlus 12 (SM8650) the LPASS codec macros' clocks come from the
+ADSP (q6prm). On any ADSP stop or restart the VA macro gets
+runtime-resumed during the teardown, its clocks fail with -EIO
+("__pm_clk_enable: failed to enable clk ..., error -5"), and its
+regcache_sync() writes to the unclocked block: a bus error that the
+secure world turns into an immediate SoC reset. The macro drivers already
+handle a failing pm_clk_resume() (stay cache-only, return the error);
+they just never get one.
+
+Return the first error and disable the clocks enabled so far.
+
+AI-assisted (Claude). Tested on the phone 2026-11-21: ADSP recovery
+(debugfs crash) completes, phone stays up; before: SoC reset.
+
+Upstream-Status: Pending [not submitted; changes behaviour for every
+  pm_clk user, needs review before sending to linux-pm]
+--- a/drivers/base/power/clock_ops.c
++++ b/drivers/base/power/clock_ops.c
+@@ -144,7 +144,7 @@
+  * @dev: The device for the given clock
+  * @ce: PM clock entry corresponding to the clock.
+  */
+-static inline void __pm_clk_enable(struct device *dev, struct pm_clock_entry *ce)
++static inline int __pm_clk_enable(struct device *dev, struct pm_clock_entry *ce)
+ {
+ 	int ret;
+ 
+@@ -156,15 +156,35 @@
+ 		ret = clk_enable(ce->clk);
+ 		break;
+ 	default:
+-		return;
++		return 0;
+ 	}
+ 	if (!ret)
+ 		ce->status = PCE_STATUS_ENABLED;
+ 	else
+ 		dev_err(dev, "%s: failed to enable clk %p, error %d\n",
+ 			__func__, ce->clk, ret);
++
++	return ret;
+ }
+ 
++/* Disable every enabled clock of @psd, in reverse order (caller holds the lock) */
++static void __pm_clk_disable_all(struct pm_subsys_data *psd)
++{
++	struct pm_clock_entry *ce;
++
++	list_for_each_entry_reverse(ce, &psd->clock_list, node) {
++		if (ce->status == PCE_STATUS_ENABLED) {
++			if (ce->enabled_when_prepared) {
++				clk_disable_unprepare(ce->clk);
++				ce->status = PCE_STATUS_ACQUIRED;
++			} else {
++				clk_disable(ce->clk);
++				ce->status = PCE_STATUS_PREPARED;
++			}
++		}
++	}
++}
++
+ /**
+  * pm_clk_acquire - Acquire a device clock.
+  * @dev: Device whose clock is to be acquired.
+@@ -521,12 +541,23 @@
+ 	if (ret)
+ 		return ret;
+ 
+-	list_for_each_entry(ce, &psd->clock_list, node)
+-		__pm_clk_enable(dev, ce);
++	list_for_each_entry(ce, &psd->clock_list, node) {
++		ret = __pm_clk_enable(dev, ce);
++		if (ret) {
++			/*
++			 * Don't report success with a clock off: the caller
++			 * would touch registers of an unclocked block (on
++			 * Qualcomm LPASS, after the ADSP that provides the
++			 * clocks died, that is a bus error and a SoC reset).
++			 */
++			__pm_clk_disable_all(psd);
++			break;
++		}
++	}
+ 
+ 	pm_clk_op_unlock(psd, &flags);
+ 
+-	return 0;
++	return ret;
+ }
+ EXPORT_SYMBOL_GPL(pm_clk_resume);
+ 
