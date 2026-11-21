@@ -1,0 +1,8 @@
+# SPDX-License-Identifier: AGPL-3.0-or-later
+# Plasma's BlueDevil "remembers" the adapter power state per address and
+# turns the controller off 1 s after BlueZ powered it (it saved false once,
+# probably at a shutdown/suspend race, and keeps it). Phone policy: Bluetooth
+# on at login; the user can still switch it off for the session.
+# (2026-11-21, ~/Develop/OnePlus12/log/2026-11-21-research-boot-audio-cleanup.md)
+[General]
+launchState=enable
