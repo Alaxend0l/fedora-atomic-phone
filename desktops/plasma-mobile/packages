@@ -47,6 +47,11 @@ flatpak
 # Firefox Flatpak fails every site with SEC_ERROR_UNKNOWN_ISSUER (2026-11-20).
 p11-kit-server
 fedora-flathub-remote
+# Screenshots: Plasma Mobile's quick-settings "Screenshot" tile runs Spectacle
+# (nothing else provides one), and its desktop file authorises it for KWin's
+# screenshot interface, so it can also capture over ssh. 4 packages, ~8 MiB on
+# Fedora 45 aarch64 (2026-11-21).
+spectacle
 
 # Shell applets and services.
 # Network applet and settings (NetworkManager from base).
