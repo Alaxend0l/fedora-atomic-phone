@@ -198,3 +198,17 @@
 			"qcom/sm8650/oneplus/waffle/cdsp_dtb.mdt";
 	status = "okay";
 };
+
+/*
+ * Crash logs: the board DT's ramoops (0x85000000, 2.25 MiB) gives everything
+ * to pmsg/console and nothing to oops/panic dumps (no record-size), so
+ * resets left /sys/fs/pstore empty. Split it: 3 x 256 KiB dump records,
+ * 512 KiB console, 1 MiB pmsg, ECC on. (RESETS-GPS-RESEARCH.md, 2026-11-21.)
+ * Note: booting LineageOS reuses this RAM, so read pstore from our kernel.
+ */
+&{/reserved-memory/ramoops@85000000} {
+	record-size = <0x40000>;
+	console-size = <0x80000>;
+	pmsg-size = <0x100000>;
+	ecc-size = <16>;
+};
