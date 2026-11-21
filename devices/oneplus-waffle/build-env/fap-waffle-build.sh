@@ -591,7 +591,7 @@ stock_v2() {   # stock_v2 <variant> <out.img>: uniLoader + stock vendor_boot DTB
 # read-back of /dev/block/mapper/fap_root must give); outputs carry the
 # unit's firmware and EFS copies: local only.
 INSTALLROOT_SIZE=${INSTALLROOT_SIZE:-8589934592}
-INSTALLROOT_PKGS="qbootctl angelfish kalk kclock kweather koko qmlkonsole spacebar elisa-player haruna krecorder okular-mobile qrca"
+INSTALLROOT_PKGS="qbootctl angelfish kalk kclock kweather koko qmlkonsole spacebar elisa-player haruna krecorder okular-mobile qrca ladspa-swh-plugins pipewire-utils"
 cmd_installroot() {
   local R=/work/installroot IMG=/work/fap-root.img D=/out/install-images kver
   [[ -f /installroot-src.tar.gz ]] || die "set INSTALLROOT_SRC=<netroot.tar.gz>"

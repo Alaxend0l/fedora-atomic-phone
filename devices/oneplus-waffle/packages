@@ -14,3 +14,7 @@ atheros-firmware
 # Vulkan (turnip) for the Adreno 750; GL/GBM (freedreno) is mesa-dri-drivers
 # from the desktop layer. GPU firmware: build-env/fap-waffle-build.sh.
 mesa-vulkan-drivers
+
+# Speakers (TFA9874): the look-ahead limiter of the PipeWire protection
+# filter (installroot/usr/share/pipewire/pipewire.conf.d/50-fap-waffle-speaker-protection.conf).
+ladspa-swh-plugins

@@ -23,6 +23,8 @@ ModemManager
 pipewire
 wireplumber
 pipewire-pulseaudio
+# pw-dump, pw-cli, pw-top, pw-cat: needed to debug audio on the phone.
+pipewire-utils
 
 # Bluetooth daemon (the UIs only ship applets).
 bluez
