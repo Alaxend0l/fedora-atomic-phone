@@ -182,6 +182,84 @@ in fastboot, then RAM-boot the same image again and read
 Stop at any reset and do not retry blindly. Collect the logs (pstore and
 netconsole) first.
 
+## Step 2 results (2026-11-21, desk work, nothing run on the phone)
+
+### Fix A: topology built from m4, with an MFC (commit 3e56dfd)
+- Upstream `SM8550-HDK.m4` at linux-msm/audioreach-topology **d6bb205**
+  rebuilds Fedora's `qcom/kaanapali/Kaanapali-MTP-tplg.bin` (qcom-firmware
+  20261019, the file we install as `OnePlus 12-tplg.bin`) **byte for byte**.
+  So there is a real source for our topology, and the binary patcher can go.
+- `tplg/OnePlus-12-waffle.m4` = that file with the primary MI2S back end
+  replaced by SECONDARY_MI2S_RX (`I2S_INTF_TYPE_SECONDARY`, SD0) using
+  `tplg/audioreach/subgraph-device-i2s-playback-mfc.m4`, which is upstream's
+  I2S playback subgraph with `LOG -> MFC -> I2S_RX`, the same as the codec-DMA
+  playback subgraph. The kernel configures a device-graph MFC from the
+  back-end hw_params (`audioreach_set_media_format`, `MODULE_ID_MFC`), so no
+  kernel change is needed for A.
+- `build-env/tplg-build.sh` checks that the stock build equals the shipped
+  binary, builds ours, decodes both and requires the diff (after renaming
+  device16 -> device18) to equal the reviewed `tplg/OnePlus-12-vs-stock.diff`.
+  That diff contains: the MFC widget, tuples and route; DAI index 16 -> 18;
+  I2S IID 0x6061 -> 0x6062 (the MFC takes 0x6061); HW_IF_IDX 0 -> 1;
+  MultiMedia2 caps (fix B). Against the v8/v9 patched topology (`sec.conf`)
+  the only difference is the MFC. Output:
+  `~/Develop/fap-build/waffle/hw-v10/tplg/OnePlus-12-tplg.bin{,.xz}`
+  (sha256 `29a9aa72c41bb3b4…`).
+- Not wired into `fap-waffle-build.sh` yet (`netroot_v8_topology` still uses
+  `tplg-sec-mi2s.py`).
+
+### Fix B: S32_LE front end (commit 2140aaf)
+- `kernels/qcom-sm8650/patches/0004-*`: q6apm-dai playback accepts S32_LE
+  (`bits_per_sample = 32`; capture still rejects it). The AudioReach code
+  derives everything else from `bit_width`: shmem endpoint, PCM
+  decoder/converter (`bits_per_sample 32`, `q_factor 31`, LSB aligned) and
+  MFC. Applies on waffle-voice 9359fc74 + 0001-0003 (`git apply --check`,
+  `patch --dry-run`); **not compiled**.
+- **The kernel patch alone would not have been enough.** soc-topology builds
+  the front-end DAI from the topology's PCM caps (`set_stream_info`), and
+  DPCM ANDs those with the component's caps (`dpcm_runtime_setup_fe`). Stock
+  MultiMedia2 caps are `S16_LE` only, so with the stock topology even S24
+  never reaches q6apm-dai. The board m4 therefore gives MultiMedia2
+  `S16_LE,S32_LE`. The FE links have no `dpcm_merged_format`, so BE caps
+  don't narrow it further (and the LPASS MI2S ports list S32 anyway).
+- One topology covers both stages: a 32-bit WAV runs 32 end to end (the MFC
+  passes it through), and a 16-bit stream is converted by the MFC. A pure
+  "v9 graph without MFC + S32 FE" test would need its own topology build.
+  Not built, because stage 4 isolates the same question with the amps off.
+
+### Building the next test kernel (not done)
+The phone runs the `oneplus12-dualboot` kernel (full Fedora config, pstore
+DT, try-kernel.sh/modules guard). The speaker test kernel should be that
+kernel plus this branch. `git merge-tree` dualboot <- hw (base 81c3d67;
+48 vs 7 commits, before this section) conflicts in:
+- `kernels/qcom-sm8650/patches/series`: keep both (0001-0004 from hw, 0010
+  from dualboot); no file overlap between the patches.
+- `build-env/waffle.config`: keep both blocks (dm/UFS-BSG/binder/PSI and
+  TFA9874/WCD939X USBSS/UCSI/FastRPC/camera). With `--full`, check that
+  `CONFIG_SND_SOC_TFA9874=m` survives olddefconfig.
+- `build-env/fap-waffle-build.sh` (+140/-20 vs +139/-5): the install/full-
+  config functions vs. the netroot v8/v9 steps. Merge by hand, then switch the
+  topology step to `tplg-build.sh` and also install the topology into the
+  installed root.
+- `dts/sm8650-oneplus-waffle-fap-netroot.dts`, `dts/README.md`, `TODO.md`:
+  text/includes, keep both.
+- The installed boot uses `sm8650-oneplus-waffle-fap-install.dts`, which
+  does **not** include `-fap-hw.dtsi`. For the speaker stages, add a
+  speakers-only include (the `/sound` pinctrl + TFA9874 nodes) to a test
+  install DT. Cameras and the USB-C headset change other buses and would
+  muddy a reset.
+- try-kernel.sh swaps only the kernel and modules. The new topology lives in
+  fap_root (`/usr/lib/firmware/qcom/sm8650/OnePlus 12-tplg.bin.xz`), so
+  replacing it is a write inside fap_root: keep the current file as
+  `.orig` and get the user's OK.
+
+### Found during step 1 (relevant to every stage)
+See `~/Develop/OnePlus12/log/2026-11-21-step1-crash-logging.md`: ramoops at
+0x85000000 does not survive even a warm reset (the boot chain overwrites
+it), netconsole over usb0 works, and a GLINK refcount use-after-free in
+`rmtfs` at shutdown hangs the phone (`panic=5` doesn't reboot it). That bug
+can fake a speaker-caused crash at any reboot, so fix or avoid it first.
+
 ## References
 - Kernel (volume `waffle-build-hw`, `/work/linux-waffle`):
   `sound/soc/qcom/sc8280xp.c` (hw_params MI2S branch, `sm8650_priv_data`,
