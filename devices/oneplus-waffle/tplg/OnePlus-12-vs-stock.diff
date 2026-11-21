@@ -10,6 +10,10 @@
 > 	}
 570a577
 > 	'device18.mfc1:tuple0'.tuples 'device18.mfc1:tuple0'
+611c618
+< 		formats 'S16_LE'
+---
+> 		formats 'S16_LE, S32_LE'
 1385a1393,1412
 > 	'device18.mfc1' {
 > 		token2 2

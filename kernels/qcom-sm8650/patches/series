@@ -3,3 +3,4 @@
 0001-power-sequencing-qcom-wcn-power-down-at-shutdown.patch
 0002-ASoC-codecs-add-TFA9874-amplifier-driver.patch
 0003-ASoC-qcom-sc8280xp-32-bit-SECONDARY_MI2S_RX-on-OnePlus-12.patch
+0004-ASoC-qcom-q6apm-dai-accept-S32_LE-playback.patch

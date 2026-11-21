@@ -1,0 +1,47 @@
+SPDX-License-Identifier: GPL-2.0-only
+From: fedora-atomic-phone <noreply@fedora-atomic-phone.invalid>
+Subject: [PATCH] ASoC: qcom: q6apm-dai: accept S32_LE playback
+
+The OnePlus 12 speaker back end (SECONDARY_MI2S_RX, two TFA9874 amps)
+runs 2 x 32-bit I2S slots (patch 0003). q6apm-dai offers only S16_LE and
+S24_LE, so a 16-bit stream reached a 32-bit I2S endpoint with no
+converter in the device graph; that test (v9) reset the phone.
+
+Let playback streams be S32_LE as well, so a stream can be 32 bit end to
+end. The AudioReach media-format code already handles a 32-bit width
+(bits_per_sample 32, q_factor 31, PCM_LSB_ALIGNED) for the shared-memory
+endpoint, PCM decoder/converter and MFC. Capture stays S16/S24.
+
+The front-end DAI from the topology must list S32_LE too (its caps are
+ANDed with these): devices/oneplus-waffle/tplg/OnePlus-12-waffle.m4 does
+that for MultiMedia2.
+
+Upstream-Status: Pending [needs a test on hardware first]
+Tested: not yet (applies to waffle-voice 9359fc74 + 0001-0003)
+
+---
+diff --git a/sound/soc/qcom/qdsp6/q6apm-dai.c b/sound/soc/qcom/qdsp6/q6apm-dai.c
+--- a/sound/soc/qcom/qdsp6/q6apm-dai.c
++++ b/sound/soc/qcom/qdsp6/q6apm-dai.c
+@@ -225,7 +225,8 @@
+ 				 SNDRV_PCM_INFO_PAUSE | SNDRV_PCM_INFO_RESUME |
+ 				 SNDRV_PCM_INFO_NO_REWINDS | SNDRV_PCM_INFO_SYNC_APPLPTR |
+ 				 SNDRV_PCM_INFO_BATCH),
+-	.formats =              (SNDRV_PCM_FMTBIT_S16_LE | SNDRV_PCM_FMTBIT_S24_LE),
++	.formats =              (SNDRV_PCM_FMTBIT_S16_LE | SNDRV_PCM_FMTBIT_S24_LE |
++				 SNDRV_PCM_FMTBIT_S32_LE),
+ 	.rates =                SNDRV_PCM_RATE_8000_192000,
+ 	.rate_min =             8000,
+ 	.rate_max =             192000,
+@@ -764,6 +765,11 @@
+ 	case SNDRV_PCM_FORMAT_S24_LE:
+ 		prtd->bits_per_sample = 24;
+ 		break;
++	case SNDRV_PCM_FORMAT_S32_LE:
++		if (substream->stream != SNDRV_PCM_STREAM_PLAYBACK)
++			return -EINVAL;
++		prtd->bits_per_sample = 32;
++		break;
+ 	default:
+ 		return -EINVAL;
+ 	}

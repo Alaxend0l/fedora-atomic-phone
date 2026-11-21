@@ -23,9 +23,11 @@ dnl Playback MultiMedia1
 STREAM_SG_PCM_ADD(audioreach/subgraph-stream-vol-playback.m4, FRONTEND_DAI_MULTIMEDIA1,
 	`S16_LE', 48000, 48000, 2, 2,
 	0x00004001, 0x00004001, 0x00006001, `110000')
-dnl Playback MultiMedia2
+dnl Playback MultiMedia2 (speaker tests). S32_LE as well, for 32-bit
+dnl streams end to end (needs the q6apm-dai S32 patch 0004; without it the
+dnl component caps limit the front end to S16/S24 and S16 is chosen).
 STREAM_SG_PCM_ADD(audioreach/subgraph-stream-vol-playback.m4, FRONTEND_DAI_MULTIMEDIA2,
-	`S16_LE', 48000, 48000, 2, 2,
+	``S16_LE,S32_LE'', 48000, 48000, 2, 2,
 	0x00004002, 0x00004002, 0x00006010, `110000')
 dnl Capture MultiMedia3
 STREAM_SG_PCM_ADD(audioreach/subgraph-stream-capture.m4, FRONTEND_DAI_MULTIMEDIA3,
