@@ -9,10 +9,10 @@ weak_deps: false
 steps:
 - where: base/packages:1
   action: install
-  specs: [openssh-server, dnsmasq, NetworkManager, NetworkManager-wifi, NetworkManager-wwan, ModemManager, pipewire, wireplumber, pipewire-pulseaudio, bluez, upower, systemd-pam, chrony, glibc-langpack-en, sudo, e2fsprogs, usbutils, pciutils, i2c-tools, dtc]
+  specs: [openssh-server, dnsmasq, NetworkManager, NetworkManager-wifi, NetworkManager-wwan, ModemManager, pipewire, wireplumber, pipewire-pulseaudio, pipewire-utils, bluez, upower, systemd-pam, chrony, glibc-langpack-en, sudo, e2fsprogs, usbutils, pciutils, i2c-tools, dtc]
 - where: desktops/plasma-mobile/packages:1
   action: install
-  specs: [plasma-mobile, plasma-mobile-sounds, kwin, plasma-workspace, plasma-keyboard, plasma-settings, plasma-dialer, plasma-discover, plasma-discover-flatpak, flatpak, fedora-flathub-remote, plasma-nm, plasma-pa, powerdevil, bluedevil, kscreen, xdg-desktop-portal-kde, sddm, sddm-wayland-plasma, google-noto-sans-fonts, google-noto-sans-mono-fonts, google-noto-color-emoji-fonts, mesa-dri-drivers]
+  specs: [plasma-mobile, plasma-mobile-sounds, kwin, plasma-workspace, plasma-keyboard, plasma-settings, plasma-dialer, plasma-discover, plasma-discover-flatpak, flatpak, p11-kit-server, fedora-flathub-remote, plasma-nm, plasma-pa, powerdevil, bluedevil, kscreen, xdg-desktop-portal-kde, sddm, sddm-wayland-plasma, google-noto-sans-fonts, google-noto-sans-mono-fonts, google-noto-color-emoji-fonts, mesa-dri-drivers, libglvnd-gles, angelfish, kalk, kclock, kweather, koko, qmlkonsole, spacebar, elisa-player, haruna, krecorder, okular-mobile, qrca]
 - where: desktops/plasma-mobile/packages.image:1
   action: install
   specs: [plasma-discover-rpm-ostree]
@@ -21,9 +21,9 @@ steps:
   specs: [qrtr, rmtfs, pd-mapper, tqftpserv, qcom-firmware, atheros-firmware]
 base:
   image: quay.io/fedora-ostree-desktops/base-atomic:45
-  digest: sha256:82f9d64740258873576f6b255fb17a8a6e73719a04ef9aa6bea603fa602dcc35
-  pinned: quay.io/fedora-ostree-desktops/base-atomic@sha256:82f9d64740258873576f6b255fb17a8a6e73719a04ef9aa6bea603fa602dcc35
-  version: 45.20261120.0
+  digest: sha256:69e5af6023aebaf747e40853e45a61109dfe21589492fcf98de75abceb1bf912
+  pinned: quay.io/fedora-ostree-desktops/base-atomic@sha256:69e5af6023aebaf747e40853e45a61109dfe21589492fcf98de75abceb1bf912
+  version: 45.20261123.0
   packages:
   - {name: 7zip, evr: 26.06-1.fc45, arch: aarch64, source: 7zip-26.06-1.fc45.src.rpm}
   - {name: ImageMagick, evr: '1:7.1.2.36-1.fc45', arch: aarch64, source: ImageMagick-7.1.2.36-1.fc45.src.rpm}
@@ -96,6 +96,15 @@ base:
   - {name: bluez, evr: 5.88-1.fc45, arch: aarch64, source: bluez-5.88-1.fc45.src.rpm}
   - {name: bluez-cups, evr: 5.88-1.fc45, arch: aarch64, source: bluez-5.88-1.fc45.src.rpm}
   - {name: bluez-libs, evr: 5.88-1.fc45, arch: aarch64, source: bluez-5.88-1.fc45.src.rpm}
+  - {name: boost-atomic, evr: 1.90.0-13.fc45, arch: aarch64, source: boost-1.90.0-13.fc45.src.rpm}
+  - {name: boost-chrono, evr: 1.90.0-13.fc45, arch: aarch64, source: boost-1.90.0-13.fc45.src.rpm}
+  - {name: boost-container, evr: 1.90.0-13.fc45, arch: aarch64, source: boost-1.90.0-13.fc45.src.rpm}
+  - {name: boost-date-time, evr: 1.90.0-13.fc45, arch: aarch64, source: boost-1.90.0-13.fc45.src.rpm}
+  - {name: boost-filesystem, evr: 1.90.0-13.fc45, arch: aarch64, source: boost-1.90.0-13.fc45.src.rpm}
+  - {name: boost-log, evr: 1.90.0-13.fc45, arch: aarch64, source: boost-1.90.0-13.fc45.src.rpm}
+  - {name: boost-regex, evr: 1.90.0-13.fc45, arch: aarch64, source: boost-1.90.0-13.fc45.src.rpm}
+  - {name: boost-serialization, evr: 1.90.0-13.fc45, arch: aarch64, source: boost-1.90.0-13.fc45.src.rpm}
+  - {name: boost-thread, evr: 1.90.0-13.fc45, arch: aarch64, source: boost-1.90.0-13.fc45.src.rpm}
   - {name: bootc, evr: 1.17.1-1.fc45, arch: aarch64, source: bootc-1.17.1-1.fc45.src.rpm}
   - {name: bootupd, evr: 0.3.2-1.fc45, arch: aarch64, source: rust-bootupd-0.3.2-1.fc45.src.rpm}
   - {name: braille-printer-app, evr: '1:2.0~b0^386eea385f-12.fc45', arch: aarch64, source: braille-printer-app-2.0~b0^386eea385f-12.fc45.src.rpm}
@@ -107,7 +116,7 @@ base:
   - {name: buildah, evr: '2:1.46.1-1.fc45', arch: aarch64, source: buildah-1.46.1-1.fc45.src.rpm}
   - {name: bzip2, evr: 1.0.8-24.fc45, arch: aarch64, source: bzip2-1.0.8-24.fc45.src.rpm}
   - {name: bzip2-libs, evr: 1.0.8-24.fc45, arch: aarch64, source: bzip2-1.0.8-24.fc45.src.rpm}
-  - {name: c-ares, evr: 1.34.8-2.fc45, arch: aarch64, source: c-ares-1.34.8-2.fc45.src.rpm}
+  - {name: c-ares, evr: 1.34.9-1.fc45, arch: aarch64, source: c-ares-1.34.9-1.fc45.src.rpm}
   - {name: c2esp, evr: 2.7-38.fc45, arch: aarch64, source: c2esp-2.7-38.fc45.src.rpm}
   - {name: ca-certificates, evr: 2026.2.92_v9.0.319-2.fc45, arch: noarch, source: ca-certificates-2026.2.92_v9.0.319-2.fc45.src.rpm}
   - {name: cairo, evr: 1.18.6-1.fc45, arch: aarch64, source: cairo-1.18.6-1.fc45.src.rpm}
@@ -242,7 +251,7 @@ base:
   - {name: device-mapper-libs, evr: 1.02.217-2.fc45, arch: aarch64, source: lvm2-2.03.43-2.fc45.src.rpm}
   - {name: device-mapper-persistent-data, evr: 1.3.4-1.fc45, arch: aarch64, source: device-mapper-persistent-data-1.3.4-1.fc45.src.rpm}
   - {name: diffutils, evr: 3.12-6.fc45, arch: aarch64, source: diffutils-3.12-6.fc45.src.rpm}
-  - {name: distribution-gpg-keys, evr: 1.123-1.fc45, arch: noarch, source: distribution-gpg-keys-1.123-1.fc45.src.rpm}
+  - {name: distribution-gpg-keys, evr: 1.124-1.fc45, arch: noarch, source: distribution-gpg-keys-1.124-1.fc45.src.rpm}
   - {name: dnf5, evr: 5.4.8.0-2.fc45, arch: aarch64, source: dnf5-5.4.8.0-2.fc45.src.rpm}
   - {name: dnf5-plugins, evr: 5.4.8.0-2.fc45, arch: aarch64, source: dnf5-5.4.8.0-2.fc45.src.rpm}
   - {name: dns-root-data, evr: 2026260100-5.fc45, arch: noarch, source: dns-root-data-2026260100-5.fc45.src.rpm}
@@ -265,7 +274,7 @@ base:
   - {name: espeak-ng, evr: 1.52.0-4.fc45, arch: aarch64, source: espeak-ng-1.52.0-4.fc45.src.rpm}
   - {name: ethtool, evr: '2:7.2-1.fc45', arch: aarch64, source: ethtool-7.2-1.fc45.src.rpm}
   - {name: exempi, evr: 2.6.4-10.fc45, arch: aarch64, source: exempi-2.6.4-10.fc45.src.rpm}
-  - {name: exfatprogs, evr: 1.4.4-1.fc45, arch: aarch64, source: exfatprogs-1.4.4-1.fc45.src.rpm}
+  - {name: exfatprogs, evr: 1.4.5-1.fc45, arch: aarch64, source: exfatprogs-1.4.5-1.fc45.src.rpm}
   - {name: exiv2, evr: 0.28.9-1.fc45, arch: aarch64, source: exiv2-0.28.9-1.fc45.src.rpm}
   - {name: exiv2-libs, evr: 0.28.9-1.fc45, arch: aarch64, source: exiv2-0.28.9-1.fc45.src.rpm}
   - {name: expat, evr: 2.9.0-1.fc45, arch: aarch64, source: expat-2.9.0-1.fc45.src.rpm}
@@ -551,7 +560,7 @@ base:
   - {name: libXdmcp, evr: 1.1.5-6.fc45, arch: aarch64, source: libXdmcp-1.1.5-6.fc45.src.rpm}
   - {name: libXext, evr: 1.3.6-6.fc45, arch: aarch64, source: libXext-1.3.6-6.fc45.src.rpm}
   - {name: libXfixes, evr: 6.0.1-8.fc45, arch: aarch64, source: libXfixes-6.0.1-8.fc45.src.rpm}
-  - {name: libXfont2, evr: 2.0.9-1.fc45, arch: aarch64, source: libXfont2-2.0.9-1.fc45.src.rpm}
+  - {name: libXfont2, evr: 2.0.10-1.fc45, arch: aarch64, source: libXfont2-2.0.10-1.fc45.src.rpm}
   - {name: libXft, evr: 2.3.8-11.fc45, arch: aarch64, source: libXft-2.3.8-11.fc45.src.rpm}
   - {name: libXi, evr: 1.8.4-1.fc45, arch: aarch64, source: libXi-1.8.4-1.fc45.src.rpm}
   - {name: libXinerama, evr: 1.1.5-11.fc45, arch: aarch64, source: libXinerama-1.1.5-11.fc45.src.rpm}
@@ -601,8 +610,8 @@ base:
   - {name: libbsd, evr: 0.12.2-8.fc45, arch: aarch64, source: libbsd-0.12.2-8.fc45.src.rpm}
   - {name: libbytesize, evr: 2.12-5.fc45, arch: aarch64, source: libbytesize-2.12-5.fc45.src.rpm}
   - {name: libcaca, evr: 0.99-0.86.beta20.fc45, arch: aarch64, source: libcaca-0.99-0.86.beta20.fc45.src.rpm}
-  - {name: libcamera, evr: 0.7.2-5.fc45, arch: aarch64, source: libcamera-0.7.2-5.fc45.src.rpm}
-  - {name: libcamera-ipa, evr: 0.7.2-5.fc45, arch: aarch64, source: libcamera-0.7.2-5.fc45.src.rpm}
+  - {name: libcamera, evr: 0.7.2-6.fc45, arch: aarch64, source: libcamera-0.7.2-6.fc45.src.rpm}
+  - {name: libcamera-ipa, evr: 0.7.2-6.fc45, arch: aarch64, source: libcamera-0.7.2-6.fc45.src.rpm}
   - {name: libcanberra, evr: 0.30-52.fc45, arch: aarch64, source: libcanberra-0.30-52.fc45.src.rpm}
   - {name: libcanberra-backend-alsa, evr: 0.30-52.fc45, arch: aarch64, source: libcanberra-0.30-52.fc45.src.rpm}
   - {name: libcanberra-backend-gstreamer, evr: 0.30-52.fc45, arch: aarch64, source: libcanberra-0.30-52.fc45.src.rpm}
@@ -618,7 +627,7 @@ base:
   - {name: libchromaprint, evr: 1.6.1-2.fc45, arch: aarch64, source: chromaprint-1.6.1-2.fc45.src.rpm}
   - {name: libcloudproviders, evr: 0.4.1-1.fc45, arch: aarch64, source: libcloudproviders-0.4.1-1.fc45.src.rpm}
   - {name: libcom_err, evr: 1.47.4-2.fc45, arch: aarch64, source: e2fsprogs-1.47.4-2.fc45.src.rpm}
-  - {name: libcue, evr: 2.3.0-15.fc45, arch: aarch64, source: libcue-2.3.0-15.fc45.src.rpm}
+  - {name: libcue, evr: 2.4.2-2.fc45, arch: aarch64, source: libcue-2.4.2-2.fc45.src.rpm}
   - {name: libcupsfilters, evr: '1:2.2.1-8.fc45', arch: aarch64, source: libcupsfilters-2.2.1-8.fc45.src.rpm}
   - {name: libcurl, evr: 8.21.0-9.fc45, arch: aarch64, source: curl-8.21.0-9.fc45.src.rpm}
   - {name: libdaemon, evr: 0.14-34.fc45, arch: aarch64, source: libdaemon-0.14-34.fc45.src.rpm}
@@ -653,7 +662,7 @@ base:
   - {name: libfdisk, evr: 2.42.4-1.fc45, arch: aarch64, source: util-linux-2.42.4-1.fc45.src.rpm}
   - {name: libffi, evr: 3.5.2-3.fc45, arch: aarch64, source: libffi-3.5.2-3.fc45.src.rpm}
   - {name: libfido2, evr: 1.17.0-6.fc45, arch: aarch64, source: libfido2-1.17.0-6.fc45.src.rpm}
-  - {name: libfontenc, evr: 1.1.8-6.fc45, arch: aarch64, source: libfontenc-1.1.8-6.fc45.src.rpm}
+  - {name: libfontenc, evr: 1.1.10-1.fc45, arch: aarch64, source: libfontenc-1.1.10-1.fc45.src.rpm}
   - {name: libfsverity, evr: 1.7-4.fc45, arch: aarch64, source: fsverity-utils-1.7-4.fc45.src.rpm}
   - {name: libfyaml, evr: 0.8-10.fc45, arch: aarch64, source: libfyaml-0.8-10.fc45.src.rpm}
   - {name: libgcc, evr: 16.2.1-3.fc45, arch: aarch64, source: gcc-16.2.1-3.fc45.src.rpm}
@@ -739,6 +748,7 @@ base:
   - {name: libpinyin, evr: 2.11.91-3.fc45, arch: aarch64, source: libpinyin-2.11.91-3.fc45.src.rpm}
   - {name: libpinyin-data, evr: 2.11.91-3.fc45, arch: aarch64, source: libpinyin-2.11.91-3.fc45.src.rpm}
   - {name: libpipeline, evr: 1.5.8-5.fc45, arch: aarch64, source: libpipeline-1.5.8-5.fc45.src.rpm}
+  - {name: libpisp, evr: 1.8.0-1.fc45, arch: aarch64, source: libpisp-1.8.0-1.fc45.src.rpm}
   - {name: libpkgconf, evr: 2.5.1-2.fc45, arch: aarch64, source: pkgconf-2.5.1-2.fc45.src.rpm}
   - {name: libplacebo, evr: 7.360.1-4.fc45, arch: aarch64, source: libplacebo-7.360.1-4.fc45.src.rpm}
   - {name: libplist, evr: 2.7.0-4.fc45, arch: aarch64, source: libplist-2.7.0-4.fc45.src.rpm}
@@ -946,7 +956,7 @@ base:
   - {name: opus, evr: 1.6-3.fc45, arch: aarch64, source: opus-1.6-3.fc45.src.rpm}
   - {name: orc, evr: 0.4.41-4.fc45, arch: aarch64, source: orc-0.4.41-4.fc45.src.rpm}
   - {name: orca, evr: 51.1-1.fc45, arch: noarch, source: orca-51.1-1.fc45.src.rpm}
-  - {name: os-prober, evr: 1.81-12.fc45, arch: aarch64, source: os-prober-1.81-12.fc45.src.rpm}
+  - {name: os-prober, evr: 1.81-13.fc45, arch: aarch64, source: os-prober-1.81-13.fc45.src.rpm}
   - {name: osinfo-db, evr: 20251212-2.fc45, arch: noarch, source: osinfo-db-20251212-2.fc45.src.rpm}
   - {name: osinfo-db-tools, evr: 1.12.0-10.fc45, arch: aarch64, source: osinfo-db-tools-1.12.0-10.fc45.src.rpm}
   - {name: ostree, evr: 2026.4-1.fc45, arch: aarch64, source: ostree-2026.4-1.fc45.src.rpm}
@@ -1028,7 +1038,7 @@ base:
   - {name: python-pip-wheel, evr: 26.1.2-5.fc45, arch: noarch, source: python-pip-26.1.2-5.fc45.src.rpm}
   - {name: python-unversioned-command, evr: 3.15.2-1.fc45, arch: noarch, source: python3.15-3.15.2-1.fc45.src.rpm}
   - {name: python3, evr: 3.15.2-1.fc45, arch: aarch64, source: python3.15-3.15.2-1.fc45.src.rpm}
-  - {name: python3-anyio, evr: 4.15.1-2.fc45, arch: noarch, source: python-anyio-4.15.1-2.fc45.src.rpm}
+  - {name: python3-anyio, evr: 4.16.0-1.fc45, arch: noarch, source: python-anyio-4.16.0-1.fc45.src.rpm}
   - {name: python3-audit, evr: 4.2.1-2.fc45, arch: aarch64, source: audit-4.2.1-2.fc45.src.rpm}
   - {name: python3-boto3, evr: 1.44.4-1.fc45, arch: noarch, source: python-boto3-1.44.4-1.fc45.src.rpm}
   - {name: python3-botocore, evr: 1.44.4-1.fc45, arch: noarch, source: python-botocore-1.44.4-1.fc45.src.rpm}
@@ -1157,7 +1167,7 @@ base:
   - {name: spice-webdavd, evr: 3.0-15.fc45, arch: aarch64, source: phodav-3.0-15.fc45.src.rpm}
   - {name: spirv-tools-libs, evr: 2026.2-3.fc45, arch: aarch64, source: spirv-tools-2026.2-3.fc45.src.rpm}
   - {name: splix, evr: 2.0.1-7.fc45, arch: aarch64, source: splix-2.0.1-7.fc45.src.rpm}
-  - {name: sqlite-libs, evr: 3.53.4-1.fc45, arch: aarch64, source: sqlite-3.53.4-1.fc45.src.rpm}
+  - {name: sqlite-libs, evr: 3.54.1-2.fc45, arch: aarch64, source: sqlite-3.54.1-2.fc45.src.rpm}
   - {name: sratom, evr: 0.6.22-2.fc45, arch: aarch64, source: sratom-0.6.22-2.fc45.src.rpm}
   - {name: srt-libs, evr: 1.5.7-1.fc45, arch: aarch64, source: srt-1.5.7-1.fc45.src.rpm}
   - {name: sssd-client, evr: 2.13.2-2.fc45, arch: aarch64, source: sssd-2.13.2-2.fc45.src.rpm}
@@ -1182,7 +1192,7 @@ base:
   - {name: systemd-shared, evr: 262.1-1.fc45, arch: aarch64, source: systemd-262.1-1.fc45.src.rpm}
   - {name: systemd-sysusers, evr: 262.1-1.fc45, arch: aarch64, source: systemd-262.1-1.fc45.src.rpm}
   - {name: systemd-udev, evr: 262.1-1.fc45, arch: aarch64, source: systemd-262.1-1.fc45.src.rpm}
-  - {name: taglib, evr: 2.3-4.fc45, arch: aarch64, source: taglib-2.3-4.fc45.src.rpm}
+  - {name: taglib, evr: 2.3.2-3.fc45, arch: aarch64, source: taglib-2.3.2-3.fc45.src.rpm}
   - {name: tar, evr: '2:1.35-10.fc45', arch: aarch64, source: tar-1.35-10.fc45.src.rpm}
   - {name: tcl, evr: '1:9.0.4-1.fc45', arch: aarch64, source: tcl-9.0.4-1.fc45.src.rpm}
   - {name: tesseract-common, evr: 5.5.4-1.fc45, arch: noarch, source: tesseract-5.5.4-1.fc45.src.rpm}
@@ -1290,6 +1300,7 @@ packages:
 - {name: NetworkManager-wwan, evr: '1:1.58.1-3.fc45', arch: aarch64, repo: '@System', source: NetworkManager-1.58.1-3.fc45.src.rpm, checksum: 'unknown:', size: 0, location: '', action: '7'}
 - {name: PackageKit-Qt6, evr: 1.1.4-5.fc45, arch: aarch64, repo: fedora, source: PackageKit-Qt-1.1.4-5.fc45.src.rpm, checksum: 'sha256:cca5db72c3eeb8a88b8365f688585d59dee3744ab4b10792ee778e5ece9f24c2', size: 128633, location: Packages/p/PackageKit-Qt6-1.1.4-5.fc45.aarch64.rpm}
 - {name: accounts-qml-module-qt6, evr: 0.7^20231216.05e79eb-9.fc45, arch: aarch64, repo: fedora, source: accounts-qml-module-0.7^20231216.05e79eb-9.fc45.src.rpm, checksum: 'sha256:49224ef7d046d67f2d209ecd72e27dbdf5372e5dc332774c4b12142e3638216d', size: 85566, location: Packages/a/accounts-qml-module-qt6-0.7^20231216.05e79eb-9.fc45.aarch64.rpm}
+- {name: angelfish, evr: 26.08.3-1.fc45, arch: aarch64, repo: updates, source: angelfish-26.08.3-1.fc45.src.rpm, checksum: 'sha256:adc460ece800de05f9a486d5365c6b801ed929e2be73b6548f642dfabd256eac', size: 1710757, location: Packages/a/angelfish-26.08.3-1.fc45.aarch64.rpm}
 - {name: appstream-qt, evr: 1.1.3-4.fc45, arch: aarch64, repo: fedora, source: appstream-1.1.3-4.fc45.src.rpm, checksum: 'sha256:cf531007aa2e4871b728ac70fe603a8c5b96504f720cd823258ec64f8c3d48bd', size: 106516, location: Packages/a/appstream-qt-1.1.3-4.fc45.aarch64.rpm}
 - {name: assimp, evr: 6.0.6-1.fc45, arch: aarch64, repo: updates, source: assimp-6.0.6-1.fc45.src.rpm, checksum: 'sha256:9b4c4abee159ea18b4dc45799fd4c9ec4a0695dd4b9ebd9be9247ad65e6ff264', size: 2288670, location: Packages/a/assimp-6.0.6-1.fc45.aarch64.rpm}
 - {name: atheros-firmware, evr: 20261019-1.fc45, arch: noarch, repo: '@System', source: linux-firmware-20261019-1.fc45.src.rpm, checksum: 'unknown:', size: 0, location: '', action: '7'}
@@ -1297,28 +1308,28 @@ packages:
 - {name: bluedevil, evr: 6.8.3-1.fc45, arch: aarch64, repo: updates, source: bluedevil-6.8.3-1.fc45.src.rpm, checksum: 'sha256:674440c2172ea91ff4a2d1fd0d1f6cbae5082fb56c43c761d647af3d7518f7c5', size: 823056, location: Packages/b/bluedevil-6.8.3-1.fc45.aarch64.rpm}
 - {name: bluez, evr: 5.88-1.fc45, arch: aarch64, repo: '@System', source: bluez-5.88-1.fc45.src.rpm, checksum: 'unknown:', size: 0, location: '', action: '7'}
 - {name: bluez-obexd, evr: 5.88-1.fc45, arch: aarch64, repo: updates, source: bluez-5.88-1.fc45.src.rpm, checksum: 'sha256:0e0103220675081e03313e243fde9c176cc5ce89fff33bbee84e781a1a59529c', size: 149654, location: Packages/b/bluez-obexd-5.88-1.fc45.aarch64.rpm}
-- {name: boost-atomic, evr: 1.90.0-13.fc45, arch: aarch64, repo: fedora, source: boost-1.90.0-13.fc45.src.rpm, checksum: 'sha256:0c232a60b6a6237b4319b09fa4202ccb3532ed72e414fdee0ce45054df167ca1', size: 18761, location: Packages/b/boost-atomic-1.90.0-13.fc45.aarch64.rpm}
-- {name: boost-chrono, evr: 1.90.0-13.fc45, arch: aarch64, repo: fedora, source: boost-1.90.0-13.fc45.src.rpm, checksum: 'sha256:943b20fee4d8b11754513b281b152505ddd90079ee4451ebcc37f6273c58de7e', size: 24344, location: Packages/b/boost-chrono-1.90.0-13.fc45.aarch64.rpm}
-- {name: boost-container, evr: 1.90.0-13.fc45, arch: aarch64, repo: fedora, source: boost-1.90.0-13.fc45.src.rpm, checksum: 'sha256:f6b9a1a2a3b8c0bfca564c2088d984ba2ad5f50f75131a2c99341680afdb39b1', size: 38579, location: Packages/b/boost-container-1.90.0-13.fc45.aarch64.rpm}
-- {name: boost-date-time, evr: 1.90.0-13.fc45, arch: aarch64, repo: fedora, source: boost-1.90.0-13.fc45.src.rpm, checksum: 'sha256:6236f8400e941c34cb46012eb2be88a6cee005fc1fd68615a0fc11c424803f15', size: 13981, location: Packages/b/boost-date-time-1.90.0-13.fc45.aarch64.rpm}
-- {name: boost-thread, evr: 1.90.0-13.fc45, arch: aarch64, repo: fedora, source: boost-1.90.0-13.fc45.src.rpm, checksum: 'sha256:fb57902c9cfb3ac22da28e3f2678dbe70e0887e3e5dc4e730e87446808db77ed', size: 53266, location: Packages/b/boost-thread-1.90.0-13.fc45.aarch64.rpm}
 - {name: breeze-cursor-theme, evr: 6.8.3-1.fc45, arch: noarch, repo: updates, source: plasma-breeze-6.8.3-1.fc45.src.rpm, checksum: 'sha256:efcb7de809c7649afcea0e6d7b132d68f1531789ce214adcb132660aac4b283f', size: 1497030, location: Packages/b/breeze-cursor-theme-6.8.3-1.fc45.noarch.rpm}
 - {name: breeze-icon-theme, evr: 6.32.0-1.fc45, arch: noarch, repo: updates, source: kf6-breeze-icons-6.32.0-1.fc45.src.rpm, checksum: 'sha256:7f0c3ee4144bf85b118d53436a850469df595d5948e71aad7bed700d8a240d0a', size: 10688294, location: Packages/b/breeze-icon-theme-6.32.0-1.fc45.noarch.rpm}
 - {name: callaudiod, evr: 0.1.99-4.fc45, arch: aarch64, repo: fedora, source: callaudiod-0.1.99-4.fc45.src.rpm, checksum: 'sha256:915ebd5cb20cd9df584295f03853b0a1994b8bb34100fcb58ed284f06d462756', size: 49819, location: Packages/c/callaudiod-0.1.99-4.fc45.aarch64.rpm}
 - {name: chrony, evr: 4.9-1.fc45, arch: aarch64, repo: '@System', source: chrony-4.9-1.fc45.src.rpm, checksum: 'unknown:', size: 0, location: '', action: '7'}
 - {name: cmake-filesystem, evr: 4.3.0-7.fc45, arch: aarch64, repo: updates, source: cmake-4.3.0-7.fc45.src.rpm, checksum: 'sha256:d10faf6152858def784d0f7768c04db2bb700633f755aacf9003922197fe7e8c', size: 15178, location: Packages/c/cmake-filesystem-4.3.0-7.fc45.aarch64.rpm}
+- {name: compat-lua-libs, evr: 5.1.5-32.fc45, arch: aarch64, repo: fedora, source: compat-lua-5.1.5-32.fc45.src.rpm, checksum: 'sha256:fa86c4780c9113e8f41977901e9e956a68228bcd7fb35597e8a0378d6c6fbfde', size: 167426, location: Packages/c/compat-lua-libs-5.1.5-32.fc45.aarch64.rpm}
 - {name: cxx-rust-cssparser, evr: 1.1.0-1.fc45, arch: aarch64, repo: fedora, source: cxx-rust-cssparser-1.1.0-1.fc45.src.rpm, checksum: 'sha256:ecb21c659c079f648744e6407c70eaa80de9b9cde953e7b12e398a7a2dfcbeda', size: 682916, location: Packages/c/cxx-rust-cssparser-1.1.0-1.fc45.aarch64.rpm}
+- {name: dbus-glib, evr: 0.112-14.fc45, arch: aarch64, repo: fedora, source: dbus-glib-0.112-14.fc45.src.rpm, checksum: 'sha256:2a7eec5576de45c8af62672f26d7d66ef0f21fcb0cd36bf75ebf3085164c55d6', size: 128930, location: Packages/d/dbus-glib-0.112-14.fc45.aarch64.rpm}
 - {name: dbus-tools, evr: '1:1.16.4-2.fc45', arch: aarch64, repo: updates, source: dbus-1.16.4-2.fc45.src.rpm, checksum: 'sha256:b0e257dbd95fd25aa7d5830464e5a7af12ae485d697c2099026c875621ccf992', size: 45239, location: Packages/d/dbus-tools-1.16.4-2.fc45.aarch64.rpm}
 - {name: ddcutil, evr: 3.0.2-1.fc45, arch: aarch64, repo: updates, source: ddcutil-3.0.2-1.fc45.src.rpm, checksum: 'sha256:7a640f8f0ea2588dcfccb5ff4f84694aaeb19d5235f972d0bd7b2f9a93da43a7', size: 609313, location: Packages/d/ddcutil-3.0.2-1.fc45.aarch64.rpm}
 - {name: desktop-backgrounds-compat, evr: 45.0.0-3.fc45, arch: noarch, repo: updates, source: desktop-backgrounds-45.0.0-3.fc45.src.rpm, checksum: 'sha256:44257a91bab7e9228b10dbcec708c65e310293731142faa2b2ccab93e668049f', size: 9955, location: Packages/d/desktop-backgrounds-compat-45.0.0-3.fc45.noarch.rpm}
 - {name: desktop-backgrounds-kde, evr: 45.0.0-3.fc45, arch: noarch, repo: updates, source: desktop-backgrounds-45.0.0-3.fc45.src.rpm, checksum: 'sha256:b40e15b4775d1632405ae4e36267ea0f0ab163ea5df6e5451b7528eedc9a46ea', size: 8675, location: Packages/d/desktop-backgrounds-kde-45.0.0-3.fc45.noarch.rpm}
+- {name: djvulibre-libs, evr: 3.5.30-2.fc45, arch: aarch64, repo: fedora, source: djvulibre-3.5.30-2.fc45.src.rpm, checksum: 'sha256:4e27994ccae90ffc208ea83f0b46b3644e513053ecf72c02838bb5a5c8530b57', size: 653164, location: Packages/d/djvulibre-libs-3.5.30-2.fc45.aarch64.rpm}
 - {name: dnsmasq, evr: 2.93-2.fc45, arch: aarch64, repo: '@System', source: dnsmasq-2.93-2.fc45.src.rpm, checksum: 'unknown:', size: 0, location: '', action: '7'}
 - {name: docbook-dtds, evr: 1.0-93.fc45, arch: noarch, repo: fedora, source: docbook-dtds-1.0-93.fc45.src.rpm, checksum: 'sha256:fd55c2b0cbe7095f72751abe061f8bdf8686b88927bf20432354ec4131c4fc57', size: 341320, location: Packages/d/docbook-dtds-1.0-93.fc45.noarch.rpm}
 - {name: docbook-style-xsl, evr: 1.79.2-29.fc45, arch: noarch, repo: fedora, source: docbook-style-xsl-1.79.2-29.fc45.src.rpm, checksum: 'sha256:31633b03022c3b57c1b7c2d85ec23604e8ab6b76bf96d53a0f62fd49fc8a032e', size: 1586112, location: Packages/d/docbook-style-xsl-1.79.2-29.fc45.noarch.rpm}
 - {name: double-conversion, evr: 3.4.0-4.fc45, arch: aarch64, repo: fedora, source: double-conversion-3.4.0-4.fc45.src.rpm, checksum: 'sha256:0419193fc48003375034bbce361bf1fbd9453c1d9da4b13ba8a65e1e43618356', size: 51372, location: Packages/d/double-conversion-3.4.0-4.fc45.aarch64.rpm}
 - {name: dtc, evr: 1.8.1-6.fc45, arch: aarch64, repo: fedora, source: dtc-1.8.1-6.fc45.src.rpm, checksum: 'sha256:4319a9c889958099510df5dd4607838b66a1b81b3bd13a765c6c9979ccb9f9f7', size: 108940, location: Packages/d/dtc-1.8.1-6.fc45.aarch64.rpm}
 - {name: e2fsprogs, evr: 1.47.4-2.fc45, arch: aarch64, repo: '@System', source: e2fsprogs-1.47.4-2.fc45.src.rpm, checksum: 'unknown:', size: 0, location: '', action: '7'}
+- {name: ebook-tools-libs, evr: 0.2.2-33.fc45, arch: aarch64, repo: fedora, source: ebook-tools-0.2.2-33.fc45.src.rpm, checksum: 'sha256:e3c9a3d9366982d1c686678091e0974d4b6b67649bda78ffa2e208a5792bb335', size: 31316, location: Packages/e/ebook-tools-libs-0.2.2-33.fc45.aarch64.rpm}
 - {name: editorconfig-libs, evr: 0.12.11-2.fc45, arch: aarch64, repo: fedora, source: editorconfig-0.12.11-2.fc45.src.rpm, checksum: 'sha256:bcf354863c579aeea999f12e54f1b8c057cb2bd3c4c01a3fe969587b8b25303b', size: 28610, location: Packages/e/editorconfig-libs-0.12.11-2.fc45.aarch64.rpm}
+- {name: elisa-player, evr: 26.08.3-2.fc45, arch: aarch64, repo: updates, source: elisa-player-26.08.3-2.fc45.src.rpm, checksum: 'sha256:114f32b891fca3e4831ef389b226b4ed9772f637f742126600cf46871d1e9657', size: 2089493, location: Packages/e/elisa-player-26.08.3-2.fc45.aarch64.rpm}
 - {name: f45-backgrounds-base, evr: 45.0.4-1.fc45, arch: noarch, repo: updates, source: f45-backgrounds-45.0.4-1.fc45.src.rpm, checksum: 'sha256:d9b11e5e5a5052e92b140a88e02f7d02e7cb605ddf2839e4b25706857b9030ff', size: 10151862, location: Packages/f/f45-backgrounds-base-45.0.4-1.fc45.noarch.rpm}
 - {name: f45-backgrounds-kde, evr: 45.0.4-1.fc45, arch: noarch, repo: updates, source: f45-backgrounds-45.0.4-1.fc45.src.rpm, checksum: 'sha256:b9209b55a916ad2f2176c530738304c439ef53ad5db58f62566a984ed484fc9e', size: 17219, location: Packages/f/f45-backgrounds-kde-45.0.4-1.fc45.noarch.rpm}
 - {name: fedora-flathub-remote, evr: 1-20.fc45, arch: noarch, repo: '@System', source: fedora-flathub-remote-1-20.fc45.src.rpm, checksum: 'unknown:', size: 0, location: '', action: '7'}
@@ -1326,6 +1337,7 @@ packages:
 - {name: flatpak, evr: 1.19.0^really1.18.4-1.fc45, arch: aarch64, repo: '@System', source: flatpak-1.19.0^really1.18.4-1.fc45.src.rpm, checksum: 'unknown:', size: 0, location: '', action: '7'}
 - {name: flatpak-kcm, evr: 6.8.3-1.fc45, arch: aarch64, repo: updates, source: flatpak-kcm-6.8.3-1.fc45.src.rpm, checksum: 'sha256:5bee6df53491937fc5b10652677acd3d71b5904092b6439b21ad56c3e2e71705', size: 283470, location: Packages/f/flatpak-kcm-6.8.3-1.fc45.aarch64.rpm}
 - {name: flatpak-libs, evr: 1.19.0^really1.18.4-1.fc45, arch: aarch64, repo: fedora, source: flatpak-1.19.0^really1.18.4-1.fc45.src.rpm, checksum: 'sha256:0eca04a4cee48da7a173d4824a07148864fae5b320a7e12f729759d3020d9871', size: 419804, location: Packages/f/flatpak-libs-1.19.0^really1.18.4-1.fc45.aarch64.rpm}
+- {name: futuresql-qt6, evr: 0.1.1-8.fc45, arch: aarch64, repo: fedora, source: futuresql-0.1.1-8.fc45.src.rpm, checksum: 'sha256:85265a384855f442148d6be66afdc1390ec1b5410be141f80cd7fd7d26f39e37', size: 47461, location: Packages/f/futuresql-qt6-0.1.1-8.fc45.aarch64.rpm}
 - {name: gcr-libs, evr: 4.4.1-1.fc45, arch: aarch64, repo: fedora, source: gcr-4.4.1-1.fc45.src.rpm, checksum: 'sha256:e6804cbab8160a957d7afe4420cc5bf4536a00aa89df90b2a8b66df58e8207dd', size: 498136, location: Packages/g/gcr-libs-4.4.1-1.fc45.aarch64.rpm}
 - {name: glibc-langpack-en, evr: 2.44-2.fc45, arch: aarch64, repo: updates, source: glibc-2.44-2.fc45.src.rpm, checksum: 'sha256:191da3d7c2660cb0da258015b9616891c2e2cb4c77db0dcb2ab32a7d9b3ec211', size: 686517, location: Packages/g/glibc-langpack-en-2.44-2.fc45.aarch64.rpm}
 - {name: glx-utils, evr: 9.0.0-12.fc45, arch: aarch64, repo: fedora, source: mesa-demos-9.0.0-12.fc45.src.rpm, checksum: 'sha256:7a01b46c539a86579fb4ee48ad394ce1ed0cb53af99f80d696b6a7db19c34395', size: 73408, location: Packages/g/glx-utils-9.0.0-12.fc45.aarch64.rpm}
@@ -1335,12 +1347,15 @@ packages:
 - {name: google-noto-sans-mono-fonts, evr: 20260601-3.fc45, arch: noarch, repo: fedora, source: google-noto-fonts-20260601-3.fc45.src.rpm, checksum: 'sha256:3f89ca24bd623823af7407b1f2c985ed7f4f1720adbe627cc6c107400708996d', size: 5083509, location: Packages/g/google-noto-sans-mono-fonts-20260601-3.fc45.noarch.rpm}
 - {name: gpsd-libs, evr: '1:3.27.5-8.fc45', arch: aarch64, repo: updates, source: gpsd-3.27.5-8.fc45.src.rpm, checksum: 'sha256:80dd4c529bb0cebe76c149556af47569d0188d2e56bc859bade295608215664e', size: 80559, location: Packages/g/gpsd-libs-3.27.5-8.fc45.aarch64.rpm}
 - {name: gsound, evr: 1.0.3-21.fc45, arch: aarch64, repo: fedora, source: gsound-1.0.3-21.fc45.src.rpm, checksum: 'sha256:ec445ca9a3c242d4c4da3e4068870eebde8e7e0de5ac1d89d511ae1cd0bb1122', size: 36960, location: Packages/g/gsound-1.0.3-21.fc45.aarch64.rpm}
+- {name: haruna, evr: 1.9.0-1.fc45, arch: aarch64, repo: updates, source: haruna-1.9.0-1.fc45.src.rpm, checksum: 'sha256:a377b4a1c8689961f3ae5f42fa3dfb5fb2c4867ed30fc9f9f5c8679ba4df17ec', size: 1400219, location: Packages/h/haruna-1.9.0-1.fc45.aarch64.rpm}
 - {name: i2c-tools, evr: 4.4-7.fc45, arch: aarch64, repo: fedora, source: i2c-tools-4.4-7.fc45.src.rpm, checksum: 'sha256:87751a665a3c00b3d72d7e25e3d8a32ce755725f601679bcba8ce39c7e4f3f54', size: 73644, location: Packages/i/i2c-tools-4.4-7.fc45.aarch64.rpm}
 - {name: ibus-panel, evr: 1.5.35-2.fc45, arch: aarch64, repo: updates, source: ibus-1.5.35-2.fc45.src.rpm, checksum: 'sha256:04384d8db0c1df11c898cf60c781900937e34ed0de51f28fdf4fed1a30598c91', size: 128544, location: Packages/i/ibus-panel-1.5.35-2.fc45.aarch64.rpm}
 - {name: iio-sensor-proxy, evr: 3.9-3.fc45, arch: aarch64, repo: fedora, source: iio-sensor-proxy-3.9-3.fc45.src.rpm, checksum: 'sha256:5956e4ae2eabc2e22345db8b867ad4a92bc66e59aa02e1994a2f82d21fd1bafd', size: 65928, location: Packages/i/iio-sensor-proxy-3.9-3.fc45.aarch64.rpm}
 - {name: jsoncpp, evr: 1.9.6-3.fc44, arch: aarch64, repo: fedora, source: jsoncpp-1.9.6-3.fc44.src.rpm, checksum: 'sha256:3085084f627d0c72ebff34ae5117f75f7a3b419de599e3b287cbc0d73c927906', size: 97109, location: Packages/j/jsoncpp-1.9.6-3.fc44.aarch64.rpm}
 - {name: kaccounts-integration-qt6, evr: 26.08.3-1.fc45, arch: aarch64, repo: updates, source: kaccounts-integration-26.08.3-1.fc45.src.rpm, checksum: 'sha256:cc37a8c690a51c1a5f3f2d1906b0c0a785aab52c5d8b624c58cd922a1c07f7f0', size: 217552, location: Packages/k/kaccounts-integration-qt6-26.08.3-1.fc45.aarch64.rpm}
 - {name: kactivitymanagerd, evr: 6.8.3-1.fc45, arch: aarch64, repo: updates, source: kactivitymanagerd-6.8.3-1.fc45.src.rpm, checksum: 'sha256:e15acf2fcba731e5717f0c8bd08490e5623363afed5ed823f6f3a7d18e04e8ad', size: 284517, location: Packages/k/kactivitymanagerd-6.8.3-1.fc45.aarch64.rpm}
+- {name: kalk, evr: 26.08.3-1.fc45, arch: aarch64, repo: updates, source: kalk-26.08.3-1.fc45.src.rpm, checksum: 'sha256:3718bad042dd95278aa3478824a78f3ef8cc9c6bce18df223e44227a317d7d79', size: 262060, location: Packages/k/kalk-26.08.3-1.fc45.aarch64.rpm}
+- {name: kclock, evr: 26.08.3-1.fc45, arch: aarch64, repo: updates, source: kclock-26.08.3-1.fc45.src.rpm, checksum: 'sha256:7ed622fcc43267459f513853112d3a8064f5aaebc1fd16e091d360e7d71646be', size: 680457, location: Packages/k/kclock-26.08.3-1.fc45.aarch64.rpm}
 - {name: kcm-plasma-keyboard, evr: '1:6.8.3-1.fc45', arch: aarch64, repo: updates, source: plasma-keyboard-6.8.3-1.fc45.src.rpm, checksum: 'sha256:5e9a603bf21be0f1f9548c15be8bc0c18d9a29aa6401677f2d66fe18d5bb10cc', size: 76121, location: Packages/k/kcm-plasma-keyboard-6.8.3-1.fc45.aarch64.rpm}
 - {name: kde-cli-tools, evr: 6.8.3-1.fc45, arch: aarch64, repo: updates, source: kde-cli-tools-6.8.3-1.fc45.src.rpm, checksum: 'sha256:52ba120325b0d5a48b36e2966413b180d64693873b0ffaa0ae59b1791b5e8fdb', size: 895091, location: Packages/k/kde-cli-tools-6.8.3-1.fc45.aarch64.rpm}
 - {name: kde-filesystem, evr: 5-8.fc45, arch: aarch64, repo: fedora, source: kde-filesystem-5-8.fc45.src.rpm, checksum: 'sha256:6bf44647243454e85bf3b248203add38e82752e594d8923ef0737450b2bc9ccb', size: 38546, location: Packages/k/kde-filesystem-5-8.fc45.aarch64.rpm}
@@ -1349,6 +1364,7 @@ packages:
 - {name: kdecoration, evr: 6.8.3-1.fc45, arch: aarch64, repo: updates, source: kdecoration-6.8.3-1.fc45.src.rpm, checksum: 'sha256:7a1159f5ee047dbabb4fc3b358e0c28e1d0bd8cc8aaa5ea81f9d27f066814a8d', size: 130889, location: Packages/k/kdecoration-6.8.3-1.fc45.aarch64.rpm}
 - {name: kdegraphics-mobipocket, evr: 26.08.3-1.fc45, arch: aarch64, repo: updates, source: kdegraphics-mobipocket-26.08.3-1.fc45.src.rpm, checksum: 'sha256:0edbd1dacced0636449f0cbb3965aca6183ee20f5d3769213c3b5d9778033401', size: 33595, location: Packages/k/kdegraphics-mobipocket-26.08.3-1.fc45.aarch64.rpm}
 - {name: kdesu, evr: '1:6.8.3-1.fc45', arch: aarch64, repo: updates, source: kde-cli-tools-6.8.3-1.fc45.src.rpm, checksum: 'sha256:179e74c06e046130513d61e5b7619eb3208f504306dea4d4a79679f7fef7ed8d', size: 279852, location: Packages/k/kdesu-6.8.3-1.fc45.aarch64.rpm}
+- {name: kdsingleapplication-qt6, evr: 1.2.1-2.fc45, arch: aarch64, repo: fedora, source: kdsingleapplication-1.2.1-2.fc45.src.rpm, checksum: 'sha256:539c47093d09e746dc599cb90c79e0c0c650a667c405a5c8436533ecde2dcac8', size: 31562, location: Packages/k/kdsingleapplication-qt6-1.2.1-2.fc45.aarch64.rpm}
 - {name: kdsoap-ws-discovery-client, evr: 0.4.0-7.fc45, arch: aarch64, repo: fedora, source: kdsoap-ws-discovery-client-0.4.0-7.fc45.src.rpm, checksum: 'sha256:8b47a8d6a903f3b3941b49a5ce04c77466a1c6e348b25720f3444c00e035dd1c', size: 77313, location: Packages/k/kdsoap-ws-discovery-client-0.4.0-7.fc45.aarch64.rpm}
 - {name: kdsoap6, evr: 2.2.0-10.fc45, arch: aarch64, repo: fedora, source: kdsoap-2.2.0-10.fc45.src.rpm, checksum: 'sha256:a3e430c68a4e2fd78cc10822bde3a0440e92f5db0f6d5bc9a1115315edbb5739', size: 140504, location: Packages/k/kdsoap6-2.2.0-10.fc45.aarch64.rpm}
 - {name: kf6-attica, evr: 6.32.0-1.fc45, arch: aarch64, repo: updates, source: kf6-attica-6.32.0-1.fc45.src.rpm, checksum: 'sha256:0b1a8f0ad69ff36c575328710203660ed9ff75f9d633e5126fdd2815adb22bc6', size: 205046, location: Packages/k/kf6-attica-6.32.0-1.fc45.aarch64.rpm}
@@ -1427,23 +1443,32 @@ packages:
 - {name: kf6-sonnet, evr: 6.32.0-1.fc45, arch: aarch64, repo: updates, source: kf6-sonnet-6.32.0-1.fc45.src.rpm, checksum: 'sha256:d02e489a5471d1245791c4fa66194e6ba546e533e845bf88eedd42377c20fef5', size: 408236, location: Packages/k/kf6-sonnet-6.32.0-1.fc45.aarch64.rpm}
 - {name: kf6-syndication, evr: 6.32.0-1.fc45, arch: aarch64, repo: updates, source: kf6-syndication-6.32.0-1.fc45.src.rpm, checksum: 'sha256:febdb55ad9211184c386ef4dff324e001561fbcfa565502d6d00dd530ce9a34b', size: 212762, location: Packages/k/kf6-syndication-6.32.0-1.fc45.aarch64.rpm}
 - {name: kf6-syntax-highlighting, evr: 6.32.0-1.fc45, arch: aarch64, repo: updates, source: kf6-syntax-highlighting-6.32.0-1.fc45.src.rpm, checksum: 'sha256:ac705475c710dd50a0a9a287a0cb631918edf369dcda9276b9b739e0dcb9e00f', size: 1855034, location: Packages/k/kf6-syntax-highlighting-6.32.0-1.fc45.aarch64.rpm}
+- {name: kf6-threadweaver, evr: 6.32.0-1.fc45, arch: aarch64, repo: updates, source: kf6-threadweaver-6.32.0-1.fc45.src.rpm, checksum: 'sha256:984ef82baabff120ab0014594bb4a6d1dc7393a2f9fd23b2f406bec9cba85c52', size: 85509, location: Packages/k/kf6-threadweaver-6.32.0-1.fc45.aarch64.rpm}
 - {name: kglobalacceld, evr: 6.8.3-1.fc45, arch: aarch64, repo: updates, source: kglobalacceld-6.8.3-1.fc45.src.rpm, checksum: 'sha256:063499eeb9324043a32a1e04afd2e83a96c7278fb78365702b9f9ca7dadbc564', size: 144227, location: Packages/k/kglobalacceld-6.8.3-1.fc45.aarch64.rpm}
 - {name: kio-extras, evr: 26.08.3-1.fc45, arch: aarch64, repo: updates, source: kio-extras-26.08.3-1.fc45.src.rpm, checksum: 'sha256:5f4b50cd02763c59b25acdf00abf07be2a363f0de27a53b9219102ac51d0b394', size: 2623226, location: Packages/k/kio-extras-26.08.3-1.fc45.aarch64.rpm}
 - {name: kio-fuse, evr: 5.1.1-4.fc45, arch: aarch64, repo: fedora, source: kio-fuse-5.1.1-4.fc45.src.rpm, checksum: 'sha256:5bc6d34fc5afe977c64b561d8d52bf61d82db8b42fe9e92bef7bd1963c8b5bbd', size: 100530, location: Packages/k/kio-fuse-5.1.1-4.fc45.aarch64.rpm}
+- {name: kirigami-app-components, evr: 1.0.2-1.fc45, arch: aarch64, repo: fedora, source: kirigami-app-components-1.0.2-1.fc45.src.rpm, checksum: 'sha256:44b231449431500950c101d8c6bb9b4fd14217757e8846118f7e443b820450e5', size: 156749, location: Packages/k/kirigami-app-components-1.0.2-1.fc45.aarch64.rpm}
 - {name: kmenuedit, evr: 6.8.3-1.fc45, arch: aarch64, repo: updates, source: kmenuedit-6.8.3-1.fc45.src.rpm, checksum: 'sha256:27d36c8d4b39e5680dcc8c49c5c63a15e5a3867bc718cc89fda8f75245b481f4', size: 1140067, location: Packages/k/kmenuedit-6.8.3-1.fc45.aarch64.rpm}
 - {name: knighttime, evr: 6.8.3-1.fc45, arch: aarch64, repo: updates, source: knighttime-6.8.3-1.fc45.src.rpm, checksum: 'sha256:108ae942088fbd3962c868ee67646a9f33ea72e0a8dee90cd928a4cf617c9535', size: 102554, location: Packages/k/knighttime-6.8.3-1.fc45.aarch64.rpm}
+- {name: koko, evr: 26.08.3-1.fc45, arch: aarch64, repo: updates, source: koko-26.08.3-1.fc45.src.rpm, checksum: 'sha256:31a42fd22a0db1268c176c7539447f79ab93ad93add66c0df08134832366b5a6', size: 9387700, location: Packages/k/koko-26.08.3-1.fc45.aarch64.rpm}
 - {name: kpipewire, evr: 6.8.3-1.fc45, arch: aarch64, repo: updates, source: kpipewire-6.8.3-1.fc45.src.rpm, checksum: 'sha256:b5d1988f43cd74848bd60168b5564c1bfdc323929331da35c299fe1aa7b0a60e', size: 234284, location: Packages/k/kpipewire-6.8.3-1.fc45.aarch64.rpm}
+- {name: kquickimageeditor-qt6, evr: 0.7.0-2.fc45, arch: aarch64, repo: fedora, source: kquickimageeditor-0.7.0-2.fc45.src.rpm, checksum: 'sha256:b9b3f671883c03fe52575e0248950d5309b66e77be52ca1cb01eeacb73a29ee0', size: 468716, location: Packages/k/kquickimageeditor-qt6-0.7.0-2.fc45.aarch64.rpm}
+- {name: krecorder, evr: 26.08.3-1.fc45, arch: aarch64, repo: updates, source: krecorder-26.08.3-1.fc45.src.rpm, checksum: 'sha256:0d44bed914275fdb5336db5d540c50d11a4156db6353e9a3681a600639766117', size: 157545, location: Packages/k/krecorder-26.08.3-1.fc45.aarch64.rpm}
 - {name: kscreen, evr: '1:6.8.3-1.fc45', arch: aarch64, repo: updates, source: kscreen-6.8.3-1.fc45.src.rpm, checksum: 'sha256:40cc6fc4bee2face9a1c46e89ec9bc32cac7e9d3768124e7423d5aab8a342309', size: 2139131, location: Packages/k/kscreen-6.8.3-1.fc45.aarch64.rpm}
 - {name: kscreenlocker, evr: 6.8.3-1.fc45, arch: aarch64, repo: updates, source: kscreenlocker-6.8.3-1.fc45.src.rpm, checksum: 'sha256:c4040f95681735d231bc66433da2137dd787855a74ce34b47b1863057dce8392', size: 376829, location: Packages/k/kscreenlocker-6.8.3-1.fc45.aarch64.rpm}
 - {name: ksystemstats, evr: 6.8.3-1.fc45, arch: aarch64, repo: updates, source: ksystemstats-6.8.3-1.fc45.src.rpm, checksum: 'sha256:0f6c458a1a8b82c356367ed3c74b96215cb823a88bc41640eb5712d79018fb2e', size: 443114, location: Packages/k/ksystemstats-6.8.3-1.fc45.aarch64.rpm}
 - {name: kwayland, evr: 6.8.3-1.fc45, arch: aarch64, repo: updates, source: kwayland-6.8.3-1.fc45.src.rpm, checksum: 'sha256:7d56c6ddbe236adfbdda276328bcbedd1b83ae284985a02ab99acabd70e7fa19', size: 249027, location: Packages/k/kwayland-6.8.3-1.fc45.aarch64.rpm}
+- {name: kweather, evr: 26.08.3-1.fc45, arch: aarch64, repo: updates, source: kweather-26.08.3-1.fc45.src.rpm, checksum: 'sha256:58cca0051c21a70b0d0db8fda29358091db147cd773ddb66920c433cdb21f77e', size: 572594, location: Packages/k/kweather-26.08.3-1.fc45.aarch64.rpm}
+- {name: kweathercore, evr: 26.08.3-1.fc45, arch: aarch64, repo: updates, source: kweathercore-26.08.3-1.fc45.src.rpm, checksum: 'sha256:b7d65f0dab86e9327408ad19c19d33fd284bf8beac220660931c6d3de634304d', size: 173469, location: Packages/k/kweathercore-26.08.3-1.fc45.aarch64.rpm}
 - {name: kwin, evr: 6.8.3-1.fc45, arch: aarch64, repo: updates, source: kwin-6.8.3-1.fc45.src.rpm, checksum: 'sha256:d118dbd809eabd87c2e3d63f4645987afdc082980460bce82c01c35dcf5d1e58', size: 508278, location: Packages/k/kwin-6.8.3-1.fc45.aarch64.rpm}
 - {name: kwin-common, evr: 6.8.3-1.fc45, arch: aarch64, repo: updates, source: kwin-6.8.3-1.fc45.src.rpm, checksum: 'sha256:4f5decd6d48da715b7a0cf3bf6d527750f78a414566fe0911a553c755fea51eb', size: 3928667, location: Packages/k/kwin-common-6.8.3-1.fc45.aarch64.rpm}
 - {name: kwin-libs, evr: 6.8.3-1.fc45, arch: aarch64, repo: updates, source: kwin-6.8.3-1.fc45.src.rpm, checksum: 'sha256:dad9e3d42cb963313b68f30ed2113f17af9965362077a80b98fccdb5227fa25e', size: 2800673, location: Packages/k/kwin-libs-6.8.3-1.fc45.aarch64.rpm}
 - {name: kwrited, evr: 6.8.3-1.fc45, arch: aarch64, repo: updates, source: kwrited-6.8.3-1.fc45.src.rpm, checksum: 'sha256:8827acd6d8ec401051ca787687470c67bafe9d64c7a05b523f9f1b01f9eb6147', size: 42397, location: Packages/k/kwrited-6.8.3-1.fc45.aarch64.rpm}
 - {name: layer-shell-qt, evr: 6.8.3-1.fc45, arch: aarch64, repo: updates, source: layer-shell-qt-6.8.3-1.fc45.src.rpm, checksum: 'sha256:b781608632094833175d28dc7ff83ac929002666a13d3eb48c9407c8a98cfc98', size: 75982, location: Packages/l/layer-shell-qt-6.8.3-1.fc45.aarch64.rpm}
+- {name: libXScrnSaver, evr: 1.2.5-2.fc45, arch: aarch64, repo: fedora, source: libXScrnSaver-1.2.5-2.fc45.src.rpm, checksum: 'sha256:58b3548d84b621e7f03595ad2d9798d097645621b21a6e58b0deaf53f2362c58', size: 25784, location: Packages/l/libXScrnSaver-1.2.5-2.fc45.aarch64.rpm}
 - {name: libXaw, evr: 1.0.16-6.fc45, arch: aarch64, repo: fedora, source: libXaw-1.0.16-6.fc45.src.rpm, checksum: 'sha256:02b10f57bbc26b2ae774f363b442331bfd84bad219f124fc6c7930436e00d2dd', size: 203434, location: Packages/l/libXaw-1.0.16-6.fc45.aarch64.rpm}
 - {name: libXmu, evr: 1.2.1-6.fc45, arch: aarch64, repo: fedora, source: libXmu-1.2.1-6.fc45.src.rpm, checksum: 'sha256:864cb41b881cfa9cd569e0021f11b0707859ee2a259a1618aef78a33ffe5774a', size: 79073, location: Packages/l/libXmu-1.2.1-6.fc45.aarch64.rpm}
+- {name: libXpresent, evr: 1.0.0-29.fc45, arch: aarch64, repo: fedora, source: libXpresent-1.0.0-29.fc45.src.rpm, checksum: 'sha256:a7af07d53004faf0bab5e87d69c5d382263fdf91a978fecdb83376989858ac7c', size: 17588, location: Packages/l/libXpresent-1.0.0-29.fc45.aarch64.rpm}
 - {name: libaccounts-glib, evr: 1.25-28.fc45, arch: aarch64, repo: fedora, source: libaccounts-glib-1.25-28.fc45.src.rpm, checksum: 'sha256:7e72fbbbe5dfdf355a985b5222227c09a886215d2b3d1f2e4d613c0b4ea97db9', size: 86299, location: Packages/l/libaccounts-glib-1.25-28.fc45.aarch64.rpm}
 - {name: libaccounts-qt6, evr: 1.17-5.fc45, arch: aarch64, repo: fedora, source: libaccounts-qt-1.17-5.fc45.src.rpm, checksum: 'sha256:12088d25a7793690ed78bd31a99e47031c19a1d9dc0283daa50f1c63e1ed957c', size: 69798, location: Packages/l/libaccounts-qt6-1.17-5.fc45.aarch64.rpm}
 - {name: libb2, evr: 0.98.1-16.fc45, arch: aarch64, repo: fedora, source: libb2-0.98.1-16.fc45.src.rpm, checksum: 'sha256:a3b6658218af7cc70b1ccbd218961e8958d1c0e7267e9973a9f0462b18d70552', size: 26397, location: Packages/l/libb2-0.98.1-16.fc45.aarch64.rpm}
@@ -1454,6 +1479,7 @@ packages:
 - {name: libeis, evr: 1.6.0-3.fc45, arch: aarch64, repo: fedora, source: libei-1.6.0-3.fc45.src.rpm, checksum: 'sha256:5fdf87857f777f260266889d6f88e4ad2d1e18e7e267ca8103c8504b663e5c24', size: 54248, location: Packages/l/libeis-1.6.0-3.fc45.aarch64.rpm}
 - {name: libfdt, evr: 1.8.1-6.fc45, arch: aarch64, repo: fedora, source: dtc-1.8.1-6.fc45.src.rpm, checksum: 'sha256:ae4b90fe75746736264d6b2335a24928fc12ad836a18a5f2026e634193ae787a', size: 36929, location: Packages/l/libfdt-1.8.1-6.fc45.aarch64.rpm}
 - {name: libfeedbackd, evr: 0.8.11-1.fc45, arch: aarch64, repo: updates, source: feedbackd-0.8.11-1.fc45.src.rpm, checksum: 'sha256:d74d49f664245179e06de19234aefa64f775851cc701b5677bea48e43b95e109', size: 34449, location: Packages/l/libfeedbackd-0.8.11-1.fc45.aarch64.rpm}
+- {name: libglvnd-gles, evr: '1:1.7.0-10.fc45', arch: aarch64, repo: '@System', source: libglvnd-1.7.0-10.fc45.src.rpm, checksum: 'unknown:', size: 0, location: '', action: '7'}
 - {name: libi2c, evr: 4.4-7.fc45, arch: aarch64, repo: fedora, source: i2c-tools-4.4-7.fc45.src.rpm, checksum: 'sha256:1c3a7f37dd2064b697ded735f94289821daa41bb9a2828ba4b9bab6147592c11', size: 22178, location: Packages/l/libi2c-4.4-7.fc45.aarch64.rpm}
 - {name: libical, evr: 3.0.20-11.fc45, arch: aarch64, repo: updates, source: libical-3.0.20-11.fc45.src.rpm, checksum: 'sha256:5b92c2c52c12da0372fe2b8c4c9b0be14fcd06dbc9de5593101777e2a440e260', size: 258429, location: Packages/l/libical-3.0.20-11.fc45.aarch64.rpm}
 - {name: libinput, evr: 1.32.0-1.fc45, arch: aarch64, repo: fedora, source: libinput-1.32.0-1.fc45.src.rpm, checksum: 'sha256:eff2f127d5632e105cbb1189f311708fb2db660670b098a6eba3bed274eebcc2', size: 271879, location: Packages/l/libinput-1.32.0-1.fc45.aarch64.rpm}
@@ -1462,10 +1488,12 @@ packages:
 - {name: libksysguard, evr: 6.8.3-1.fc45, arch: aarch64, repo: updates, source: libksysguard-6.8.3-1.fc45.src.rpm, checksum: 'sha256:d13e6a2b2599b2f1071ccee8487b2ce6eb62ca5c1496d60cc6351221183c2feb', size: 955576, location: Packages/l/libksysguard-6.8.3-1.fc45.aarch64.rpm}
 - {name: libksysguard-common, evr: 6.8.3-1.fc45, arch: aarch64, repo: updates, source: libksysguard-6.8.3-1.fc45.src.rpm, checksum: 'sha256:266328556358dd125301ea5da88be4da454357b7cb9f416ef5e15875b8d366e3', size: 53045, location: Packages/l/libksysguard-common-6.8.3-1.fc45.aarch64.rpm}
 - {name: libkworkspace6, evr: 6.8.3-1.fc45, arch: aarch64, repo: updates, source: plasma-workspace-6.8.3-1.fc45.src.rpm, checksum: 'sha256:619ca446ab6485b53fa4a30a6e4f987e322f7827459b479770c6cabe06ba00cd', size: 135539, location: Packages/l/libkworkspace6-6.8.3-1.fc45.aarch64.rpm}
+- {name: libmarkdown, evr: 2.2.7-15.fc45, arch: aarch64, repo: fedora, source: discount-2.2.7-15.fc45.src.rpm, checksum: 'sha256:0f5fb46cccd1e305bd0096aec333e790af182cd663eb10f18b8ed422b6a9ed63', size: 47767, location: Packages/l/libmarkdown-2.2.7-15.fc45.aarch64.rpm}
 - {name: libmtp, evr: 1.1.22-4.fc45, arch: aarch64, repo: fedora, source: libmtp-1.1.22-4.fc45.src.rpm, checksum: 'sha256:27de26ee05dbcd8cb866df1e135a0279c54fbf9026a82a35dc46690569690b0a', size: 158601, location: Packages/l/libmtp-1.1.22-4.fc45.aarch64.rpm}
 - {name: libphonenumber, evr: 8.13.55-13.fc45, arch: aarch64, repo: fedora, source: libphonenumber-8.13.55-13.fc45.src.rpm, checksum: 'sha256:87399c1797dd2562b66aeee4907239272f98c0c2bcc2bced42376dd2ac0a26d3', size: 1117771, location: Packages/l/libphonenumber-8.13.55-13.fc45.aarch64.rpm}
 - {name: libplasma, evr: 6.8.3-1.fc45, arch: aarch64, repo: updates, source: libplasma-6.8.3-1.fc45.src.rpm, checksum: 'sha256:c928d070850147a4abb09d5a2a244f980346ea1d419158791aacf67ee5c2b7bd', size: 2495747, location: Packages/l/libplasma-6.8.3-1.fc45.aarch64.rpm}
 - {name: libqalculate, evr: 5.11.0-3.fc45, arch: aarch64, repo: fedora, source: libqalculate-5.11.0-3.fc45.src.rpm, checksum: 'sha256:8fab2a4dfbaa06dbfb44f44da50e8889615f3aafeda0753a4bab3594152ba314', size: 2461842, location: Packages/l/libqalculate-5.11.0-3.fc45.aarch64.rpm}
+- {name: libspectre, evr: 0.2.12-12.fc45, arch: aarch64, repo: fedora, source: libspectre-0.2.12-12.fc45.src.rpm, checksum: 'sha256:81945c20345421cb4f2bfffb794a7d5b925ab56d03c0ea38af52ed4ed99617a9', size: 43783, location: Packages/l/libspectre-0.2.12-12.fc45.aarch64.rpm}
 - {name: libunity-gtk3-parser, evr: 0.0.0+17.04.20170403-25.fc45, arch: aarch64, repo: fedora, source: unity-gtk-module-0.0.0+17.04.20170403-25.fc45.src.rpm, checksum: 'sha256:f48d94cc67529cf6106f1b5bd4416a5af35c79791e0f134bae57597ced1c7ea7', size: 46518, location: Packages/l/libunity-gtk3-parser-0.0.0+17.04.20170403-25.fc45.aarch64.rpm}
 - {name: libutempter, evr: 1.2.1-21.fc45, arch: aarch64, repo: fedora, source: libutempter-1.2.1-21.fc45.src.rpm, checksum: 'sha256:bf288ff1c3166ead3e1663a3b2c97c56b81de759249eb9ed1becbed5625cf47d', size: 27364, location: Packages/l/libutempter-1.2.1-21.fc45.aarch64.rpm}
 - {name: libwacom, evr: 2.19.0-2.fc45, arch: aarch64, repo: fedora, source: libwacom-2.19.0-2.fc45.src.rpm, checksum: 'sha256:2d05cac1c952dbeed1af320f699b3ae6442ab789549445070971c4dd44d876d5', size: 51825, location: Packages/l/libwacom-2.19.0-2.fc45.aarch64.rpm}
@@ -1474,15 +1502,25 @@ packages:
 - {name: libxkbcommon-x11, evr: 1.13.1-4.fc45, arch: aarch64, repo: fedora, source: libxkbcommon-1.13.1-4.fc45.src.rpm, checksum: 'sha256:5f9323b6e2afc0e285660c77c35d81c277c4ada9107506f2765613e5784eca60', size: 22366, location: Packages/l/libxkbcommon-x11-1.13.1-4.fc45.aarch64.rpm}
 - {name: mesa-dri-drivers, evr: 26.2.7-1.fc45, arch: aarch64, repo: '@System', source: mesa-26.2.7-1.fc45.src.rpm, checksum: 'unknown:', size: 0, location: '', action: '7'}
 - {name: minizip-ng-compat, evr: 4.1.0-5.fc45, arch: aarch64, repo: fedora, source: minizip-ng-4.1.0-5.fc45.src.rpm, checksum: 'sha256:dd7e03de11114ca559a2c6e6bbe76085416b3dda6bf0643eada505c677ae400d', size: 61851, location: Packages/m/minizip-ng-compat-4.1.0-5.fc45.aarch64.rpm}
+- {name: mpv-libs, evr: 0.41.0-10.fc45, arch: aarch64, repo: fedora, source: mpv-0.41.0-10.fc45.src.rpm, checksum: 'sha256:669846ce9f67d8c0a23e34efbe41793822401780785b7f4a1b2d4f9c1b4c8ce2', size: 1116365, location: Packages/m/mpv-libs-0.41.0-10.fc45.aarch64.rpm}
+- {name: mpvqt, evr: 1.1.1-3.fc45, arch: aarch64, repo: fedora, source: mpvqt-1.1.1-3.fc45.src.rpm, checksum: 'sha256:a01ae302949d971147e6a7591b166512917a97bf53fbb567d12ed7c8317abd7a', size: 52797, location: Packages/m/mpvqt-1.1.1-3.fc45.aarch64.rpm}
 - {name: mtdev, evr: 1.1.6-13.fc45, arch: aarch64, repo: fedora, source: mtdev-1.1.6-13.fc45.src.rpm, checksum: 'sha256:3dacb417ecc23b8386277423e5588a68bf1b069e6b34d928c4326bbb241ac155', size: 21341, location: Packages/m/mtdev-1.1.6-13.fc45.aarch64.rpm}
+- {name: mujs, evr: 1.3.7-3.fc45, arch: aarch64, repo: fedora, source: mujs-1.3.7-3.fc45.src.rpm, checksum: 'sha256:815282c4d3276a3003716e8ca39456c1b1ec175d60a656bf5e7fefa064ed0a56', size: 325002, location: Packages/m/mujs-1.3.7-3.fc45.aarch64.rpm}
 - {name: ocean-sound-theme, evr: 6.8.3-1.fc45, arch: noarch, repo: updates, source: ocean-sound-theme-6.8.3-1.fc45.src.rpm, checksum: 'sha256:15ac79de614028c68cd02870ab9178ed1aba6fead49fbdb374928ab951792fa5', size: 2065923, location: Packages/o/ocean-sound-theme-6.8.3-1.fc45.noarch.rpm}
+- {name: okular-libs, evr: 26.08.3-1.fc45, arch: aarch64, repo: updates, source: okular-26.08.3-1.fc45.src.rpm, checksum: 'sha256:2306042aaab805c1ccd020bcd20f42eac3bcc55f55f4cefc7c542ba2b1aecb0b', size: 467371, location: Packages/o/okular-libs-26.08.3-1.fc45.aarch64.rpm}
+- {name: okular-mobile, evr: 26.08.3-1.fc45, arch: aarch64, repo: updates, source: okular-26.08.3-1.fc45.src.rpm, checksum: 'sha256:317c7cdca7ea1409fe37beca293977cd87835a749dc531d9bfd70e217a1f6cad', size: 263089, location: Packages/o/okular-mobile-26.08.3-1.fc45.aarch64.rpm}
+- {name: okular-part, evr: 26.08.3-1.fc45, arch: aarch64, repo: updates, source: okular-26.08.3-1.fc45.src.rpm, checksum: 'sha256:02e047382743a680d5eb7c3aae791f45b69da9955235734af6a30fff6f106606', size: 2521836, location: Packages/o/okular-part-26.08.3-1.fc45.aarch64.rpm}
 - {name: openssh-server, evr: 10.5p1-1.fc45, arch: aarch64, repo: '@System', source: openssh-10.5p1-1.fc45.src.rpm, checksum: 'unknown:', size: 0, location: '', action: '7'}
 - {name: openxr-libs, evr: 1.1.65-1.fc45, arch: aarch64, repo: updates, source: openxr-1.1.65-1.fc45.src.rpm, checksum: 'sha256:0f27810ceaecb3a07ca2445b4a838eaf225ca44075c38681542e58027b442ed1', size: 101778, location: Packages/o/openxr-libs-1.1.65-1.fc45.aarch64.rpm}
+- {name: p11-kit-server, evr: 0.26.6-1.fc45, arch: aarch64, repo: '@System', source: p11-kit-0.26.6-1.fc45.src.rpm, checksum: 'unknown:', size: 0, location: '', action: '7'}
 - {name: pciutils, evr: 3.15.0-2.fc45, arch: aarch64, repo: '@System', source: pciutils-3.15.0-2.fc45.src.rpm, checksum: 'unknown:', size: 0, location: '', action: '7'}
 - {name: pcre2-utf16, evr: 10.49-1.fc45, arch: aarch64, repo: updates, source: pcre2-10.49-1.fc45.src.rpm, checksum: 'sha256:924981a01a38b07a624ec38bb1e03b83d45c4f4817f0f3c7e8bb75dbfbb40e40', size: 236765, location: Packages/p/pcre2-utf16-10.49-1.fc45.aarch64.rpm}
+- {name: phonon-common, evr: 4.12.0-12.fc45, arch: noarch, repo: fedora, source: phonon-4.12.0-12.fc45.src.rpm, checksum: 'sha256:9e2178655548bbec1afa7f01b0405c776e82da21a201f78fa36f484a9f3a59d6', size: 112790, location: Packages/p/phonon-common-4.12.0-12.fc45.noarch.rpm}
+- {name: phonon-qt6, evr: 4.12.0-12.fc45, arch: aarch64, repo: fedora, source: phonon-4.12.0-12.fc45.src.rpm, checksum: 'sha256:02d5684e0608e0bf699a33c155fadce180c467795c4306316b4a5747e8dacd87', size: 317249, location: Packages/p/phonon-qt6-4.12.0-12.fc45.aarch64.rpm}
 - {name: pinentry-gnome3, evr: 1.3.3-2.fc45, arch: aarch64, repo: fedora, source: pinentry-1.3.3-2.fc45.src.rpm, checksum: 'sha256:85faec9cde20f5a48c49549230ed6a588f45d2126259d118fa3dfe0e2b5fc3fc', size: 43139, location: Packages/p/pinentry-gnome3-1.3.3-2.fc45.aarch64.rpm}
 - {name: pipewire, evr: 1.6.11-1.fc45, arch: aarch64, repo: '@System', source: pipewire-1.6.11-1.fc45.src.rpm, checksum: 'unknown:', size: 0, location: '', action: '7'}
 - {name: pipewire-pulseaudio, evr: 1.6.11-1.fc45, arch: aarch64, repo: '@System', source: pipewire-1.6.11-1.fc45.src.rpm, checksum: 'unknown:', size: 0, location: '', action: '7'}
+- {name: pipewire-utils, evr: 1.6.11-1.fc45, arch: aarch64, repo: '@System', source: pipewire-1.6.11-1.fc45.src.rpm, checksum: 'unknown:', size: 0, location: '', action: '7'}
 - {name: plasma-activities, evr: 6.8.3-1.fc45, arch: aarch64, repo: updates, source: plasma-activities-6.8.3-1.fc45.src.rpm, checksum: 'sha256:3759d4a34785b75d9ccbd4abc351116ba1f3e19f03f2c89fd23d5aa50921421f', size: 157166, location: Packages/p/plasma-activities-6.8.3-1.fc45.aarch64.rpm}
 - {name: plasma-activities-stats, evr: 6.8.3-1.fc45, arch: aarch64, repo: updates, source: plasma-activities-stats-6.8.3-1.fc45.src.rpm, checksum: 'sha256:9af336e30aa871f37d5df41794d3faa125472ca2112f1c47cb10bce2d527ede6', size: 121810, location: Packages/p/plasma-activities-stats-6.8.3-1.fc45.aarch64.rpm}
 - {name: plasma-breeze, evr: 6.8.3-1.fc45, arch: aarch64, repo: updates, source: plasma-breeze-6.8.3-1.fc45.src.rpm, checksum: 'sha256:957d636d6e2518cca1208b9f360fa8597795e291baf588d77927a554642c4165', size: 296664, location: Packages/p/plasma-breeze-6.8.3-1.fc45.aarch64.rpm}
@@ -1525,7 +1563,9 @@ packages:
 - {name: qca-qt6-ossl, evr: 2.3.12-1.fc45, arch: aarch64, repo: fedora, source: qca-2.3.12-1.fc45.src.rpm, checksum: 'sha256:128aea251aef6202f485fadd6d5a108f34050377aa9d047d1bb321c2767d972d', size: 122768, location: Packages/q/qca-qt6-ossl-2.3.12-1.fc45.aarch64.rpm}
 - {name: qcom-firmware, evr: 20261019-1.fc45, arch: noarch, repo: '@System', source: linux-firmware-20261019-1.fc45.src.rpm, checksum: 'unknown:', size: 0, location: '', action: '7'}
 - {name: qcoro-qt6, evr: 0.12.0-7.fc45, arch: aarch64, repo: fedora, source: qcoro-0.12.0-7.fc45.src.rpm, checksum: 'sha256:7e2d9eebd6d53b65ae5be88ca74ad1feeee9c78857320694c9aaed7b776972a7', size: 142783, location: Packages/q/qcoro-qt6-0.12.0-7.fc45.aarch64.rpm}
+- {name: qmlkonsole, evr: 26.08.3-1.fc45, arch: aarch64, repo: updates, source: qmlkonsole-26.08.3-1.fc45.src.rpm, checksum: 'sha256:24dd4f0ff399a7e0589e76d7bad91d675cee7f6e6f7a746c4403e02c41e940e4', size: 270957, location: Packages/q/qmlkonsole-26.08.3-1.fc45.aarch64.rpm}
 - {name: qqc2-breeze-style, evr: 6.8.3-1.fc45, arch: aarch64, repo: updates, source: qqc2-breeze-style-6.8.3-1.fc45.src.rpm, checksum: 'sha256:7a782f66abceec0d41ac4cacaa9ec6e34b80b9f80f859a701e03f3266f4c4b06', size: 596038, location: Packages/q/qqc2-breeze-style-6.8.3-1.fc45.aarch64.rpm}
+- {name: qrca, evr: 26.08.3-1.fc45, arch: aarch64, repo: updates, source: qrca-26.08.3-1.fc45.src.rpm, checksum: 'sha256:5fbe8fb350c453b3e94a553ac10eb5a9b6454f814efbd685a1410ab8e7361d15', size: 163900, location: Packages/q/qrca-26.08.3-1.fc45.aarch64.rpm}
 - {name: qrtr, evr: 1.2-3.fc45, arch: aarch64, repo: '@System', source: qrtr-1.2-3.fc45.src.rpm, checksum: 'unknown:', size: 0, location: '', action: '7'}
 - {name: qrtr, evr: 1.2-3.fc45, arch: aarch64, repo: '@System', source: qrtr-1.2-3.fc45.src.rpm, checksum: 'unknown:', size: 0, location: '', action: '7'}
 - {name: qt6-filesystem, evr: 6.11.2-1.fc45, arch: aarch64, repo: fedora, source: qt6-6.11.2-1.fc45.src.rpm, checksum: 'sha256:71f8e6efa6e7d10764ebe8c63ad83f90188d315f034d1507f39933d9fdae6e2f', size: 10662, location: Packages/q/qt6-filesystem-6.11.2-1.fc45.aarch64.rpm}
@@ -1533,6 +1573,7 @@ packages:
 - {name: qt6-qtbase, evr: 6.11.2-3.fc45, arch: aarch64, repo: fedora, source: qt6-qtbase-6.11.2-3.fc45.src.rpm, checksum: 'sha256:c6bf21200de71c938161913f22ba9e48cf9e09f7b22530eac7dfbae71403b1c9', size: 4382068, location: Packages/q/qt6-qtbase-6.11.2-3.fc45.aarch64.rpm}
 - {name: qt6-qtbase-common, evr: 6.11.2-3.fc45, arch: noarch, repo: fedora, source: qt6-qtbase-6.11.2-3.fc45.src.rpm, checksum: 'sha256:66a7bca247c43705c2fa42a79263a57f0685c7464dc23f50cea90d939ad3620b', size: 11618, location: Packages/q/qt6-qtbase-common-6.11.2-3.fc45.noarch.rpm}
 - {name: qt6-qtbase-gui, evr: 6.11.2-3.fc45, arch: aarch64, repo: fedora, source: qt6-qtbase-6.11.2-3.fc45.src.rpm, checksum: 'sha256:4afb4a397620ab69b6a3dbfef8d87e0936e2b9210f4e2ef2079b3aaf18740fac', size: 8600923, location: Packages/q/qt6-qtbase-gui-6.11.2-3.fc45.aarch64.rpm}
+- {name: qt6-qtcharts, evr: 6.11.2-1.fc45, arch: aarch64, repo: fedora, source: qt6-qtcharts-6.11.2-1.fc45.src.rpm, checksum: 'sha256:97b2fb035fa224fcee7e7c6de2ec63970bf92078394235fd1681a45626e31a9a', size: 865499, location: Packages/q/qt6-qtcharts-6.11.2-1.fc45.aarch64.rpm}
 - {name: qt6-qtdeclarative, evr: 6.11.2-3.fc45, arch: aarch64, repo: updates, source: qt6-qtdeclarative-6.11.2-3.fc45.src.rpm, checksum: 'sha256:16afe1ace92a08179b11669a51cc498184b30bf48d2ffaf8739663a7cf637b99', size: 14853131, location: Packages/q/qt6-qtdeclarative-6.11.2-3.fc45.aarch64.rpm}
 - {name: qt6-qtlocation, evr: 6.11.2-1.fc45, arch: aarch64, repo: fedora, source: qt6-qtlocation-6.11.2-1.fc45.src.rpm, checksum: 'sha256:a2d04be6d5d468edce98a02a4bbc7335bfaac54ccf4274ad72a4f7d84f65a1ac', size: 736425, location: Packages/q/qt6-qtlocation-6.11.2-1.fc45.aarch64.rpm}
 - {name: qt6-qtmultimedia, evr: 6.11.2-2.fc45, arch: aarch64, repo: fedora, source: qt6-qtmultimedia-6.11.2-2.fc45.src.rpm, checksum: 'sha256:c1d24f10af12436ea9f928d5c57442b828295d03a73cf9980797732c256c8613', size: 1455555, location: Packages/q/qt6-qtmultimedia-6.11.2-2.fc45.aarch64.rpm}
@@ -1565,14 +1606,18 @@ packages:
 - {name: signon-qt6, evr: 8.60^20240205.c8ad982-6.fc45, arch: aarch64, repo: fedora, source: signon-8.60^20240205.c8ad982-6.fc45.src.rpm, checksum: 'sha256:7f6bd6156f54b2b9f14c2851412de8ebc7cc6a45b24babb8b779db1e0dae5e24', size: 92954, location: Packages/s/signon-qt6-8.60^20240205.c8ad982-6.fc45.aarch64.rpm}
 - {name: socat, evr: 1.8.1.3-1.fc45, arch: aarch64, repo: updates, source: socat-1.8.1.3-1.fc45.src.rpm, checksum: 'sha256:18888514b548d07e3c54613d57fa04a1023f58b9d26cdf535e7020dac148bcc0', size: 396235, location: Packages/s/socat-1.8.1.3-1.fc45.aarch64.rpm}
 - {name: source-foundry-hack-fonts, evr: 3.003-8.fc45, arch: noarch, repo: fedora, source: source-foundry-hack-fonts-3.003-8.fc45.src.rpm, checksum: 'sha256:f4eaa097b2c0f157a269f2b43cdf928acd2dbce08819fbbeb1f821ab281d8ffe', size: 409592, location: Packages/s/source-foundry-hack-fonts-3.003-8.fc45.noarch.rpm}
+- {name: spacebar, evr: '1:6.8.3-1.fc45', arch: aarch64, repo: updates, source: spacebar-6.8.3-1.fc45.src.rpm, checksum: 'sha256:8a73ce205e43b21b2649b52faaf89be0b57a9e63af35c12b602390d84c35ba9b', size: 473197, location: Packages/s/spacebar-6.8.3-1.fc45.aarch64.rpm}
 - {name: sudo, evr: 1.9.17-18.p2.fc45, arch: aarch64, repo: '@System', source: sudo-1.9.17-18.p2.fc45.src.rpm, checksum: 'unknown:', size: 0, location: '', action: '7'}
 - {name: systemd-pam, evr: 262.1-1.fc45, arch: aarch64, repo: '@System', source: systemd-262.1-1.fc45.src.rpm, checksum: 'unknown:', size: 0, location: '', action: '7'}
+- {name: telepathy-glib, evr: 0.24.2-16.fc45, arch: aarch64, repo: fedora, source: telepathy-glib-0.24.2-16.fc45.src.rpm, checksum: 'sha256:1146de12cfed2fc2e9a06d63ff85446e689ad15567fda731eaa60a6b60d09ff0', size: 741523, location: Packages/t/telepathy-glib-0.24.2-16.fc45.aarch64.rpm}
+- {name: telepathy-mission-control, evr: '1:5.16.5-16.fc45', arch: aarch64, repo: fedora, source: telepathy-mission-control-5.16.5-16.fc45.src.rpm, checksum: 'sha256:640f495e2f5d07b0b3f5e323a33b5ddf044fb0e929f415457f1ce56f52faca67', size: 208469, location: Packages/t/telepathy-mission-control-5.16.5-16.fc45.aarch64.rpm}
 - {name: tqftpserv, evr: 1.3-1.fc45, arch: aarch64, repo: updates, source: tqftpserv-1.3-1.fc45.src.rpm, checksum: 'sha256:b66c913d3bc58757742531b27c48c1addc3e0b8262da46ee87c02d54c005e9e7', size: 25239, location: Packages/t/tqftpserv-1.3-1.fc45.aarch64.rpm}
 - {name: tslib, evr: 1.24-3.fc45, arch: aarch64, repo: fedora, source: tslib-1.24-3.fc45.src.rpm, checksum: 'sha256:0d8d4a3a0019009b563048fd3a45754d90eead4afb847a7ee3df64d7a27d49ca', size: 165120, location: Packages/t/tslib-1.24-3.fc45.aarch64.rpm}
 - {name: unity-gtk-module-common, evr: 0.0.0+17.04.20170403-25.fc45, arch: noarch, repo: fedora, source: unity-gtk-module-0.0.0+17.04.20170403-25.fc45.src.rpm, checksum: 'sha256:a8ecee714bdb661d6d92c5486619182c27773a14309d04fade711fdd80eb24e8', size: 23144, location: Packages/u/unity-gtk-module-common-0.0.0+17.04.20170403-25.fc45.noarch.rpm}
 - {name: unity-gtk3-module, evr: 0.0.0+17.04.20170403-25.fc45, arch: aarch64, repo: fedora, source: unity-gtk-module-0.0.0+17.04.20170403-25.fc45.src.rpm, checksum: 'sha256:ee1daf045fd4f409e46b4b6c664bc6d4346221d1a10a8b1daea6a310251891f0', size: 19019, location: Packages/u/unity-gtk3-module-0.0.0+17.04.20170403-25.fc45.aarch64.rpm}
 - {name: upower, evr: 1.91.5-1.fc45, arch: aarch64, repo: '@System', source: upower-1.91.5-1.fc45.src.rpm, checksum: 'unknown:', size: 0, location: '', action: '7'}
 - {name: usbutils, evr: 019-3.fc45, arch: aarch64, repo: '@System', source: usbutils-019-3.fc45.src.rpm, checksum: 'unknown:', size: 0, location: '', action: '7'}
+- {name: vapoursynth-libs, evr: 79-3.fc45, arch: aarch64, repo: fedora, source: vapoursynth-79-3.fc45.src.rpm, checksum: 'sha256:0ed417eb7568c655c3353919240c089118e355cebbc292e97e5b8bc8ee604a76', size: 530499, location: Packages/v/vapoursynth-libs-79-3.fc45.aarch64.rpm}
 - {name: wireplumber, evr: 0.5.19-1.fc45, arch: aarch64, repo: '@System', source: wireplumber-0.5.19-1.fc45.src.rpm, checksum: 'unknown:', size: 0, location: '', action: '7'}
 - {name: xcb-util-cursor, evr: 0.1.6-3.fc45, arch: aarch64, repo: fedora, source: xcb-util-cursor-0.1.6-3.fc45.src.rpm, checksum: 'sha256:fd6bf5661aeff57c7b028eed13fcb65328ef3b400948d8bf79af074692324408', size: 19223, location: Packages/x/xcb-util-cursor-0.1.6-3.fc45.aarch64.rpm}
 - {name: xcb-util-image, evr: 0.4.1-10.fc45, arch: aarch64, repo: fedora, source: xcb-util-image-0.4.1-10.fc45.src.rpm, checksum: 'sha256:dbc7d132e8ca6e3f0335f4b214653a21386b17e3f6afa0e5a450cb47cde05e52', size: 18996, location: Packages/x/xcb-util-image-0.4.1-10.fc45.aarch64.rpm}

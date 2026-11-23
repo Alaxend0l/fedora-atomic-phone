@@ -12,9 +12,9 @@ steps:
   specs: [systemd, systemd-udev, dbus-broker, kmod, openssh-server, iproute, iputils, procps-ng, util-linux, less, pciutils, usbutils, i2c-tools, dtc, evtest, lm_sensors, linux-firmware-whence, qrtr, rmtfs, tqftpserv, atheros-firmware, iw, wpa_supplicant, dhcpcd]
 kernel_image:
   image: quay.io/fedora/fedora-silverblue:45
-  digest: sha256:96cc142ddf2cdc215c0d589bb4c0c4b94733de32a962a718fd9c20b0953f4fc7
-  pinned: quay.io/fedora/fedora-silverblue@sha256:96cc142ddf2cdc215c0d589bb4c0c4b94733de32a962a718fd9c20b0953f4fc7
-  version: 45.20261120.0
+  digest: sha256:36ebcb2f41b7487e78ca13f6e594691aa65f37dde4672ddac5c1d8b335e50da4
+  pinned: quay.io/fedora/fedora-silverblue@sha256:36ebcb2f41b7487e78ca13f6e594691aa65f37dde4672ddac5c1d8b335e50da4
+  version: 45.20261123.0
   packages:
   - {name: kernel, evr: 7.3.4-300.fc45, arch: aarch64, source: kernel-7.3.4-300.fc45.src.rpm}
   - {name: kernel-core, evr: 7.3.4-300.fc45, arch: aarch64, source: kernel-7.3.4-300.fc45.src.rpm}
@@ -25,8 +25,8 @@ kernel_image:
   - {name: kernel-tools-libs, evr: 7.3.4-300.fc45, arch: aarch64, source: kernel-7.3.4-300.fc45.src.rpm}
 base:
   image: registry.fedoraproject.org/fedora:45
-  digest: sha256:e95f75e5259d232f31d31f80595faf24b6c2da9d2680ef801cf9f8604dd9a98e
-  pinned: registry.fedoraproject.org/fedora@sha256:e95f75e5259d232f31d31f80595faf24b6c2da9d2680ef801cf9f8604dd9a98e
+  digest: sha256:62d5eaec1e8a34f6cb94934f806420754611834c7eef8a4f50b9cdbcd1c90c10
+  pinned: registry.fedoraproject.org/fedora@sha256:62d5eaec1e8a34f6cb94934f806420754611834c7eef8a4f50b9cdbcd1c90c10
   version: '45'
   packages:
   - {name: alternatives, evr: 1.33-6.fc45, arch: aarch64, source: chkconfig-1.33-6.fc45.src.rpm}
@@ -162,7 +162,7 @@ base:
   - {name: sed, evr: 4.10-2.fc45, arch: aarch64, source: sed-4.10-2.fc45.src.rpm}
   - {name: setup, evr: 2.15.1-2.fc45, arch: noarch, source: setup-2.15.1-2.fc45.src.rpm}
   - {name: shadow-utils, evr: '2:4.20.0-2.fc45', arch: aarch64, source: shadow-utils-4.20.0-2.fc45.src.rpm}
-  - {name: sqlite-libs, evr: 3.53.4-1.fc45, arch: aarch64, source: sqlite-3.53.4-1.fc45.src.rpm}
+  - {name: sqlite-libs, evr: 3.54.1-2.fc45, arch: aarch64, source: sqlite-3.54.1-2.fc45.src.rpm}
   - {name: sudo, evr: 1.9.17-18.p2.fc45, arch: aarch64, source: sudo-1.9.17-18.p2.fc45.src.rpm}
   - {name: systemd-libs, evr: 262.1-1.fc45, arch: aarch64, source: systemd-262.1-1.fc45.src.rpm}
   - {name: systemd-standalone-sysusers, evr: 262.1-1.fc45, arch: aarch64, source: systemd-262.1-1.fc45.src.rpm}

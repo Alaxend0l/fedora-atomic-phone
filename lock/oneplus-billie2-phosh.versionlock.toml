@@ -68,46 +68,6 @@ comparator = "="
 value = "5.88-1.fc45"
 
 [[packages]]
-name = "boost-atomic"
-comment = "oneplus-billie2-phosh"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "1.90.0-13.fc45"
-
-[[packages]]
-name = "boost-chrono"
-comment = "oneplus-billie2-phosh"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "1.90.0-13.fc45"
-
-[[packages]]
-name = "boost-container"
-comment = "oneplus-billie2-phosh"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "1.90.0-13.fc45"
-
-[[packages]]
-name = "boost-date-time"
-comment = "oneplus-billie2-phosh"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "1.90.0-13.fc45"
-
-[[packages]]
-name = "boost-thread"
-comment = "oneplus-billie2-phosh"
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "1.90.0-13.fc45"
-
-[[packages]]
 name = "callaudiod"
 comment = "oneplus-billie2-phosh"
 [[packages.conditions]]
@@ -572,6 +532,14 @@ comparator = "="
 value = "0.20.8-4.fc45"
 
 [[packages]]
+name = "libglvnd-gles"
+comment = "oneplus-billie2-phosh"
+[[packages.conditions]]
+key = "evr"
+comparator = "="
+value = "1:1.7.0-10.fc45"
+
+[[packages]]
 name = "libgtop2"
 comment = "oneplus-billie2-phosh"
 [[packages.conditions]]
@@ -869,6 +837,14 @@ value = "1.6.11-1.fc45"
 
 [[packages]]
 name = "pipewire-pulseaudio"
+comment = "oneplus-billie2-phosh"
+[[packages.conditions]]
+key = "evr"
+comparator = "="
+value = "1.6.11-1.fc45"
+
+[[packages]]
+name = "pipewire-utils"
 comment = "oneplus-billie2-phosh"
 [[packages.conditions]]
 key = "evr"

@@ -9,18 +9,18 @@ weak_deps: false
 steps:
 - where: base/packages:1
   action: install
-  specs: [openssh-server, dnsmasq, NetworkManager, NetworkManager-wifi, NetworkManager-wwan, ModemManager, pipewire, wireplumber, pipewire-pulseaudio, bluez, upower, systemd-pam, chrony, glibc-langpack-en, sudo, e2fsprogs, usbutils, pciutils, i2c-tools, dtc]
+  specs: [openssh-server, dnsmasq, NetworkManager, NetworkManager-wifi, NetworkManager-wwan, ModemManager, pipewire, wireplumber, pipewire-pulseaudio, pipewire-utils, bluez, upower, systemd-pam, chrony, glibc-langpack-en, sudo, e2fsprogs, usbutils, pciutils, i2c-tools, dtc]
 - where: desktops/phosh/packages:1
   action: install
-  specs: [phosh, phrog, stevia, phosh-mobile-settings, gnome-control-center, calls, feedbackd, xdg-desktop-portal-gnome, xdg-desktop-portal-gtk, adwaita-sans-fonts, adwaita-mono-fonts, mesa-dri-drivers]
+  specs: [phosh, phrog, stevia, phosh-mobile-settings, gnome-control-center, calls, feedbackd, xdg-desktop-portal-gnome, xdg-desktop-portal-gtk, adwaita-sans-fonts, adwaita-mono-fonts, mesa-dri-drivers, libglvnd-gles]
 - where: devices/oneplus-billie2/packages:1
   action: install
   specs: [qrtr, rmtfs, pd-mapper, tqftpserv, qcom-firmware, atheros-firmware]
 base:
   image: quay.io/fedora-ostree-desktops/base-atomic:45
-  digest: sha256:82f9d64740258873576f6b255fb17a8a6e73719a04ef9aa6bea603fa602dcc35
-  pinned: quay.io/fedora-ostree-desktops/base-atomic@sha256:82f9d64740258873576f6b255fb17a8a6e73719a04ef9aa6bea603fa602dcc35
-  version: 45.20261120.0
+  digest: sha256:69e5af6023aebaf747e40853e45a61109dfe21589492fcf98de75abceb1bf912
+  pinned: quay.io/fedora-ostree-desktops/base-atomic@sha256:69e5af6023aebaf747e40853e45a61109dfe21589492fcf98de75abceb1bf912
+  version: 45.20261123.0
   packages:
   - {name: 7zip, evr: 26.06-1.fc45, arch: aarch64, source: 7zip-26.06-1.fc45.src.rpm}
   - {name: ImageMagick, evr: '1:7.1.2.36-1.fc45', arch: aarch64, source: ImageMagick-7.1.2.36-1.fc45.src.rpm}
@@ -93,6 +93,15 @@ base:
   - {name: bluez, evr: 5.88-1.fc45, arch: aarch64, source: bluez-5.88-1.fc45.src.rpm}
   - {name: bluez-cups, evr: 5.88-1.fc45, arch: aarch64, source: bluez-5.88-1.fc45.src.rpm}
   - {name: bluez-libs, evr: 5.88-1.fc45, arch: aarch64, source: bluez-5.88-1.fc45.src.rpm}
+  - {name: boost-atomic, evr: 1.90.0-13.fc45, arch: aarch64, source: boost-1.90.0-13.fc45.src.rpm}
+  - {name: boost-chrono, evr: 1.90.0-13.fc45, arch: aarch64, source: boost-1.90.0-13.fc45.src.rpm}
+  - {name: boost-container, evr: 1.90.0-13.fc45, arch: aarch64, source: boost-1.90.0-13.fc45.src.rpm}
+  - {name: boost-date-time, evr: 1.90.0-13.fc45, arch: aarch64, source: boost-1.90.0-13.fc45.src.rpm}
+  - {name: boost-filesystem, evr: 1.90.0-13.fc45, arch: aarch64, source: boost-1.90.0-13.fc45.src.rpm}
+  - {name: boost-log, evr: 1.90.0-13.fc45, arch: aarch64, source: boost-1.90.0-13.fc45.src.rpm}
+  - {name: boost-regex, evr: 1.90.0-13.fc45, arch: aarch64, source: boost-1.90.0-13.fc45.src.rpm}
+  - {name: boost-serialization, evr: 1.90.0-13.fc45, arch: aarch64, source: boost-1.90.0-13.fc45.src.rpm}
+  - {name: boost-thread, evr: 1.90.0-13.fc45, arch: aarch64, source: boost-1.90.0-13.fc45.src.rpm}
   - {name: bootc, evr: 1.17.1-1.fc45, arch: aarch64, source: bootc-1.17.1-1.fc45.src.rpm}
   - {name: bootupd, evr: 0.3.2-1.fc45, arch: aarch64, source: rust-bootupd-0.3.2-1.fc45.src.rpm}
   - {name: braille-printer-app, evr: '1:2.0~b0^386eea385f-12.fc45', arch: aarch64, source: braille-printer-app-2.0~b0^386eea385f-12.fc45.src.rpm}
@@ -104,7 +113,7 @@ base:
   - {name: buildah, evr: '2:1.46.1-1.fc45', arch: aarch64, source: buildah-1.46.1-1.fc45.src.rpm}
   - {name: bzip2, evr: 1.0.8-24.fc45, arch: aarch64, source: bzip2-1.0.8-24.fc45.src.rpm}
   - {name: bzip2-libs, evr: 1.0.8-24.fc45, arch: aarch64, source: bzip2-1.0.8-24.fc45.src.rpm}
-  - {name: c-ares, evr: 1.34.8-2.fc45, arch: aarch64, source: c-ares-1.34.8-2.fc45.src.rpm}
+  - {name: c-ares, evr: 1.34.9-1.fc45, arch: aarch64, source: c-ares-1.34.9-1.fc45.src.rpm}
   - {name: c2esp, evr: 2.7-38.fc45, arch: aarch64, source: c2esp-2.7-38.fc45.src.rpm}
   - {name: ca-certificates, evr: 2026.2.92_v9.0.319-2.fc45, arch: noarch, source: ca-certificates-2026.2.92_v9.0.319-2.fc45.src.rpm}
   - {name: cairo, evr: 1.18.6-1.fc45, arch: aarch64, source: cairo-1.18.6-1.fc45.src.rpm}
@@ -239,7 +248,7 @@ base:
   - {name: device-mapper-libs, evr: 1.02.217-2.fc45, arch: aarch64, source: lvm2-2.03.43-2.fc45.src.rpm}
   - {name: device-mapper-persistent-data, evr: 1.3.4-1.fc45, arch: aarch64, source: device-mapper-persistent-data-1.3.4-1.fc45.src.rpm}
   - {name: diffutils, evr: 3.12-6.fc45, arch: aarch64, source: diffutils-3.12-6.fc45.src.rpm}
-  - {name: distribution-gpg-keys, evr: 1.123-1.fc45, arch: noarch, source: distribution-gpg-keys-1.123-1.fc45.src.rpm}
+  - {name: distribution-gpg-keys, evr: 1.124-1.fc45, arch: noarch, source: distribution-gpg-keys-1.124-1.fc45.src.rpm}
   - {name: dnf5, evr: 5.4.8.0-2.fc45, arch: aarch64, source: dnf5-5.4.8.0-2.fc45.src.rpm}
   - {name: dnf5-plugins, evr: 5.4.8.0-2.fc45, arch: aarch64, source: dnf5-5.4.8.0-2.fc45.src.rpm}
   - {name: dns-root-data, evr: 2026260100-5.fc45, arch: noarch, source: dns-root-data-2026260100-5.fc45.src.rpm}
@@ -262,7 +271,7 @@ base:
   - {name: espeak-ng, evr: 1.52.0-4.fc45, arch: aarch64, source: espeak-ng-1.52.0-4.fc45.src.rpm}
   - {name: ethtool, evr: '2:7.2-1.fc45', arch: aarch64, source: ethtool-7.2-1.fc45.src.rpm}
   - {name: exempi, evr: 2.6.4-10.fc45, arch: aarch64, source: exempi-2.6.4-10.fc45.src.rpm}
-  - {name: exfatprogs, evr: 1.4.4-1.fc45, arch: aarch64, source: exfatprogs-1.4.4-1.fc45.src.rpm}
+  - {name: exfatprogs, evr: 1.4.5-1.fc45, arch: aarch64, source: exfatprogs-1.4.5-1.fc45.src.rpm}
   - {name: exiv2, evr: 0.28.9-1.fc45, arch: aarch64, source: exiv2-0.28.9-1.fc45.src.rpm}
   - {name: exiv2-libs, evr: 0.28.9-1.fc45, arch: aarch64, source: exiv2-0.28.9-1.fc45.src.rpm}
   - {name: expat, evr: 2.9.0-1.fc45, arch: aarch64, source: expat-2.9.0-1.fc45.src.rpm}
@@ -548,7 +557,7 @@ base:
   - {name: libXdmcp, evr: 1.1.5-6.fc45, arch: aarch64, source: libXdmcp-1.1.5-6.fc45.src.rpm}
   - {name: libXext, evr: 1.3.6-6.fc45, arch: aarch64, source: libXext-1.3.6-6.fc45.src.rpm}
   - {name: libXfixes, evr: 6.0.1-8.fc45, arch: aarch64, source: libXfixes-6.0.1-8.fc45.src.rpm}
-  - {name: libXfont2, evr: 2.0.9-1.fc45, arch: aarch64, source: libXfont2-2.0.9-1.fc45.src.rpm}
+  - {name: libXfont2, evr: 2.0.10-1.fc45, arch: aarch64, source: libXfont2-2.0.10-1.fc45.src.rpm}
   - {name: libXft, evr: 2.3.8-11.fc45, arch: aarch64, source: libXft-2.3.8-11.fc45.src.rpm}
   - {name: libXi, evr: 1.8.4-1.fc45, arch: aarch64, source: libXi-1.8.4-1.fc45.src.rpm}
   - {name: libXinerama, evr: 1.1.5-11.fc45, arch: aarch64, source: libXinerama-1.1.5-11.fc45.src.rpm}
@@ -598,8 +607,8 @@ base:
   - {name: libbsd, evr: 0.12.2-8.fc45, arch: aarch64, source: libbsd-0.12.2-8.fc45.src.rpm}
   - {name: libbytesize, evr: 2.12-5.fc45, arch: aarch64, source: libbytesize-2.12-5.fc45.src.rpm}
   - {name: libcaca, evr: 0.99-0.86.beta20.fc45, arch: aarch64, source: libcaca-0.99-0.86.beta20.fc45.src.rpm}
-  - {name: libcamera, evr: 0.7.2-5.fc45, arch: aarch64, source: libcamera-0.7.2-5.fc45.src.rpm}
-  - {name: libcamera-ipa, evr: 0.7.2-5.fc45, arch: aarch64, source: libcamera-0.7.2-5.fc45.src.rpm}
+  - {name: libcamera, evr: 0.7.2-6.fc45, arch: aarch64, source: libcamera-0.7.2-6.fc45.src.rpm}
+  - {name: libcamera-ipa, evr: 0.7.2-6.fc45, arch: aarch64, source: libcamera-0.7.2-6.fc45.src.rpm}
   - {name: libcanberra, evr: 0.30-52.fc45, arch: aarch64, source: libcanberra-0.30-52.fc45.src.rpm}
   - {name: libcanberra-backend-alsa, evr: 0.30-52.fc45, arch: aarch64, source: libcanberra-0.30-52.fc45.src.rpm}
   - {name: libcanberra-backend-gstreamer, evr: 0.30-52.fc45, arch: aarch64, source: libcanberra-0.30-52.fc45.src.rpm}
@@ -615,7 +624,7 @@ base:
   - {name: libchromaprint, evr: 1.6.1-2.fc45, arch: aarch64, source: chromaprint-1.6.1-2.fc45.src.rpm}
   - {name: libcloudproviders, evr: 0.4.1-1.fc45, arch: aarch64, source: libcloudproviders-0.4.1-1.fc45.src.rpm}
   - {name: libcom_err, evr: 1.47.4-2.fc45, arch: aarch64, source: e2fsprogs-1.47.4-2.fc45.src.rpm}
-  - {name: libcue, evr: 2.3.0-15.fc45, arch: aarch64, source: libcue-2.3.0-15.fc45.src.rpm}
+  - {name: libcue, evr: 2.4.2-2.fc45, arch: aarch64, source: libcue-2.4.2-2.fc45.src.rpm}
   - {name: libcupsfilters, evr: '1:2.2.1-8.fc45', arch: aarch64, source: libcupsfilters-2.2.1-8.fc45.src.rpm}
   - {name: libcurl, evr: 8.21.0-9.fc45, arch: aarch64, source: curl-8.21.0-9.fc45.src.rpm}
   - {name: libdaemon, evr: 0.14-34.fc45, arch: aarch64, source: libdaemon-0.14-34.fc45.src.rpm}
@@ -650,7 +659,7 @@ base:
   - {name: libfdisk, evr: 2.42.4-1.fc45, arch: aarch64, source: util-linux-2.42.4-1.fc45.src.rpm}
   - {name: libffi, evr: 3.5.2-3.fc45, arch: aarch64, source: libffi-3.5.2-3.fc45.src.rpm}
   - {name: libfido2, evr: 1.17.0-6.fc45, arch: aarch64, source: libfido2-1.17.0-6.fc45.src.rpm}
-  - {name: libfontenc, evr: 1.1.8-6.fc45, arch: aarch64, source: libfontenc-1.1.8-6.fc45.src.rpm}
+  - {name: libfontenc, evr: 1.1.10-1.fc45, arch: aarch64, source: libfontenc-1.1.10-1.fc45.src.rpm}
   - {name: libfsverity, evr: 1.7-4.fc45, arch: aarch64, source: fsverity-utils-1.7-4.fc45.src.rpm}
   - {name: libfyaml, evr: 0.8-10.fc45, arch: aarch64, source: libfyaml-0.8-10.fc45.src.rpm}
   - {name: libgcc, evr: 16.2.1-3.fc45, arch: aarch64, source: gcc-16.2.1-3.fc45.src.rpm}
@@ -736,6 +745,7 @@ base:
   - {name: libpinyin, evr: 2.11.91-3.fc45, arch: aarch64, source: libpinyin-2.11.91-3.fc45.src.rpm}
   - {name: libpinyin-data, evr: 2.11.91-3.fc45, arch: aarch64, source: libpinyin-2.11.91-3.fc45.src.rpm}
   - {name: libpipeline, evr: 1.5.8-5.fc45, arch: aarch64, source: libpipeline-1.5.8-5.fc45.src.rpm}
+  - {name: libpisp, evr: 1.8.0-1.fc45, arch: aarch64, source: libpisp-1.8.0-1.fc45.src.rpm}
   - {name: libpkgconf, evr: 2.5.1-2.fc45, arch: aarch64, source: pkgconf-2.5.1-2.fc45.src.rpm}
   - {name: libplacebo, evr: 7.360.1-4.fc45, arch: aarch64, source: libplacebo-7.360.1-4.fc45.src.rpm}
   - {name: libplist, evr: 2.7.0-4.fc45, arch: aarch64, source: libplist-2.7.0-4.fc45.src.rpm}
@@ -943,7 +953,7 @@ base:
   - {name: opus, evr: 1.6-3.fc45, arch: aarch64, source: opus-1.6-3.fc45.src.rpm}
   - {name: orc, evr: 0.4.41-4.fc45, arch: aarch64, source: orc-0.4.41-4.fc45.src.rpm}
   - {name: orca, evr: 51.1-1.fc45, arch: noarch, source: orca-51.1-1.fc45.src.rpm}
-  - {name: os-prober, evr: 1.81-12.fc45, arch: aarch64, source: os-prober-1.81-12.fc45.src.rpm}
+  - {name: os-prober, evr: 1.81-13.fc45, arch: aarch64, source: os-prober-1.81-13.fc45.src.rpm}
   - {name: osinfo-db, evr: 20251212-2.fc45, arch: noarch, source: osinfo-db-20251212-2.fc45.src.rpm}
   - {name: osinfo-db-tools, evr: 1.12.0-10.fc45, arch: aarch64, source: osinfo-db-tools-1.12.0-10.fc45.src.rpm}
   - {name: ostree, evr: 2026.4-1.fc45, arch: aarch64, source: ostree-2026.4-1.fc45.src.rpm}
@@ -1025,7 +1035,7 @@ base:
   - {name: python-pip-wheel, evr: 26.1.2-5.fc45, arch: noarch, source: python-pip-26.1.2-5.fc45.src.rpm}
   - {name: python-unversioned-command, evr: 3.15.2-1.fc45, arch: noarch, source: python3.15-3.15.2-1.fc45.src.rpm}
   - {name: python3, evr: 3.15.2-1.fc45, arch: aarch64, source: python3.15-3.15.2-1.fc45.src.rpm}
-  - {name: python3-anyio, evr: 4.15.1-2.fc45, arch: noarch, source: python-anyio-4.15.1-2.fc45.src.rpm}
+  - {name: python3-anyio, evr: 4.16.0-1.fc45, arch: noarch, source: python-anyio-4.16.0-1.fc45.src.rpm}
   - {name: python3-audit, evr: 4.2.1-2.fc45, arch: aarch64, source: audit-4.2.1-2.fc45.src.rpm}
   - {name: python3-boto3, evr: 1.44.4-1.fc45, arch: noarch, source: python-boto3-1.44.4-1.fc45.src.rpm}
   - {name: python3-botocore, evr: 1.44.4-1.fc45, arch: noarch, source: python-botocore-1.44.4-1.fc45.src.rpm}
@@ -1154,7 +1164,7 @@ base:
   - {name: spice-webdavd, evr: 3.0-15.fc45, arch: aarch64, source: phodav-3.0-15.fc45.src.rpm}
   - {name: spirv-tools-libs, evr: 2026.2-3.fc45, arch: aarch64, source: spirv-tools-2026.2-3.fc45.src.rpm}
   - {name: splix, evr: 2.0.1-7.fc45, arch: aarch64, source: splix-2.0.1-7.fc45.src.rpm}
-  - {name: sqlite-libs, evr: 3.53.4-1.fc45, arch: aarch64, source: sqlite-3.53.4-1.fc45.src.rpm}
+  - {name: sqlite-libs, evr: 3.54.1-2.fc45, arch: aarch64, source: sqlite-3.54.1-2.fc45.src.rpm}
   - {name: sratom, evr: 0.6.22-2.fc45, arch: aarch64, source: sratom-0.6.22-2.fc45.src.rpm}
   - {name: srt-libs, evr: 1.5.7-1.fc45, arch: aarch64, source: srt-1.5.7-1.fc45.src.rpm}
   - {name: sssd-client, evr: 2.13.2-2.fc45, arch: aarch64, source: sssd-2.13.2-2.fc45.src.rpm}
@@ -1179,7 +1189,7 @@ base:
   - {name: systemd-shared, evr: 262.1-1.fc45, arch: aarch64, source: systemd-262.1-1.fc45.src.rpm}
   - {name: systemd-sysusers, evr: 262.1-1.fc45, arch: aarch64, source: systemd-262.1-1.fc45.src.rpm}
   - {name: systemd-udev, evr: 262.1-1.fc45, arch: aarch64, source: systemd-262.1-1.fc45.src.rpm}
-  - {name: taglib, evr: 2.3-4.fc45, arch: aarch64, source: taglib-2.3-4.fc45.src.rpm}
+  - {name: taglib, evr: 2.3.2-3.fc45, arch: aarch64, source: taglib-2.3.2-3.fc45.src.rpm}
   - {name: tar, evr: '2:1.35-10.fc45', arch: aarch64, source: tar-1.35-10.fc45.src.rpm}
   - {name: tcl, evr: '1:9.0.4-1.fc45', arch: aarch64, source: tcl-9.0.4-1.fc45.src.rpm}
   - {name: tesseract-common, evr: 5.5.4-1.fc45, arch: noarch, source: tesseract-5.5.4-1.fc45.src.rpm}
@@ -1289,11 +1299,6 @@ packages:
 - {name: adwaita-sans-fonts, evr: 51.0-1.fc45, arch: noarch, repo: '@System', source: adwaita-fonts-51.0-1.fc45.src.rpm, checksum: 'unknown:', size: 0, location: '', action: '7'}
 - {name: atheros-firmware, evr: 20261019-1.fc45, arch: noarch, repo: '@System', source: linux-firmware-20261019-1.fc45.src.rpm, checksum: 'unknown:', size: 0, location: '', action: '7'}
 - {name: bluez, evr: 5.88-1.fc45, arch: aarch64, repo: '@System', source: bluez-5.88-1.fc45.src.rpm, checksum: 'unknown:', size: 0, location: '', action: '7'}
-- {name: boost-atomic, evr: 1.90.0-13.fc45, arch: aarch64, repo: fedora, source: boost-1.90.0-13.fc45.src.rpm, checksum: 'sha256:0c232a60b6a6237b4319b09fa4202ccb3532ed72e414fdee0ce45054df167ca1', size: 18761, location: Packages/b/boost-atomic-1.90.0-13.fc45.aarch64.rpm}
-- {name: boost-chrono, evr: 1.90.0-13.fc45, arch: aarch64, repo: fedora, source: boost-1.90.0-13.fc45.src.rpm, checksum: 'sha256:943b20fee4d8b11754513b281b152505ddd90079ee4451ebcc37f6273c58de7e', size: 24344, location: Packages/b/boost-chrono-1.90.0-13.fc45.aarch64.rpm}
-- {name: boost-container, evr: 1.90.0-13.fc45, arch: aarch64, repo: fedora, source: boost-1.90.0-13.fc45.src.rpm, checksum: 'sha256:f6b9a1a2a3b8c0bfca564c2088d984ba2ad5f50f75131a2c99341680afdb39b1', size: 38579, location: Packages/b/boost-container-1.90.0-13.fc45.aarch64.rpm}
-- {name: boost-date-time, evr: 1.90.0-13.fc45, arch: aarch64, repo: fedora, source: boost-1.90.0-13.fc45.src.rpm, checksum: 'sha256:6236f8400e941c34cb46012eb2be88a6cee005fc1fd68615a0fc11c424803f15', size: 13981, location: Packages/b/boost-date-time-1.90.0-13.fc45.aarch64.rpm}
-- {name: boost-thread, evr: 1.90.0-13.fc45, arch: aarch64, repo: fedora, source: boost-1.90.0-13.fc45.src.rpm, checksum: 'sha256:fb57902c9cfb3ac22da28e3f2678dbe70e0887e3e5dc4e730e87446808db77ed', size: 53266, location: Packages/b/boost-thread-1.90.0-13.fc45.aarch64.rpm}
 - {name: callaudiod, evr: 0.1.99-4.fc45, arch: aarch64, repo: fedora, source: callaudiod-0.1.99-4.fc45.src.rpm, checksum: 'sha256:915ebd5cb20cd9df584295f03853b0a1994b8bb34100fcb58ed284f06d462756', size: 49819, location: Packages/c/callaudiod-0.1.99-4.fc45.aarch64.rpm}
 - {name: calls, evr: 51.1-1.fc45, arch: aarch64, repo: updates, source: calls-51.1-1.fc45.src.rpm, checksum: 'sha256:f2668630e1c7d9779992babb7205d86e6a27c02941912faf9cef9622f2c6b371', size: 425521, location: Packages/c/calls-51.1-1.fc45.aarch64.rpm}
 - {name: chrony, evr: 4.9-1.fc45, arch: aarch64, repo: '@System', source: chrony-4.9-1.fc45.src.rpm, checksum: 'unknown:', size: 0, location: '', action: '7'}
@@ -1352,6 +1357,7 @@ packages:
 - {name: libfdt, evr: 1.8.1-6.fc45, arch: aarch64, repo: fedora, source: dtc-1.8.1-6.fc45.src.rpm, checksum: 'sha256:ae4b90fe75746736264d6b2335a24928fc12ad836a18a5f2026e634193ae787a', size: 36929, location: Packages/l/libfdt-1.8.1-6.fc45.aarch64.rpm}
 - {name: libfeedbackd, evr: 0.8.11-1.fc45, arch: aarch64, repo: updates, source: feedbackd-0.8.11-1.fc45.src.rpm, checksum: 'sha256:d74d49f664245179e06de19234aefa64f775851cc701b5677bea48e43b95e109', size: 34449, location: Packages/l/libfeedbackd-0.8.11-1.fc45.aarch64.rpm}
 - {name: libgee, evr: 0.20.8-4.fc45, arch: aarch64, repo: fedora, source: libgee-0.20.8-4.fc45.src.rpm, checksum: 'sha256:0e3811fabf20452fff87341ecc86fd2257c2b30eff5b785b25eb3d8a5fd664f6', size: 272426, location: Packages/l/libgee-0.20.8-4.fc45.aarch64.rpm}
+- {name: libglvnd-gles, evr: '1:1.7.0-10.fc45', arch: aarch64, repo: '@System', source: libglvnd-1.7.0-10.fc45.src.rpm, checksum: 'unknown:', size: 0, location: '', action: '7'}
 - {name: libgtop2, evr: 2.41.3-13.fc45, arch: aarch64, repo: fedora, source: libgtop2-2.41.3-13.fc45.src.rpm, checksum: 'sha256:9e851d9de23f7d570991dc91f043550b69ff82742c9e6b99f4736fc21bf839a6', size: 168421, location: Packages/l/libgtop2-2.41.3-13.fc45.aarch64.rpm}
 - {name: libgweather, evr: 4.6.0-6.fc45, arch: aarch64, repo: fedora, source: libgweather-4.6.0-6.fc45.src.rpm, checksum: 'sha256:ea7f49d516af70b43c0e0e9d1d45f9ce2320ecfe5316155f517a6cab687fe84a', size: 357081, location: Packages/l/libgweather-4.6.0-6.fc45.aarch64.rpm}
 - {name: libhandy, evr: 1.8.3-16.fc45, arch: aarch64, repo: fedora, source: libhandy-1.8.3-16.fc45.src.rpm, checksum: 'sha256:6492b2795902ba5222f9a77e962cc7a488f4ec211924a18cbd40a21ca2d98086', size: 389319, location: Packages/l/libhandy-1.8.3-16.fc45.aarch64.rpm}
@@ -1390,6 +1396,7 @@ packages:
 - {name: phrog, evr: 0.53.0-3.fc45, arch: aarch64, repo: fedora, source: phrog-0.53.0-3.fc45.src.rpm, checksum: 'sha256:530e1e46576ea6149184d01409eb66f4e9ed69f8b6f1ba90be05ac585c93bca5', size: 1197059, location: Packages/p/phrog-0.53.0-3.fc45.aarch64.rpm}
 - {name: pipewire, evr: 1.6.11-1.fc45, arch: aarch64, repo: '@System', source: pipewire-1.6.11-1.fc45.src.rpm, checksum: 'unknown:', size: 0, location: '', action: '7'}
 - {name: pipewire-pulseaudio, evr: 1.6.11-1.fc45, arch: aarch64, repo: '@System', source: pipewire-1.6.11-1.fc45.src.rpm, checksum: 'unknown:', size: 0, location: '', action: '7'}
+- {name: pipewire-utils, evr: 1.6.11-1.fc45, arch: aarch64, repo: '@System', source: pipewire-1.6.11-1.fc45.src.rpm, checksum: 'unknown:', size: 0, location: '', action: '7'}
 - {name: protobuf-cpp, evr: 6.33.5-7.fc45, arch: aarch64, repo: fedora, source: protobuf-33.5-7.fc45.src.rpm, checksum: 'sha256:fb431fd17cf2d0ad2980979851fcc2b373335ef012ff0a433bdf0ab607a5993c', size: 1179911, location: Packages/p/protobuf-cpp-6.33.5-7.fc45.aarch64.rpm}
 - {name: pulseaudio-libs-glib2, evr: 17.0-11.fc45, arch: aarch64, repo: fedora, source: pulseaudio-17.0-11.fc45.src.rpm, checksum: 'sha256:8ea4823527a4462aa86120ba16aab8d87f01c0b8e5f0369362df6ec9abd28a2b', size: 16705, location: Packages/p/pulseaudio-libs-glib2-17.0-11.fc45.aarch64.rpm}
 - {name: qcom-firmware, evr: 20261019-1.fc45, arch: noarch, repo: '@System', source: linux-firmware-20261019-1.fc45.src.rpm, checksum: 'unknown:', size: 0, location: '', action: '7'}

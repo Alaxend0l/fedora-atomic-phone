@@ -148,6 +148,14 @@ comparator = "="
 value = "1.6.11-1.fc45"
 
 [[packages]]
+name = "pipewire-utils"
+comment = "oneplus-billie2-tty"
+[[packages.conditions]]
+key = "evr"
+comparator = "="
+value = "1.6.11-1.fc45"
+
+[[packages]]
 name = "qcom-firmware"
 comment = "oneplus-billie2-tty"
 [[packages.conditions]]
